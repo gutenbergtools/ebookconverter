@@ -32,10 +32,12 @@ from libgutenberg.GutenbergGlobals import Struct
 from libgutenberg.Logger import info, debug, warning, error, exception
 
 from ebookmaker import CommonCode
+from ebookmaker.CommonCode import Options
 
 from ebookconverter import Candidates
 from ebookconverter.Version import VERSION
 
+options = Options()
 
 CONFIG_FILES = ['/etc/ebookconverter.conf', os.path.expanduser ('~/.ebookconverter')]
 
@@ -488,7 +490,8 @@ def config ():
     CommonCode.add_common_options (ap, CONFIG_FILES[1])
     add_local_options (ap)
 
-    options = CommonCode.parse_config_and_args (
+    global options 
+    options.update(vars(CommonCode.parse_config_and_args (
         ap,
         CONFIG_FILES[0],
         {
@@ -498,11 +501,7 @@ def config ():
             'ebookmaker': 'ebookmaker',
             'timestamp': datetime.datetime.today ().isoformat ()[:19],
         }
-    )
-
-    builtins.options = options
-    builtins._ = CommonCode.null_translation
-
+    )))
 
 def grouper (iterable, n, fillvalue = None):
     """ Itertools recipe: Collect data into fixed-length chunks or blocks """
