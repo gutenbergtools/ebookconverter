@@ -1,0 +1,18 @@
+[[source]]
+name = "pypi"
+url = "https://pypi.org/simple"
+verify_ssl = true
+
+[dev-packages]
+
+[packages]
+e1839a8 = {editable = true,path = "."}
+setproctitle = "*"
+psycopg2 = "*"
+libgutenberg = {editable = true,git = "https://github.com/gutenbergtools/libgutenberg",ref = "89a2380072ce3db6122795a9944ed3ffa6215fbf"}
+jaraco-functools = "*"
+ebookmaker = {editable = true,git = "https://github.com/gutenbergtools/ebookmaker",ref = "59728d372e7fa1f4419c1cbc3aaf204d5556d9bc"}
+ebookconverter = {editable = true,path = "."}
+
+[requires]
+python_version = "3.6"

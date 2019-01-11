@@ -1,0 +1,9 @@
+0.5.0 (January 10, 2019)
+
+- added packaging, with dependencies, including pipfile
+- removed dependence on options hacked into builtins
+- includes scripts used to invoke the converter
+- added a sample .env file
+
+
+0.4.0a3 (most recent changes October 20, 2017)
