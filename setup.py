@@ -20,9 +20,17 @@ setup (
     ],
 
     install_requires = [
-        'ebookmaker==0.5.0'
+        'ebookmaker>=0.5.0',
+        'setproctitle==1.1.10',
+        'requests_oauthlib>=1.2.0',
+        'rdflib>=4.2.2',
+        'qrcode>=6.1',
     ],
-
+    
+    extras_require = {
+        'postgres': ['psycopg2>=2.7.7',],
+    },
+    
     package_data = {
     },
 
