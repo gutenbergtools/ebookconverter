@@ -1,0 +1,31 @@
+-e git+https://github.com/gutenbergtools/ebookmaker.git@adc06d59b7481181895f21e8766e726769a16de7#egg=ebookmaker
+-e git+https://github.com/gutenbergtools/libgutenberg.git@6a047f066969cf4d2803b0d7c1955198e50d1f6d#egg=libgutenberg
+backports.functools-lru-cache==1.5
+certifi==2018.11.29
+chardet==3.0.4
+cheroot==6.5.4
+cherrypy==18.1.0
+cssutils==1.0.2
+docutils==0.14
+idna==2.8
+isodate==0.6.0
+jaraco-functools==2.0
+jaraco.functools==2.0
+lxml==4.3.2
+more-itertools==6.0.0
+oauthlib==3.0.1
+pillow==5.4.1
+portend==2.3
+psycopg2==2.7.7
+pyparsing==2.3.1
+pytz==2018.9
+qrcode==6.1
+rdflib==4.2.2
+requests-oauthlib==1.2.0
+requests==2.21.0
+roman==3.1
+setproctitle==1.1.10
+six==1.12.0
+tempora==1.14
+urllib3==1.24.1
+zc.lockfile==1.4
