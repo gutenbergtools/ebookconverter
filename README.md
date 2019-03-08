@@ -2,7 +2,7 @@
 code that orchestrates ebook conversion for project gutenberg
 
 
-EbookConverter manages the creation and update of ebook assets for Project Gutenberg. It uses a postgres database to keep track of both ebook metadata and ebook files.
+EbookConverter manages the creation and update of ebook assets for Project Gutenberg. It uses a postgres database to keep track of both ebook metadata and ebook files. the postgress database is managed by the libgutenberg package.
 
 The cron-rebuild-files.sh script runs as a cron job, rebuilding 2100 books per day, so as to rebuild every book roughly once a month.
 
@@ -12,8 +12,12 @@ ebookconverter expects source files to be in numbered directories in a 'files' d
 
 Config parameters should be set in a file at /etc/ebookconverter.conf or ~/.ebookconverter
 
+ebookconverter has been tested on Python 3.6.7. It's not expected to run on python 2.7
+
 ## Installing
 
+
+
+`pipenv install -e git+https://github.com/gutenbergtools/libgutenberg.git@dev#egg=libgutenberg`
+`pipenv install -e git+https://github.com/gutenbergtools/ebookmaker@dev#egg=ebookmaker`
 `pipenv install -e git+https://github.com/gutenbergtools/ebookconverter.git@dev#egg=ebookconverter`
-
-
