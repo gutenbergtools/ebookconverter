@@ -18,6 +18,6 @@ ebookconverter has been tested on Python 3.6.7. It's not expected to run on pyth
 
 
 
-`pipenv install -e git+https://github.com/gutenbergtools/libgutenberg.git@dev#egg=libgutenberg`
+`pipenv install -e git+https://github.com/gutenbergtools/libgutenberg.git@dev#egg=libgutenberg[covers,postgres]`
 `pipenv install -e git+https://github.com/gutenbergtools/ebookmaker@dev#egg=ebookmaker`
 `pipenv install -e git+https://github.com/gutenbergtools/ebookconverter.git@dev#egg=ebookconverter`

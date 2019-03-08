@@ -25,12 +25,9 @@ setup (
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',
         'qrcode>=6.1',
+        'postgres': ['psycopg2>=2.7.7',],        
     ],
-    
-    extras_require = {
-        'postgres': ['psycopg2>=2.7.7',],
-    },
-    
+        
     package_data = {
     },
 
