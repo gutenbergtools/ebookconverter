@@ -9,13 +9,11 @@ verify_ssl = true
 e1839a8 = {editable = true,path = "."}
 setproctitle = "*"
 psycopg2 = "*"
-libgutenberg = {editable = true,git = "https://github.com/gutenbergtools/libgutenberg.git",ref = "dev"}
 jaraco-functools = "*"
-ebookmaker = {editable = true,git = "https://github.com/gutenbergtools/ebookmaker.git",ref = "dev"}
-ebookconverter = {editable = true,path = "."}
 requests-oauthlib = "*"
 rdflib = "*"
 qrcode = "*"
+libgutenberg = {extras = ["covers", "postgres"],version = "*"}
 
 [requires]
 python_version = "3.6"

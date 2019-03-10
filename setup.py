@@ -25,9 +25,9 @@ setup (
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',
         'qrcode>=6.1',
-        'postgres': ['psycopg2>=2.7.7',],        
+        'libgutenberg[postgres]>=0.3.0',
     ],
-        
+    
     package_data = {
     },
 
