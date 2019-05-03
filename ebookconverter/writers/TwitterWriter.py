@@ -86,7 +86,7 @@ class Writer (writers.BaseWriter):
 
         try:
             title = job.dc.make_pretty_title (74)
-            tweet = "New #ebook @gutenberg_org: %s http://www.gutenberg.org/ebooks/%d" % (
+            tweet = "New #ebook @gutenberg_org: %s https://www.gutenberg.org/ebooks/%d" % (
                 title, job.dc.project_gutenberg_id)
 
             r = self.session.post (URL, data = { 'status': tweet })
