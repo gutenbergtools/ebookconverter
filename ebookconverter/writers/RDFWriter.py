@@ -105,7 +105,7 @@ class Writer (writers.BaseWriter):
         self.append (this_doc, RNS.rdf.type,   RNS.cc.Work)
         self.append (this_doc, RNS.rdfs.comment, Literal (
             '''Archives containing the RDF files for *all* our books can be downloaded at
-            http://www.gutenberg.org/wiki/Gutenberg:Feeds#The_Complete_Project_Gutenberg_Catalog'''
+            https://www.gutenberg.org/wiki/Gutenberg:Feeds#The_Complete_Project_Gutenberg_Catalog'''
         ))
 
 
