@@ -63,9 +63,6 @@ PREFERRED_INPUT_FORMATS = {
     # utf txt is created from text files
     'txt.utf-8': ('rst/*', ) + NON_UTF_TXTS,
 
-    # closed source, so nobody knows for sure what it can handle ...
-    'qioo': ('txt/iso-8859-1', 'txt/us-ascii', 'txt/unknown'),
-
     # pdf is created only from rst
     'pdf.images': ('rst/*', ),
 
@@ -106,7 +103,6 @@ FILENAMES = {
     'pdf.noimages':     'pg{id}.pdf',
     'pdf.images':       'pg{id}-images.pdf',
     'txt.utf-8':        'pg{id}.txt.utf8',
-    'qioo':             'pg{id}.qioo.jar',
     'rdf':              'pg{id}.rdf',
     'rst.gen':          'pg{id}.rst.utf8',
     'twitter':          'pg{id}.twitter',            # FIXME: do we need these?
@@ -143,7 +139,6 @@ BUILD_ORDER = """
 picsdir.images picsdir.noimages
 rst.gen
 txt.utf-8
-qioo
 html.images html.noimages
 epub.images epub.noimages
 kindle.images kindle.noimages
