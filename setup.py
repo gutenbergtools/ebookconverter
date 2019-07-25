@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.5.2'
+VERSION = '0.5.3'
 
 setup (
     name = 'ebookconverter',
@@ -12,6 +12,7 @@ setup (
 
     packages = [
         'ebookconverter',
+        'ebookconverter.writers',
     ],
 
     scripts = [
