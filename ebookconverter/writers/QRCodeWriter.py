@@ -23,8 +23,8 @@ from libgutenberg.Logger import info, exception
 from ebookmaker import writers
 
 
-DESKTOP_URL = 'http://www.gutenberg.org/ebooks/%d'
-MOBILE_URL  = 'http://m.gutenberg.org/ebooks/%d'
+DESKTOP_URL = 'https://www.gutenberg.org/ebooks/%d'
+MOBILE_URL  = 'https://m.gutenberg.org/ebooks/%d'
 
 BOXSIZE     = 4           # pixels per box
 COLOR       = '000000ff'  # RGBA

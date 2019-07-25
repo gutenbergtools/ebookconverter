@@ -1,3 +1,9 @@
+0.5.3 (May 24, 2019)
+- updated Facebook to API version 3.3
+- moved facebook token to a separate file, as it gets expired after 2-3 months
+- simplified post as the bits that can be scraped are no longer needed.
+- added ebookconverter.writers in setup.py
+
 0.5.1 (March 7, 2019)
 
 - added and updated missing dependencies
