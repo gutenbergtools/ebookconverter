@@ -305,7 +305,7 @@ def run_job_queue (job_queue):
 
     for job in job_queue:
         try:
-            os.mkdir (job.outputdir, 0o755)
+            os.mkdir (job.outputdir, 0o775)
         except OSError: # directory exists
             pass
 
