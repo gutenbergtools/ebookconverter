@@ -18,6 +18,7 @@ setup (
     scripts = [
         'scripts/ebookconverter',
         'scripts/cron-rebuild-files.sh',
+        'scripts/cron-dopush-facebook.sh',
     ],
 
     install_requires = [
