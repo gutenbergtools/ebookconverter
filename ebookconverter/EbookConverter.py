@@ -215,11 +215,13 @@ class Maker (object):
         except OSError:
             pass
 
-        # FIXME why don't we use remove_filetype_from_database ?
         fn = os.path.join (self.get_cache_loc (), make_output_filename (type_, self.ebook))
 
-        self.dc.remove_file_from_database (fn)
-        debug ("Removed file from database: %s" % fn)
+        if options.shadow:
+            debug ("If not in shadow, would have removed file from database: %s" % fn)
+        else:
+            self.dc.remove_file_from_database (fn)
+            debug ("Removed file from database: %s" % fn)
 
 
     def mk_job_queue (self):
@@ -339,7 +341,10 @@ def run_job_queue (job_queue):
         for job in job_queue:
             filename = os.path.join (job.outputdir, job.outputfile)
             if os.access (filename, os.R_OK):
-                job.dc.store_file_in_database (job.ebook, filename, job.type)
+                if options.shadow:
+                    debug ('if not in shadow, would have stored %s in database.' % filename)
+                else:
+                    job.dc.store_file_in_database (job.ebook, filename, job.type)
 
 
 def add_local_options (ap):
@@ -423,6 +428,12 @@ def add_local_options (ap):
         dest    = "dry_run",
         action  = "store_true",
         help    = "don't actually run Ebookmaker; just print the commands.")
+
+    ap.add_argument (
+        "--shadow",
+        dest    = "shadow",
+        action  = "store_true",
+        help    = "run, but don't change postgres.")
 
     ap.add_argument (
         "--stop",
