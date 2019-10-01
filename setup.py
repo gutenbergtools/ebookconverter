@@ -22,7 +22,7 @@ setup (
     ],
 
     install_requires = [
-        'ebookmaker>=0.5.0',
+        'ebookmaker>=0.7.1',
         'setproctitle==1.1.10',
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',

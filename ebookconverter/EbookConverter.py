@@ -495,6 +495,7 @@ def config ():
     ap = argparse.ArgumentParser (prog = 'EbookConverter')
     CommonCode.add_common_options (ap, CONFIG_FILES[1])
     add_local_options (ap)
+    CommonCode.set_arg_defaults (ap, CONFIG_FILES[1])
 
     global options 
     options.update(vars(CommonCode.parse_config_and_args (
