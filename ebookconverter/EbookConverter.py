@@ -69,8 +69,8 @@ PREFERRED_INPUT_FORMATS = {
     # picsdir only if pdf or html are created
     'picsdir.images': ('rst/*', ),
 
-    # coverpage (any old html will do)
-    'cover.medium':  ('rst/*', 'html/*'),
+    # coverpage (a cover will be generated, whatever)
+    'cover.medium':   ('epub.images/*', ),
 
     'rdf': (),
     'qrcode': (),
@@ -215,11 +215,13 @@ class Maker (object):
         except OSError:
             pass
 
-        # FIXME why don't we use remove_filetype_from_database ?
         fn = os.path.join (self.get_cache_loc (), make_output_filename (type_, self.ebook))
 
-        self.dc.remove_file_from_database (fn)
-        debug ("Removed file from database: %s" % fn)
+        if options.shadow:
+            debug ("If not in shadow, would have removed file from database: %s" % fn)
+        else:
+            self.dc.remove_file_from_database (fn)
+            debug ("Removed file from database: %s" % fn)
 
 
     def mk_job_queue (self):
@@ -339,7 +341,10 @@ def run_job_queue (job_queue):
         for job in job_queue:
             filename = os.path.join (job.outputdir, job.outputfile)
             if os.access (filename, os.R_OK):
-                job.dc.store_file_in_database (job.ebook, filename, job.type)
+                if options.shadow:
+                    debug ('if not in shadow, would have stored %s in database.' % filename)
+                else:
+                    job.dc.store_file_in_database (job.ebook, filename, job.type)
 
 
 def add_local_options (ap):
@@ -425,6 +430,12 @@ def add_local_options (ap):
         help    = "don't actually run Ebookmaker; just print the commands.")
 
     ap.add_argument (
+        "--shadow",
+        dest    = "shadow",
+        action  = "store_true",
+        help    = "run, but don't change postgres.")
+
+    ap.add_argument (
         "--stop",
         dest    = "stop_on_errors",
         action  = "store_true",
@@ -484,6 +495,7 @@ def config ():
     ap = argparse.ArgumentParser (prog = 'EbookConverter')
     CommonCode.add_common_options (ap, CONFIG_FILES[1])
     add_local_options (ap)
+    CommonCode.set_arg_defaults (ap, CONFIG_FILES[1])
 
     global options 
     options.update(vars(CommonCode.parse_config_and_args (

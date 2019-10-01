@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.5.3'
+VERSION = '0.5.5'
 
 setup (
     name = 'ebookconverter',
@@ -18,10 +18,11 @@ setup (
     scripts = [
         'scripts/ebookconverter',
         'scripts/cron-rebuild-files.sh',
+        'scripts/cron-dopush-facebook.sh',
     ],
 
     install_requires = [
-        'ebookmaker>=0.5.0',
+        'ebookmaker>=0.7.1',
         'setproctitle==1.1.10',
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',

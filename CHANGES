@@ -1,3 +1,14 @@
+0.5.5 (September 30, 2019)
+- added ability to default cli args with ~/.ebookconverter (same as ebookmaker)
+- added cover-adding whenever an epub is made
+- updated requirements to fix ebookmaker handling of ebookconverter job queues
+- tweaked facebook script
+
+0.5.4 (August 14, 2019)
+- when EbookConverter creates a book directory, it is group-writable
+- begin process of moving to production by adding a dopush script for facebook posting
+- add scripts we've used for posting backlog to facebook
+
 0.5.3 (May 24, 2019)
 - updated Facebook to API version 3.3
 - moved facebook token to a separate file, as it gets expired after 2-3 months

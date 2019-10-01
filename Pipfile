@@ -13,8 +13,8 @@ jaraco-functools = "*"
 requests-oauthlib = "*"
 rdflib = "*"
 qrcode = "*"
-libgutenberg = {extras = ["covers", "postgres"],version = "*"}
-ebookmaker = "==0.6.2"
+libgutenberg = {extras = ["covers", "postgres"],version = ">=0.4.0"}
+ebookmaker = ">=0.7.1"
 
 [requires]
 python_version = "3.6"
