@@ -69,8 +69,8 @@ PREFERRED_INPUT_FORMATS = {
     # picsdir only if pdf or html are created
     'picsdir.images': ('rst/*', ),
 
-    # coverpage (any old html will do)
-    'cover.medium':  ('rst/*', 'html/*'),
+    # coverpage (a cover will be generated, whatever)
+    'cover.medium':   ('epub.images/*', ),
 
     'rdf': (),
     'qrcode': (),
