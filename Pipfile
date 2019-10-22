@@ -14,7 +14,7 @@ requests-oauthlib = "*"
 rdflib = "*"
 qrcode = "*"
 libgutenberg = {extras = ["covers", "postgres"],version = ">=0.4.0"}
-ebookmaker = "==0.7.3"
+ebookmaker = "==0.7.4"
 ebookconverter = {editable = true,path = "."}
 
 [requires]
