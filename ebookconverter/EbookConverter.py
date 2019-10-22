@@ -70,7 +70,7 @@ PREFERRED_INPUT_FORMATS = {
     'picsdir.images': ('rst/*', ),
 
     # coverpage (a cover will be generated, whatever)
-    'cover.medium':   ('epub.images/*', ),
+    'cover.medium':  ('rst/*', 'html/*'),
 
     'rdf': (),
     'qrcode': (),
