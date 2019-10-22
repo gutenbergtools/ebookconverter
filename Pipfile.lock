@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "8fa1ca011e3fee414869be9360873ee3de325333dfd5234c10cd4de13de8710f"
+            "sha256": "9c3b890307576be0f2875db9932c03e19c6039aa60eebec55fbd85fba363ad58"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -110,10 +110,10 @@
         },
         "ebookmaker": {
             "hashes": [
-                "sha256:2086a414a7aa16845ed7a8bd0744434e79abc048ec6eae9f32d8e197a5a3188b"
+                "sha256:4dad9860353a94e89d57466f072c419fea43be94969c6a801b871282bbef0a1b"
             ],
             "index": "pypi",
-            "version": "==0.7.4"
+            "version": "==0.7.5"
         },
         "idna": {
             "hashes": [
@@ -149,10 +149,10 @@
                 "postgres"
             ],
             "hashes": [
-                "sha256:81babf3bb0e9fd4a28a8e973a81cab426eaaa1c5c365ef8d1c61adb3b3cb13fa"
+                "sha256:90bb975c32a34437cb0c502c49aace9e144f5d26ada0de727d3cf0e9eb58a741"
             ],
             "index": "pypi",
-            "version": "==0.4.1"
+            "version": "==0.5.0"
         },
         "lxml": {
             "hashes": [

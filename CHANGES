@@ -1,3 +1,7 @@
+0.5.8 (October 22, 2019)
+- updated ebookmaker to 0.7.5
+- updated libgutenberg to 0.5.0
+
 0.5.7 (October 21, 2019)
 - updated ebookmaker to 0.7.4
 - reverted preferred source for covers
