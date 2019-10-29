@@ -11,6 +11,21 @@ Distributable under the GNU General Public License Version 3 or newer.
 
 Extract metadata from posted PG ebook.
 
+Notes: 10/28/2019
+
+- FileInfo.py looks for files named [number].zip.trig in the dopush "log" directory. If it finds 
+  one, it looks for files in the in the FILES/[number] directory. 
+- FileInfo scans the files (or members of the zip file) for a source file containing a plain-text 
+  "PG header" and puts the metadata from the header into STDOUT. dopush pipes this metadata to 
+  autocat.php 
+  TODO: bring autocat.php functionality into EbookConverter so that metadata initialization can be 
+  smarter.
+- All that BitCollider does is compute file hashes. These hashes were used in various Torrent-like
+  distribution networks. The hashes are no longer used anywhere; the Postgres database only stores 
+  hashes for the file used as the source file; not hashes are computed for other files. 
+  TODO: remove Bitcollider, remove hash columns from the Postgres database.
+- When finished, the .trig files are moved to a 'backup' subdirectory.
+
 
 """
 
@@ -286,7 +301,7 @@ def scan_directory (dirname):
     """ Scan one directory in the new archive filesystem. """
 
     # dirname = os.path.realpath (dirname)
-    # print ("Scanning directory %s ..." % dirname)
+    debug ("Scanning directory %s ..." % dirname)
 
     found_files = []
     for root, dummy_dirs, files in os.walk (dirname):
@@ -296,7 +311,7 @@ def scan_directory (dirname):
             found_files.append (os.path.join (root, f))
 
     for filename in sorted (found_files, key=file_sort_key):
-        # print ("Found file: %s" % filename)
+        debug ("Found file: %s" % filename)
 
         if stat_file (filename):
             if filename.endswith ('.zip'):
@@ -322,7 +337,7 @@ def scan_dopush_log ():
         if stat.S_ISDIR (mode):
             continue
 
-        # print ("Tag file: %s" % filename)
+        debug ("Tag file: %s" % filename)
 
         m = re.match (r'^(\d+)\.zip\.trig$', filename)
         if m:
@@ -350,10 +365,8 @@ def scan_dopush_log ():
 
     return retcode
 
-
-if __name__ == '__main__':
-
-    Logger.setup (Logger.LOGFORMAT)
+def main ():
+    Logger.setup (Logger.LOGFORMAT, 'fileinfo.log')
     Logger.set_log_level (2)
 
     # This is the only encoding used at PG/ibiblio.
@@ -369,3 +382,6 @@ if __name__ == '__main__':
 
     else:
         sys.exit (scan_dopush_log ())
+
+if __name__ == '__main__':
+    main()
