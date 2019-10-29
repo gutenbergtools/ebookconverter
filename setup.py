@@ -21,6 +21,7 @@ setup (
         'scripts/fileinfo',
         'scripts/cron-rebuild-files.sh',
         'scripts/cron-dopush-facebook.sh',
+        'scripts/cron-dopush.sh',
     ],
 
     install_requires = [
