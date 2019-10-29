@@ -17,6 +17,8 @@ setup (
 
     scripts = [
         'scripts/ebookconverter',
+        'scripts/autodelete',
+        'scripts/fileinfo',
         'scripts/cron-rebuild-files.sh',
         'scripts/cron-dopush-facebook.sh',
     ],
