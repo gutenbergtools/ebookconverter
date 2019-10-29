@@ -28,11 +28,16 @@ from libgutenberg import Logger
 from libgutenberg import GutenbergGlobals as gg
 from libgutenberg import GutenbergDatabase
 
+from ebookmaker.CommonCode import Options
+
+from ebookconverter.EbookConverter import config
+
 PRIVATE = os.getenv ('PRIVATE') or ''
 PUBLIC  = os.getenv ('PUBLIC')  or ''
 
 DIRS  = PUBLIC + '/dirs'
 
+options = Options()
 
 def check_book (ebook):
     """ Check all files of ebook for presence. """
@@ -66,22 +71,14 @@ def check_book (ebook):
 
 def main ():
     goback = 1
+    try:
+        config ()
+    except configparser.Error as what:
+        error ("Error in configuration file: %s", str (what))
+        return 1
 
-    options = gg.Struct ()
-    options.config = gg.Struct ()
-
-    cp = configparser.SafeConfigParser ()
-    cp.read ('site.config')
-    for section in cp.sections ():
-        for name, value in cp.items (section):
-            if name.startswith ('pg.pg'):
-                setattr (options.config, name[3:].upper (), value)
-
-    # store away for easy reference
-    builtins.options = options
-
-    Logger.setup (Logger.LOGFORMAT)
-    Logger.set_log_level (1)
+    Logger.setup (Logger.LOGFORMAT, 'autodelete.log')
+    Logger.set_log_level (2)
 
     debug ("Starting AutoDelete.py")
 
