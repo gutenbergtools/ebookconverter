@@ -8,7 +8,7 @@ The Facebook access token needs to be updated every two months. This is because 
  - choose facebook app "Project Gutenberg"
  - choose page or user "New Project Gutenberg Books"
  - make sure `manage_pages` and `publish_pages` permissions are listed
- - click "Get Access Token"
+ - DO NOT click "Get Access Token"
  - click "copy Token"
  
 - Go to https://developers.facebook.com/tools/debug/accesstoken/
@@ -17,6 +17,8 @@ The Facebook access token needs to be updated every two months. This is because 
  - click "extend access token"
  - click debug on the new token
  - verify that "expires" is in 2 months
+ - verify that the token 'type' is 'page'
+ - copy the token
 
 - paste the token into a new file named `.fb_access_token`
 
