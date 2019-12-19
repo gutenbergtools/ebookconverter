@@ -1,3 +1,7 @@
+0.6.1 (December 19, 2019)
+- updated ebookmaker requirement to 0.7.7
+- added cron-dopush-social.sh scripts
+
 0.6.0 (October 29, 2019)
 - incorporated FileInfo.py and AutoDelete.py
 - fixed AutoDelete compatibility
