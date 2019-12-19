@@ -20,12 +20,12 @@ setup (
         'scripts/autodelete',
         'scripts/fileinfo',
         'scripts/cron-rebuild-files.sh',
-        'scripts/cron-dopush-facebook.sh',
+        'scripts/cron-dopush-social.sh',
         'scripts/cron-dopush.sh',
     ],
 
     install_requires = [
-        'ebookmaker>=0.7.5',
+        'ebookmaker>=0.7.7',
         'setproctitle==1.1.10',
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',
