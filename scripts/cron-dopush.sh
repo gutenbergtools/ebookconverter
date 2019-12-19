@@ -4,16 +4,24 @@
 # echo "cron-dopush: checking for files ..."
 
 cd /export/sunsite/users/gutenbackend/ebookconverter
-~/.local/bin/pipenv shell
 
+# Load environment variables:
+. ./.env
 
-fileinfo | ${PHP} ${PRIVATE}/lib/python/autocat/autocat.php || exit 1
+# First check whether there are any .trig files in 
+#  /public/vhost/g/gutenberg/private/logs/dopush/
+~/.local/bin/pipenv --bare run fileinfo | ${PHP} ${PRIVATE}/lib/python/autocat/autocat.php || exit 1
 
+# We have work to do! 
 echo "do_push: making files ..."
 
-autodelete
+~/.local/bin/pipenv run autodelete
 
-ebookconverter -v --range=1- --goback=24 --make=all
+echo "ran autodelete"
+
+~/.local/bin/pipenv run ebookconverter -v --range=1- --goback=24 --make=all
+
+echo "ran ebookconverter"
 
 exit
 sleep 300
