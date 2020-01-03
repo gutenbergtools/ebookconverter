@@ -1,0 +1,9 @@
+from datetime import datetime
+import subprocess
+
+start = datetime(2019,12,16,17)
+test = datetime.now()
+elapsed = test - start
+pgstart = 60586
+todo = pgstart + elapsed.days * 12 + elapsed.seconds // 7200
+subprocess.call(["ebookconverter", "-v", "-v", "--build=twitter", "--range=%s" % todo]) 

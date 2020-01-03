@@ -1,0 +1,19 @@
+#!/public/vhost/g/gutenberg/local/bin/python3.6
+#  -*- mode: python; indent-tabs-mode: nil; -*- coding: iso-8859-1 -*-
+
+"""
+
+This script runs fileinfo with depub set.
+
+"""
+
+import logging
+
+from ebookconverter import FileInfo
+
+def set_log_level (level):
+    """ Set log level to debug. """
+    logging.getLogger ().setLevel (logging.DEBUG)
+
+FileInfo.Logger.set_log_level = set_log_level
+FileInfo.main()
