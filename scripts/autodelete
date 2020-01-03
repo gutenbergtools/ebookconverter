@@ -1,0 +1,16 @@
+#!/public/vhost/g/gutenberg/local/bin/python3.6
+#  -*- mode: python; indent-tabs-mode: nil; -*- coding: iso-8859-1 -*-
+
+"""
+
+autodelete script
+
+Distributable under the GNU General Public License Version 3 or newer.
+
+This script runs autodelete.
+
+"""
+
+from ebookconverter import AutoDelete
+
+AutoDelete.main()

@@ -32,10 +32,12 @@ from libgutenberg.GutenbergGlobals import Struct
 from libgutenberg.Logger import info, debug, warning, error, exception
 
 from ebookmaker import CommonCode
+from ebookmaker.CommonCode import Options
 
 from ebookconverter import Candidates
 from ebookconverter.Version import VERSION
 
+options = Options()
 
 CONFIG_FILES = ['/etc/ebookconverter.conf', os.path.expanduser ('~/.ebookconverter')]
 
@@ -61,16 +63,13 @@ PREFERRED_INPUT_FORMATS = {
     # utf txt is created from text files
     'txt.utf-8': ('rst/*', ) + NON_UTF_TXTS,
 
-    # closed source, so nobody knows for sure what it can handle ...
-    'qioo': ('txt/iso-8859-1', 'txt/us-ascii', 'txt/unknown'),
-
     # pdf is created only from rst
     'pdf.images': ('rst/*', ),
 
     # picsdir only if pdf or html are created
     'picsdir.images': ('rst/*', ),
 
-    # coverpage (any old html will do)
+    # coverpage (a cover will be generated, whatever)
     'cover.medium':  ('rst/*', 'html/*'),
 
     'rdf': (),
@@ -104,7 +103,6 @@ FILENAMES = {
     'pdf.noimages':     'pg{id}.pdf',
     'pdf.images':       'pg{id}-images.pdf',
     'txt.utf-8':        'pg{id}.txt.utf8',
-    'qioo':             'pg{id}.qioo.jar',
     'rdf':              'pg{id}.rdf',
     'rst.gen':          'pg{id}.rst.utf8',
     'twitter':          'pg{id}.twitter',            # FIXME: do we need these?
@@ -141,7 +139,6 @@ BUILD_ORDER = """
 picsdir.images picsdir.noimages
 rst.gen
 txt.utf-8
-qioo
 html.images html.noimages
 epub.images epub.noimages
 kindle.images kindle.noimages
@@ -218,11 +215,13 @@ class Maker (object):
         except OSError:
             pass
 
-        # FIXME why don't we use remove_filetype_from_database ?
         fn = os.path.join (self.get_cache_loc (), make_output_filename (type_, self.ebook))
 
-        self.dc.remove_file_from_database (fn)
-        debug ("Removed file from database: %s" % fn)
+        if options.shadow:
+            debug ("If not in shadow, would have removed file from database: %s" % fn)
+        else:
+            self.dc.remove_file_from_database (fn)
+            debug ("Removed file from database: %s" % fn)
 
 
     def mk_job_queue (self):
@@ -308,7 +307,7 @@ def run_job_queue (job_queue):
 
     for job in job_queue:
         try:
-            os.mkdir (job.outputdir, 0o755)
+            os.mkdir (job.outputdir, 0o775)
         except OSError: # directory exists
             pass
 
@@ -342,7 +341,10 @@ def run_job_queue (job_queue):
         for job in job_queue:
             filename = os.path.join (job.outputdir, job.outputfile)
             if os.access (filename, os.R_OK):
-                job.dc.store_file_in_database (job.ebook, filename, job.type)
+                if options.shadow:
+                    debug ('if not in shadow, would have stored %s in database.' % filename)
+                else:
+                    job.dc.store_file_in_database (job.ebook, filename, job.type)
 
 
 def add_local_options (ap):
@@ -428,6 +430,12 @@ def add_local_options (ap):
         help    = "don't actually run Ebookmaker; just print the commands.")
 
     ap.add_argument (
+        "--shadow",
+        dest    = "shadow",
+        action  = "store_true",
+        help    = "run, but don't change postgres.")
+
+    ap.add_argument (
         "--stop",
         dest    = "stop_on_errors",
         action  = "store_true",
@@ -487,8 +495,10 @@ def config ():
     ap = argparse.ArgumentParser (prog = 'EbookConverter')
     CommonCode.add_common_options (ap, CONFIG_FILES[1])
     add_local_options (ap)
+    CommonCode.set_arg_defaults (ap, CONFIG_FILES[1])
 
-    options = CommonCode.parse_config_and_args (
+    global options 
+    options.update(vars(CommonCode.parse_config_and_args (
         ap,
         CONFIG_FILES[0],
         {
@@ -498,11 +508,7 @@ def config ():
             'ebookmaker': 'ebookmaker',
             'timestamp': datetime.datetime.today ().isoformat ()[:19],
         }
-    )
-
-    builtins.options = options
-    builtins._ = CommonCode.null_translation
-
+    )))
 
 def grouper (iterable, n, fillvalue = None):
     """ Itertools recipe: Collect data into fixed-length chunks or blocks """

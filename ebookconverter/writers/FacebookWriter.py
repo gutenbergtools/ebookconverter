@@ -24,7 +24,7 @@ from ebookmaker import writers
 
 PGURL = "https://www.gutenberg.org/"
 
-GRAPH = "https://graph.facebook.com/v2.8/"
+GRAPH = "https://graph.facebook.com/v3.3/"
 
 class Writer (writers.BaseWriter):
     """ Class to post about new ebooks.
@@ -42,17 +42,22 @@ class Writer (writers.BaseWriter):
 
 
     def __init__ (self):
-        # already initialized
-        if hasattr (self, 'access_token'):
-            return
-
         super (Writer, self).__init__ ()
 
-        self.page_id = '171646249561837' # New Project Gutenberg Books Page
-        self.access_token = os.environ.get ('FB_ACCESS_TOKEN')
+        # default = New Project Gutenberg Books Page
+        self.page_id = os.environ.get ('FB_PAGE_ID','171646249561837') 
+        self.access_token
 
-        if not self.access_token:
-            raise SkipOutputFormat ('Facebook credentials not found.')
+    _access_token = None
+    @property
+    def access_token (self):
+        if not self._access_token:
+            token_file = os.path.expanduser ('~/.fb_access_token')
+            with open (token_file, 'r') as tf:
+                self._access_token = tf.read ().strip ()
+            if not self._access_token:
+                raise SkipOutputFormat ('Facebook credentials not found.')
+        return self._access_token
 
 
     def build (self, job):
@@ -60,6 +65,7 @@ class Writer (writers.BaseWriter):
 
         if job.dc.project_gutenberg_id < 45000:
             # don't post about old books
+            info ('old book, no Facebook post')
             return
 
         db = GutenbergDatabase.Database ()
@@ -72,16 +78,14 @@ class Writer (writers.BaseWriter):
         rows = c.fetchone ()
         if rows:
             # already posted
+            info ('already posted, no new Facebook post')
             return
 
         try:
             id_ = job.dc.project_gutenberg_id
             data = {
                 'link': PGURL + "ebooks/%d" % id_,
-                'picture': PGURL + "cache/epub/%d/pg%d.cover.medium.jpg" % (id_, id_),
-                'name': job.dc.make_pretty_title (200),
-                'caption': "",
-                'description': "This is a free ebook by Project Gutenberg.",
+                'message': "This is a free ebook by Project Gutenberg.",
                 'access_token': self.access_token,
                 }
 

@@ -1,0 +1,18 @@
+#!/public/vhost/g/gutenberg/local/bin/python3.4
+#  -*- mode: python; indent-tabs-mode: nil; -*- coding: iso-8859-1 -*-
+
+"""
+
+ebookconverter script
+
+Copyright 2014 by Marcello Perathoner
+
+Distributable under the GNU General Public License Version 3 or newer.
+
+This script starts epubmaker.
+
+"""
+
+from ebookconverter import EbookConverter
+
+EbookConverter.main ()
