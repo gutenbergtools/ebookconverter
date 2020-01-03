@@ -345,6 +345,8 @@ def run_job_queue (job_queue):
                     debug ('if not in shadow, would have stored %s in database.' % filename)
                 else:
                     job.dc.store_file_in_database (job.ebook, filename, job.type)
+            else:
+                error ('Failed to build file: %s' % filename)
 
 
 def add_local_options (ap):
