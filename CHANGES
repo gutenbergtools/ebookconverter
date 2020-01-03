@@ -1,3 +1,7 @@
+0.6.2 (January 3, 2020)
+- added build failure message to log
+- twiddled utility scripts
+
 0.6.1 (December 19, 2019)
 - updated ebookmaker requirement to 0.7.7
 - added cron-dopush-social.sh scripts
