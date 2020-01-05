@@ -345,7 +345,10 @@ def run_job_queue (job_queue):
                     debug ('if not in shadow, would have stored %s in database.' % filename)
                 else:
                     job.dc.store_file_in_database (job.ebook, filename, job.type)
-            else:
+                mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
+                if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
+                    warning ('Failed to build new file: %s' % filename)
+            elif filename.split('.')[-1] not in {'facebook', 'twitter'}:
                 error ('Failed to build file: %s' % filename)
 
 

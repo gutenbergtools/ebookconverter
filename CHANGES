@@ -1,3 +1,9 @@
+0.6.3 (January 4, 2020)
+- refined build failure messages:
+  - don't report false fails for twitter and facebook
+  - check moddate to see if files have really been built
+- updated ebookmaker and libgutenberg dependencies
+
 0.6.2 (January 3, 2020)
 - added build failure message to log
 - twiddled utility scripts
