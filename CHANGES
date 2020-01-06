@@ -1,3 +1,7 @@
+0.6.4 (January 6, 2020)
+- added ebooknumber to job summary logging:
+- updated ebookmaker dependency to 0.7.9
+
 0.6.3 (January 4, 2020)
 - refined build failure messages:
   - don't report false fails for twitter and facebook
