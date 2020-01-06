@@ -340,6 +340,7 @@ def run_job_queue (job_queue):
     if ebm.returncode == 0:
         for job in job_queue:
             filename = os.path.join (job.outputdir, job.outputfile)
+            Logger.ebook = job.ebook
             if os.access (filename, os.R_OK):
                 if options.shadow:
                     debug ('if not in shadow, would have stored %s in database.' % filename)
