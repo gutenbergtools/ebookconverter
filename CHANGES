@@ -1,3 +1,7 @@
+0.6.5 (January 20, 2020)
+- added picsdir to summary logging exclusion
+- updated ebookmaker and libgutenberg dependencies
+
 0.6.4 (January 6, 2020)
 - added ebooknumber to job summary logging:
 - updated ebookmaker dependency to 0.7.9
