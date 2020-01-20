@@ -349,7 +349,7 @@ def run_job_queue (job_queue):
                 mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
                 if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
                     warning ('Failed to build new file: %s' % filename)
-            elif filename.split('.')[-1] not in {'facebook', 'twitter'}:
+            elif filename.split('.')[-1] not in {'facebook', 'twitter', 'picsdir'}:
                 error ('Failed to build file: %s' % filename)
 
 
