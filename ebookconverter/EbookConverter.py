@@ -70,7 +70,7 @@ PREFERRED_INPUT_FORMATS = {
     'picsdir.images': ('rst/*', ),
 
     # coverpage (a cover will be generated, whatever)
-    'cover.medium':  ('rst/*', 'html/*'),
+    'cover.medium':  ('rst/*', 'html/*', 'txt/*'),
 
     'rdf': (),
     'qrcode': (),
