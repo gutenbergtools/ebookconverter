@@ -1,3 +1,9 @@
+0.6.6 (March 4, 2020)
+- added conversion_summary script
+- fixed absence of scaled covers when generating from txt
+- added unittests and test files for fileinfo
+- updated dependencies
+
 0.6.5 (January 20, 2020)
 - added picsdir to summary logging exclusion
 - updated ebookmaker and libgutenberg dependencies

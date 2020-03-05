@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.6.5'
+VERSION = '0.6.6'
 
 setup (
     name = 'ebookconverter',

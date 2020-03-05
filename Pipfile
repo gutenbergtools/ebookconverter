@@ -13,8 +13,8 @@ jaraco-functools = "*"
 requests-oauthlib = "*"
 rdflib = "*"
 qrcode = "*"
-libgutenberg = "==0.5.1"
-ebookmaker = "==0.7.9"
+libgutenberg = "==0.6.2"
+ebookmaker = ">0.8.2"
 ebookconverter = {editable = true,path = "."}
 
 [requires]
