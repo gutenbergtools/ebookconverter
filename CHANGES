@@ -1,3 +1,6 @@
+0.6.7 (March 5, 2020)
+- don't make rdf and qrcode for books without source files. This has been an issue for end-of-the-month rebuilds.
+
 0.6.6 (March 4, 2020)
 - added conversion_summary script
 - fixed absence of scaled covers when generating from txt
