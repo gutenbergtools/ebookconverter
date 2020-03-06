@@ -43,7 +43,8 @@ CONFIG_FILES = ['/etc/ebookconverter.conf', os.path.expanduser ('~/.ebookconvert
 
 NON_UTF_TXTS = ('txt/windows-125*', 'txt/iso-8859-*', 'txt/big5', 'txt/ibm*', 'txt/*')
 ALL_TXTS = ('txt/utf-8', ) + NON_UTF_TXTS
-
+ALL_HTM =  ('html/utf-8', 'html/windows-125*', 'html/iso-8859-*', 'html/*')
+ALL_SRCS = ('rst/*',) + ALL_HTM + ALL_TXTS
 PREFERRED_INPUT_FORMATS = {
 
     # current practice is not to upload rst.master yet
@@ -51,8 +52,7 @@ PREFERRED_INPUT_FORMATS = {
 
     # epub readers should be able to handle unicode,
     # prefer the big charsets but accept any charset
-    'epub.images': ('rst/*', 'html/utf-8', 'html/windows-125*',
-                    'html/iso-8859-*', 'html/*') + ALL_TXTS,
+    'epub.images': ALL_SRCS,
 
     'kindle.images': ('epub.images/*', ),
     'kindle.noimages': ('epub.noimages/*', ),
@@ -71,11 +71,12 @@ PREFERRED_INPUT_FORMATS = {
 
     # coverpage (a cover will be generated, whatever)
     'cover.medium':  ('rst/*', 'html/*', 'txt/*'),
-
-    'rdf': (),
-    'qrcode': (),
-    'facebook': (),
-    'twitter': (),
+    
+    # only make these if there's a source file registered in the database
+    'rdf': ('rst/*', 'html/*', 'txt/*'),
+    'qrcode': ('rst/*', 'html/*', 'txt/*'),
+    'facebook': ('rst/*', 'html/*', 'txt/*'),
+    'twitter': ('rst/*', 'html/*', 'txt/*'),
 }
 
 PREFERRED_INPUT_FORMATS['html.noimages']      = PREFERRED_INPUT_FORMATS['html.images']
