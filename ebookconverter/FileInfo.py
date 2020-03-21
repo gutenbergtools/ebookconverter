@@ -43,7 +43,7 @@ import zipfile
 import lxml
 
 from libgutenberg.GutenbergGlobals import xpath
-from libgutenberg.Logger import debug, exception
+from libgutenberg.Logger import debug, info, exception
 from libgutenberg import Logger
 from libgutenberg import DublinCore
 
@@ -65,59 +65,6 @@ def parseable_file (filename):
     """ Return true if this file should be parsed for a pg header judging by the extension. """
     # these extension are parseable (ascii-ish) files
     return os.path.splitext (filename)[1] in PARSEABLE_FILES
-
-
-
-def print_metadata_text (dc):
-    """ Print out the metadata. """
-
-    def print_caption (caption, data):
-        """ Print one or more lines of metadata. """
-
-        if isinstance (data, list):
-            for d in data:
-                print ("%s: %s" % (caption, d))
-        else:
-            if data:
-                print ("%s: %s" % (caption, data))
-
-    for a in dc.authors:
-        if ',' in a.name:
-            print_caption (a.role.title (), a.name)
-        else:
-            m = re.match (r'^(.+?)\s+([-\'\w]+)$', a.name, re.I | re.U)
-            if m:
-                print_caption (a.role.title (), "%s, %s" % (m.group (2), m.group (1)))
-            else:
-                print_caption (a.role.title (), a.name)
-
-    for l in dc.languages:
-        print_caption ('Language', l.language)
-
-    for s in dc.subjects:
-        print_caption ('Subject', s.subject)
-
-    for l in dc.loccs:
-        print_caption ('Locc', l.locc)
-
-    if dc.project_gutenberg_id:
-        print_caption ('Etext-Nr',     str (dc.project_gutenberg_id))
-
-    if dc.title:
-        dc.title = re.sub (r'\s*\n\s*', ' _ ', dc.title.strip ())
-
-    print_caption ('Title',        dc.title)
-    print_caption ('Encoding',     dc.encoding)
-    print_caption ('Category',     dc.categories)
-    print_caption ('Contents',     dc.contents)
-    print_caption ('Notes',        dc.notes)
-    print_caption ('Edition',      dc.edition)
-
-    if dc.release_date:
-        print_caption ('Release-Date', datetime.datetime.strftime (dc.release_date, '%b %d, %Y'))
-
-    if dc.rights.lower ().find ('copyright') > -1:
-        print_caption ('Copyright', '1')
 
 
 def scan_header (bytes_, filename):
@@ -176,7 +123,7 @@ def scan_header (bytes_, filename):
 
         if dc.project_gutenberg_id:
             print_metadata_text (dc)
-            return dc.project_gutenberg_id
+            return dc
         return None
 
     except ValueError as what:
@@ -191,8 +138,7 @@ def scan_file (filename):
     if parseable_file (filename):
         with open (filename, 'rb') as fp:
             if scan_header (fp.read (), filename):
-                return True
-    return False
+            return scan_header(fp.read(), filename):
 
 
 def scan_zip (filename):
@@ -202,9 +148,9 @@ def scan_zip (filename):
         zip_ = zipfile.ZipFile (filename)
         for member in sorted (zip_.namelist (), key=file_sort_key):
             if parseable_file (member):
-                if scan_header (zip_.read (member), member):
-                    print ('Zipmemberfilename: %s' %  member)
-                    return True
+                member_dc = scan_header(zip_.read(member), member)
+                if member_dc:
+                    return member_dc
 
     except (zipfile.error, NotImplementedError):
         pass
@@ -256,7 +202,6 @@ def file_sort_key (filename):
 def scan_directory (dirname):
     """ Scan one directory in the new archive filesystem. """
 
-    # dirname = os.path.realpath (dirname)
     debug ("Scanning directory %s ..." % dirname)
 
     found_files = []
@@ -271,17 +216,18 @@ def scan_directory (dirname):
 
         if stat_file (filename):
             if filename.endswith ('.zip'):
-                scan_zip (filename)
+                file_dc = scan_zip(filename)
             else:
-                scan_file (filename)
+                file_dc = scan_file(filename)
+            return file_dc
 
+    return False
 
 def scan_dopush_log ():
-    """ Scan the dopush log directory for new files.
 
-    Files in this directory are placeholders only. The real files are
-    in FILES/ and DIRS/ and PUBLISH/.
-
+    """ 
+    Scan the dopush log directory for new files.
+    Files in this directory are placeholders only. The real files are in FILES/ and DIRS/.
     """
 
     retcode = 1
@@ -296,10 +242,8 @@ def scan_dopush_log ():
         m = re.match (r'^(\d+)\.zip\.trig$', filename)
         if m:
             dirname = os.path.join (FILES, m.group (1))
-            scan_directory (dirname)
+            push_dc = scan_directory(dirname)
 
-            dirname = os.path.join (PUBLISH, m.group (1))
-            # scan_directory (dirname)
         else:
             # old archive /etextXX
             m = re.match (r'^(etext\d\d)-(\w+\.\w+).trig$', filename)
@@ -307,12 +251,14 @@ def scan_dopush_log ():
                 fn = os.path.join (DIRS, m.group (1), m.group (2))
                 if stat_file (fn):
                     if filename.endswith ('.zip'):
-                        scan_zip (fn)
+                        push_dc = scan_zip(fn)
                     else:
-                        scan_file (fn)
 
         shutil.move (os.path.join (DOPUSH_LOG_DIR, filename),
                      os.path.join (DOPUSH_LOG_DIR, 'backup', filename))
+                        push_dc = scan_file(fn)
+        
+        process_dc(push_dc)
         retcode = 0
 
     return retcode
@@ -320,17 +266,25 @@ def scan_dopush_log ():
 def main ():
     Logger.setup (Logger.LOGFORMAT, 'fileinfo.log')
     Logger.set_log_level (2)
+def process_dc(push_dc):
+    """ this does what autocat.php used to do"""
+    pass
 
     # This is the only encoding used at PG/ibiblio.
     # Bail out early if the environment is misconfigured.
     assert sys.stdout.encoding.lower () == 'utf-8'
 
-    if len (sys.argv) > 1:
+    if len(sys.argv) > 1: # first arg will be 'fileinfo.py'
         for arg in sys.argv[1:]:
             try:
-                scan_directory (os.path.join (FILES, str (int (arg))))
+                # arg is a pg id
+                push_dc = scan_directory(os.path.join(FILES, str(int(arg))))
             except ValueError: # no int
-                scan_file (arg)
+                # arg is a file path
+                push_dc = scan_file(arg)
+
+            if push_dc:
+                process_dc(push_dc)
 
     else:
         sys.exit (scan_dopush_log ())
