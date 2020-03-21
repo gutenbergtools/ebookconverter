@@ -39,9 +39,11 @@ import zipfile
 import lxml
 
 from libgutenberg.GutenbergGlobals import xpath
-from libgutenberg.Logger import debug, info, exception
 from libgutenberg import Logger
-from libgutenberg import DublinCore
+from libgutenberg.Logger import debug, exception
+from libgutenberg import DublinCore, DummyConnectionPool
+from libgutenberg.GutenbergDatabaseDublinCore import GutenbergDatabaseDublinCore
+
 
 PRIVATE = os.getenv('PRIVATE') or ''
 PUBLIC = os.getenv('PUBLIC')  or ''
@@ -153,7 +155,7 @@ def scan_zip(filename):
 
 def stat_file(filename):
     """ Stat file. """
-
+    f_info = {}
     try:
         # is file readable? else raise IOError
         fp = open(filename, 'r')
@@ -161,22 +163,20 @@ def stat_file(filename):
 
         st = os.stat(filename)
 
-        info('filename: %s' % os.path.split(filename)[1])
+        f_info['file_path'] = filename
+        f_info['filename'] = os.path.split(filename)[1]
 
         directory = os.path.split(filename)[0]
         directory = os.path.realpath(directory)
         directory = directory.replace(FTP, '')
 
-        info('directory: %s' % directory)
-
-        info('mtime: %d' % st.st_mtime)
-        info('size: %d'  % st.st_size)
-
-        return 1
+        f_info['directory'] = directory
+        f_info['mtime'] = st.st_mtime
+        f_info['size'] = st.st_size
 
     except (OSError, IOError):
-        return 0
-
+        pass
+    return f_info
 
 def file_sort_key(filename):
     """ Sort files according to metadata quality.
@@ -206,15 +206,15 @@ def scan_directory(dirname):
 
     for filename in sorted(found_files, key=file_sort_key):
         debug("Found file: %s" % filename)
-
-        if stat_file(filename):
+        f_info = stat_file(filename)
+        if f_info:
             if filename.endswith('.zip'):
                 file_dc = scan_zip(filename)
             else:
                 file_dc = scan_file(filename)
-            return file_dc
+            return f_info, file_dc
 
-    return False
+    return None, False
 
 
 def scan_dopush_log():
@@ -235,20 +235,21 @@ def scan_dopush_log():
         m = re.match(r'^(\d+)\.zip\.trig$', filename)
         if m:
             dirname = os.path.join(FILES, m.group(1))
-            push_dc = scan_directory(dirname)
+            f_info, push_dc = scan_directory(dirname)
 
         else:
             # old archive /etextXX
             m = re.match(r'^(etext\d\d)-(\w+\.\w+).trig$', filename)
             if m:
                 fn = os.path.join(DIRS, m.group(1), m.group(2))
-                if stat_file(fn):
+                f_info = stat_file(fn)
+                if f_info:
                     if filename.endswith('.zip'):
                         push_dc = scan_zip(fn)
                     else:
                         push_dc = scan_file(fn)
 
-        process_dc(push_dc)
+        process_dc(f_info, push_dc)
 
         shutil.move(os.path.join(DOPUSH_LOG_DIR, filename),
                     os.path.join(DOPUSH_LOG_DIR, 'backup', filename))
@@ -256,9 +257,28 @@ def scan_dopush_log():
 
     return retcode
 
-def process_dc(push_dc):
+def process_dc(f_info, push_dc):
     """ this does what autocat.php used to do"""
-    pass
+    class DublinCoreObject(GutenbergDatabaseDublinCore):
+        def __init__(self):
+            super(DublinCoreObject).__init__(DummyConnectionPool.ConnectionPool())
+        def update_dc(self, dc):
+            pass
+        def create_dc(self, dc):
+            pass
+        def commit(self):
+            pass
+        def add_file(self, **fileinfo):
+            pass
+    dc = DublinCoreObject(push_dc.project_gutenberg_id)
+    try:
+        dc.load_from_database(push_dc.project_gutenberg_id)
+        dc.update_dc(push_dc)
+    except Exception:
+        # it's not in the database yet
+        dc.create_dc(push_dc)
+
+    dc.add_file(f_info)
 
 def main():
     Logger.setup(Logger.LOGFORMAT, 'fileinfo.log')
@@ -275,10 +295,10 @@ def main():
                 push_dc = scan_directory(os.path.join(FILES, str(int(arg))))
             except ValueError: # no int
                 # arg is a file path
-                push_dc = scan_file(arg)
+                f_info, push_dc = scan_file(arg)
 
             if push_dc:
-                process_dc(push_dc)
+                process_dc(f_info, push_dc)
 
     else:
         sys.exit(scan_dopush_log())
