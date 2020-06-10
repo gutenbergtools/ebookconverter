@@ -15,8 +15,8 @@ jaraco-functools = "*"
 requests-oauthlib = "*"
 rdflib = "*"
 qrcode = "*"
-libgutenberg = ">0.6.2"
-ebookmaker = ">0.9.0"
+libgutenberg = ">=0.6.2"
+ebookmaker = ">=0.9.0"
 ebookconverter = {editable = true,path = "."}
 
 [requires]
