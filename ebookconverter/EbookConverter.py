@@ -275,7 +275,7 @@ class Maker (object):
                 if job.maintype == 'txt' and candidate.size > 8 * 1024 * 1024:
                     warning ('Skipping %s: file too big' % candidate.filename)
                     continue
-                if job.maintype != 'kindle' and candidate.size > 16 * 1024 * 1024:
+                if job.maintype != 'kindle' and candidate.size > 32 * 1024 * 1024:
                     # the candidates for kindle, epubs, can get quite big
                     warning ('Skipping %s: file too big' % candidate.filename)
                     continue
