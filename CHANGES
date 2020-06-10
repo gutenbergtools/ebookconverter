@@ -1,3 +1,10 @@
+0.6.8 (June 10, 2020)
+- QRCode is now just for desktop, and is no longer blurry
+- FileInfo no sets the ebook number is logs
+- Source files up to 32M are now allowed (up from 16M)
+- Added kindlegen and too_deep reports to conversion_summary.sh
+- Bumped the required ebookmaker version
+
 0.6.7 (March 5, 2020)
 - don't make rdf and qrcode for books without source files. This has been an issue for end-of-the-month rebuilds.
 
