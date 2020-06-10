@@ -23,39 +23,37 @@ from ebookmaker import writers
 
 DESKTOP_URL = 'https://www.gutenberg.org/ebooks/%d'
 
-class MyQRCode (qrcode.QRCode):
+class MyQRCode(qrcode.QRCode):
     """ QRCode with parameters. """
 
-    def __init__ (self):
-        super (MyQRCode, self).__init__ (
-            error_correction = qrcode.constants.ERROR_CORRECT_M,
-            box_size         = 4,
-            border           = 0,
+    def __init__(self):
+        super(MyQRCode, self).__init__(
+            error_correction=qrcode.constants.ERROR_CORRECT_M,
+            box_size=4,
+            border=0,
         )
 
 
-
-
-class Writer (writers.BaseWriter):
+class Writer(writers.BaseWriter):
     """ QRCode image writer. """
 
-    def build (self, job):
+    def build(self, job):
         """ write qrcode . """
 
-        info ("Making   %s" % job.outputfile)
+        info("Making   %s" % job.outputfile)
 
         try:
-            qr = MyQRCode ()
-            qr.add_data (DESKTOP_URL % job.ebook)
-            qr.make (fit = True)
-            qrcode1 = qr.make_image (fill_color="black", back_color="white")
+            qr = MyQRCode()
+            qr.add_data(DESKTOP_URL % job.ebook)
+            qr.make(fit=True)
+            qrcode1 = qr.make_image(fill_color="black", back_color="white")
 
-            fn = os.path.join (job.outputdir, job.outputfile)
-            with open (fn, 'wb') as fp:
-                qrcode1.save (fp, 'png')
+            fn = os.path.join(job.outputdir, job.outputfile)
+            with open(fn, 'wb') as fp:
+                qrcode1.save(fp, 'png')
 
-            info ("Done     %s" % job.outputfile)
+            info("Done     %s" % job.outputfile)
 
         except Exception as what:
-            exception ("Error building QR-Code: %s" % what)
+            exception("Error building QR-Code: %s" % what)
             raise
