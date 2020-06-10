@@ -219,6 +219,7 @@ def scan_header (bytes_, filename):
                         return None
 
         if dc.project_gutenberg_id:
+            Logger.ebook = dc.project_gutenberg_id
             print_metadata_text (dc)
             return dc.project_gutenberg_id
         return None
@@ -341,6 +342,7 @@ def scan_dopush_log ():
 
         m = re.match (r'^(\d+)\.zip\.trig$', filename)
         if m:
+            Logger.ebook = m.group(1)
             dirname = os.path.join (FILES, m.group (1))
             scan_directory (dirname)
 
@@ -376,6 +378,7 @@ def main ():
     if len (sys.argv) > 1:
         for arg in sys.argv[1:]:
             try:
+                Logger.ebook = int(arg)
                 scan_directory (os.path.join (FILES, str (int (arg))))
             except ValueError: # no int
                 scan_file (arg)
