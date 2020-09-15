@@ -342,7 +342,7 @@ def scan_dopush_log ():
 
         m = re.match (r'^(\d+)\.zip\.trig$', filename)
         if m:
-            Logger.ebook = m.group(1)
+            Logger.ebook = int(m.group(1))
             dirname = os.path.join (FILES, m.group (1))
             scan_directory (dirname)
 
