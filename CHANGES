@@ -1,6 +1,12 @@
+0.6.9 (September 15, 2020)
+- assets (covers, rdf, etc.) are built for TeX sourced books
+- FileInfo now sets the ebook number in logs, correctly
+- updated scripts
+- updated Facebook token documentation
+
 0.6.8 (June 10, 2020)
 - QRCode is now just for desktop, and is no longer blurry
-- FileInfo no sets the ebook number is logs
+- FileInfo now sets the ebook number in logs
 - Source files up to 32M are now allowed (up from 16M)
 - Added kindlegen and too_deep reports to conversion_summary.sh
 - Bumped the required ebookmaker version
