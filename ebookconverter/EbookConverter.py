@@ -70,13 +70,13 @@ PREFERRED_INPUT_FORMATS = {
     'picsdir.images': ('rst/*', ),
 
     # coverpage (a cover will be generated, whatever)
-    'cover.medium':  ('rst/*', 'html/*', 'txt/*'),
+    'cover.medium':  ('rst/*', 'html/*', 'txt/*', 'tex/*'),
     
     # only make these if there's a source file registered in the database
-    'rdf': ('rst/*', 'html/*', 'txt/*'),
-    'qrcode': ('rst/*', 'html/*', 'txt/*'),
-    'facebook': ('rst/*', 'html/*', 'txt/*'),
-    'twitter': ('rst/*', 'html/*', 'txt/*'),
+    'rdf': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
+    'qrcode': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
+    'facebook': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
+    'twitter': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
 }
 
 PREFERRED_INPUT_FORMATS['html.noimages']      = PREFERRED_INPUT_FORMATS['html.images']
