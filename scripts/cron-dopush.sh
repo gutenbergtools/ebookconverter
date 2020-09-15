@@ -1,4 +1,24 @@
+#!/bin/bash
+#
+# esh 20200902: removed invocation of the jekyll build so that can have its own cron schedule
+# gbn 20200826: If this file exists, what's below will fail. Check
+# for it first, and squawk if it exists:
+if [ -f /tmp/ebookconverter.pid ] ; then
+    echo "$0: Cannot run, because /tmp/ebookconverter.pid exists"
+    /bin/ls -l /tmp/ebookconverter.pid
+    exit 1
+fi
 
+# echo "cron-dopush: checking for files ..."
+
+cd /export/sunsite/users/gutenbackend/converter
+
+# Load environment variables:
+# gbn 2020-05-07: This confuses things due to multiple Python installs
+# on login2. Instead, let ~gutenbackend/.bashrc take care of this:
+. ./.env
+export VHOST="/public/vhost/g/gutenberg"
+export PRIVATE="${VHOST}/private"
 export PUBLIC="${VHOST}/html"
 export PHP="php -c ${PRIVATE}/lib/php/"
 
@@ -35,6 +55,3 @@ for i in ${LIST}; do
 done
 
 
-
-#hely 2020-04-29: This pushes the latest book covers to the jekyll site generator
-./cron-latesttitles.sh
