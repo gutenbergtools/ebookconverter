@@ -20,10 +20,7 @@ Notes: 10/28/2019
   autocat.php 
   TODO: bring autocat.php functionality into EbookConverter so that metadata initialization can be 
   smarter.
-- All that BitCollider does is compute file hashes. These hashes were used in various Torrent-like
-  distribution networks. The hashes are no longer used anywhere; the Postgres database only stores 
-  hashes for the file used as the source file; not hashes are computed for other files. 
-  TODO: remove Bitcollider, remove hash columns from the Postgres database.
+- TODO: remove hash columns from the Postgres database.
 - When finished, the .trig files are moved to a 'backup' subdirectory.
 
 
@@ -64,52 +61,12 @@ BITCOLLIDER_EXECUTABLE = PRIVATE + '/bin/bitcollider-0.6.0'
 PARSEABLE_FILES = '.rst .html .htm .tex .txt'.split ()
 HTML_FILES = '.html .htm'.split ()
 
-BITCOLLIDER_REGEXES = {
-    'crc32.hex'    : re.compile (r'^tag\.crc32\.crc32=([A-Z0-9]+)$',   re.I | re.M),
-    'md5.hex'      : re.compile (r'^tag\.md5\.md5=([A-Z0-9]+)$',       re.I | re.M),
-    'kzhash.hex'   : re.compile (r'^tag\.kzhash\.kzhash=([A-Z0-9]+)$', re.I | re.M),
-    'ed2khash.hex' : re.compile (r'^tag\.ed2k\.ed2khash=([A-Z0-9]+)$', re.I | re.M),
-}
 
 
 def parseable_file (filename):
     """ Return true if this file should be parsed for a pg header judging by the extension. """
     # these extension are parseable (ascii-ish) files
     return os.path.splitext (filename)[1] in PARSEABLE_FILES
-
-
-def call_bitcollider (filename):
-    """ Call the bitcollider executable and process results. """
-
-    output = subprocess.Popen ([BITCOLLIDER_EXECUTABLE, '-p', '--md5', '--crc32', filename],
-                               stdout=subprocess.PIPE, stderr=subprocess.PIPE).communicate ()[0]
-
-    try:
-        output = output.decode ('ascii')
-    except UnicodeError as what:
-        sys.stderr.write ("Bitcollider Error: %s\n" % what)
-        return
-
-    hashes = dict ()
-
-    for key, regex in BITCOLLIDER_REGEXES.items ():
-        m = regex.search (output)
-        if m:
-            hashes[key] = m.group (1)
-
-    m = re.search (r'^bitprint=([A-Z0-9]+)\.([A-Z0-9]+)$', output, re.I | re.M)
-    if m:
-        s1 = m.group (1).ljust (32, '=')
-        s2 = m.group (2).ljust (40, '=')
-        hashes['sha1.base32']      = s1
-        hashes['tigertree.base32'] = s2
-        hashes['sha1.hex']         = binascii.hexlify (base64.b32decode (s1)).decode ('ascii')
-        hashes['tigertree.hex']    = binascii.hexlify (base64.b32decode (s2)).decode ('ascii')
-
-    hashes['crc32.hex'] = (hashes['crc32.hex'].lower ())
-
-    for key in sorted (hashes.keys ()):
-        print ('%s: %s' % (key, hashes[key]))
 
 
 def print_metadata_text (dc):
@@ -319,7 +276,6 @@ def scan_directory (dirname):
                 scan_zip (filename)
             else:
                 scan_file (filename)
-            call_bitcollider (filename)
             print ('-' * 10)
 
 
@@ -358,7 +314,6 @@ def scan_dopush_log ():
                         scan_zip (fn)
                     else:
                         scan_file (fn)
-                    call_bitcollider (fn)
                     print ('-' * 10)
 
         shutil.move (os.path.join (DOPUSH_LOG_DIR, filename),
