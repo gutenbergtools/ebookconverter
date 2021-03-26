@@ -18,7 +18,7 @@ import fnmatch
 
 from libgutenberg import GutenbergDatabase
 from libgutenberg import GutenbergGlobals as gg
-
+from libgutenberg.Logger import info, debug, warning, error, exception
 
 class Candidates (object):
     """ Class to get build candidates from the PG database.
@@ -86,5 +86,6 @@ order by fk_filetypes, fk_encodings, filemtime DESC""", {'ebook': ebook} )
                 if fnmatch.fnmatch (f (candidate), typeglob):
                     if candidate not in result:
                         result.append (candidate)
+                        info (candidate)
 
         return result

@@ -45,7 +45,7 @@ import lxml
 from libgutenberg.GutenbergGlobals import xpath
 from libgutenberg.Logger import debug, exception
 from libgutenberg import Logger
-from libgutenberg import DublinCore
+from libgutenberg.DublinCoreMapping import DublinCoreObject
 
 PRIVATE = os.getenv ('PRIVATE') or ''
 PUBLIC  = os.getenv ('PUBLIC')  or ''
@@ -69,8 +69,8 @@ def parseable_file (filename):
     return os.path.splitext (filename)[1] in PARSEABLE_FILES
 
 
-def print_metadata_text (dc):
-    """ Print out the metadata. """
+def save_metadata(dc):
+    """ Save the metadata. """
 
     def print_caption (caption, data):
         """ Print one or more lines of metadata. """
@@ -83,49 +83,27 @@ def print_metadata_text (dc):
                 print ("%s: %s" % (caption, data))
 
     for a in dc.authors:
-        if ',' in a.name:
-            print_caption (a.role.title (), a.name)
-        else:
+        if ',' not in a.name:
             m = re.match (r'^(.+?)\s+([-\'\w]+)$', a.name, re.I | re.U)
             if m:
-                print_caption (a.role.title (), "%s, %s" % (m.group (2), m.group (1)))
-            else:
-                print_caption (a.role.title (), a.name)
-
-    for l in dc.languages:
-        print_caption ('Language', l.language)
-
-    for s in dc.subjects:
-        print_caption ('Subject', s.subject)
-
-    for l in dc.loccs:
-        print_caption ('Locc', l.locc)
-
-    if dc.project_gutenberg_id:
-        print_caption ('Etext-Nr',     str (dc.project_gutenberg_id))
+                a.name = "%s, %s" % (m.group (2), m.group (1))
 
     if dc.title:
         dc.title = re.sub (r'\s*\n\s*', ' _ ', dc.title.strip ())
 
-    print_caption ('Title',        dc.title)
-    print_caption ('Encoding',     dc.encoding)
-    print_caption ('Category',     dc.categories)
-    print_caption ('Contents',     dc.contents)
-    print_caption ('Notes',        dc.notes)
-    print_caption ('Edition',      dc.edition)
-
     if dc.release_date:
-        print_caption ('Release-Date', datetime.datetime.strftime (dc.release_date, '%b %d, %Y'))
+        dc.release_date = datetime.datetime.strftime(dc.release_date, '%b %d, %Y')
 
     if dc.rights.lower ().find ('copyright') > -1:
-        print_caption ('Copyright', '1')
+        dc.rights = 1
 
+    dc.session.commit()
 
 def scan_header (bytes_, filename):
     """ Scan pg header in file. """
 
     try:
-        dc = DublinCore.GutenbergDublinCore ()
+        dc = DublinCoreObject ()
         ext = os.path.splitext (filename)[1]
 
         if ext in HTML_FILES:
@@ -177,7 +155,7 @@ def scan_header (bytes_, filename):
 
         if dc.project_gutenberg_id:
             Logger.ebook = dc.project_gutenberg_id
-            print_metadata_text (dc)
+            save_metadata(dc)
             return dc.project_gutenberg_id
         return None
 
