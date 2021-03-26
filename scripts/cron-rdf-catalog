@@ -1,0 +1,57 @@
+#!/bin/bash
+#
+
+cd /public/vhost/g/gutenberg/private/bin
+. ./env
+
+TMP=$PRIVATE/tmp/rdf
+mkdir -p $TMP
+
+cd $PUBLIC
+
+# $PHP $PUBLIC/catalog/admin/make-rdf.php > $TMP/catalog.rdf
+# xmllint --maxmem 1073741824 --noout $TMP/catalog.rdf
+# xmllint --stream --noout $TMP/catalog.rdf
+
+DAYOFWEEK=$(date +"%u")
+if [ "${DAYOFWEEK}" -eq 4 ]; then
+  # run once a week
+  header ebookconverter
+  ebookconverter -v -v --range=1- --build=rdf --jobs=100 --pidfile=/tmp/rdfbuild.pid
+fi
+
+header "getting list of rdf files"
+# find cache/epub -name '*.rdf' -print | sort -n > $TMP/rdf-files.txt
+find cache/epub -name '*.delete' -prune -o -name 'DELETE*' -prune -o -name '*.rdf' -print | sort -n > $TMP/rdf-files.txt
+echo -n "count: "
+wc -l < $TMP/rdf-files.txt
+
+header "ones with mod-time in the last 24 hours:"
+find cache/epub -name '*.rdf' -mtime -1 -print > $TMP/recent
+n_recent_files=`wc -l < $TMP/recent`
+if [ $n_recent_files -ge 100 ]; then
+    echo "(Too many files to list: $n_recent_files)"
+else
+    sort $TMP/recent
+fi
+
+header "making tarball of rdf files"
+tar -cf $TMP/rdf-files.tar -T $TMP/rdf-files.txt
+
+cd $TMP
+
+# zip catalog.rdf.zip   catalog.rdf
+# bzip2 -kf catalog.rdf
+# mv -f catalog.rdf.* $FEEDS/
+
+header "zip & bzip the tarball"
+zip rdf-files.tar.zip rdf-files.tar
+bzip2 -kf rdf-files.tar
+mv -f rdf-files.tar.* $FEEDS/
+
+# $BIN/pgrdf2marc.pl $TMP/catalog.rdf > $TMP/catalog.marc 2>/dev/null
+# zip catalog.marc.zip  catalog.marc
+# bzip2 -kf catalog.marc
+# mv -f catalog.marc.* $FEEDS/
+
+rm $TMP/*
