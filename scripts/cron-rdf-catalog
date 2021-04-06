@@ -1,13 +1,11 @@
 #!/bin/bash
-#
+# 
 
 cd /export/sunsite/users/gutenbackend/converter
 . ./.env
 
 TMP=$PRIVATE/tmp/rdf
 mkdir -p $TMP
-
-# cd $PUBLIC
 
 
 DAYOFWEEK=$(date +"%u")
@@ -17,9 +15,11 @@ if [ "${DAYOFWEEK}" -eq 8 ]; then
   ~/.local/bin/pipenv run ebookconverter -v -v --range=1- --build=rdf --jobs=100 --pidfile=/tmp/rdfbuild.pid
 fi
 
+cd $PUBLIC
+
 header "getting list of rdf files"
 
-find ~/cache/epub -name '*.delete' -prune -o -name 'DELETE*' -prune -o -name '*.rdf' -print | sort -n > $TMP/rdf-files.txt
+find cache/epub -name '*.delete' -prune -o -name 'DELETE*' -prune -o -name '*.rdf' -print | sort -n > $TMP/rdf-files.txt
 echo -n "count: "
 wc -l < $TMP/rdf-files.txt
 
