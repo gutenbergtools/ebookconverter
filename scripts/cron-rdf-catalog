@@ -1,0 +1,37 @@
+#!/bin/bash
+# 
+
+cd /export/sunsite/users/gutenbackend/converter
+. ./.env
+
+TMP=$PRIVATE/tmp/rdf
+mkdir -p $TMP
+
+
+DAYOFWEEK=$(date +"%u")
+if [ "${DAYOFWEEK}" -eq 8 ]; then
+  # to run once a week, change 8 to < 7
+  header ebookconverter
+  ~/.local/bin/pipenv run ebookconverter -v -v --range=1- --build=rdf --jobs=100 --pidfile=/tmp/rdfbuild.pid
+fi
+
+cd $PUBLIC
+
+header "getting list of rdf files"
+
+find cache/epub -name '*.delete' -prune -o -name 'DELETE*' -prune -o -name '*.rdf' -print | sort -n > $TMP/rdf-files.txt
+echo -n "count: "
+wc -l < $TMP/rdf-files.txt
+
+
+header "making tarball of rdf files"
+tar -cf $TMP/rdf-files.tar -T $TMP/rdf-files.txt
+
+cd $TMP
+
+header "zip & bzip the tarball"
+zip rdf-files.tar.zip rdf-files.tar
+bzip2 -kf rdf-files.tar
+mv -f rdf-files.tar.* $FEEDS/
+
+rm $TMP/*
