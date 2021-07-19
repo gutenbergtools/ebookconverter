@@ -282,12 +282,12 @@ class Maker (object):
                 debug ("Candidates: %s" % ' '.join (map (f, candidates)))
 
                 # oom-killer safeguard
-                if job.maintype == 'txt' and candidate.size > 8 * 1024 * 1024:
-                    warning ('Skipping %s: file too big' % candidate.filename)
+                if job.maintype == 'txt' and candidate.extent > 8 * 1024 * 1024:
+                    warning ('Skipping %s: file too big' % candidate.archive_path)
                     continue
-                if job.maintype != 'kindle' and candidate.size > 32 * 1024 * 1024:
+                if job.maintype != 'kindle' and candidate.extent > 32 * 1024 * 1024:
                     # the candidates for kindle, epubs, can get quite big
-                    warning ('Skipping %s: file too big' % candidate.filename)
+                    warning ('Skipping %s: file too big' % candidate.archive_path)
                     continue
 
                 job.url = os.path.join (options.config.FILESDIR, candidate.archive_path)
@@ -355,14 +355,17 @@ def run_job_queue (job_queue):
             Logger.ebook = job.ebook
             if os.access (filename, os.R_OK):
                 if options.shadow:
-                    debug ('if not in shadow, would have stored %s in database.' % filename)
+                    debug ('if not in shadow, would have stored %s in database.', filename)
                 else:
-                    job.dc.store_file_in_database (job.ebook, filename, job.type)
+                    debug ('adding %s to database.', filename)
+                    dc.store_file_in_database (job.ebook, filename, job.type)
                 mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
                 if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
-                    warning ('Failed to build new file: %s' % filename)
+                    warning ('Failed to build new file: %s', filename)
             elif filename.split('.')[-1] not in {'facebook', 'twitter', 'picsdir'}:
-                error ('Failed to build file: %s' % filename)
+                error ('Failed to build file: %s', filename)
+    else:
+        error ('returncode was %s', ebm.returncode)
 
 
 def add_local_options (ap):
