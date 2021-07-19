@@ -64,7 +64,7 @@ PREFERRED_INPUT_FORMATS = {
     'kindle.noimages': ('epub.noimages/*', ),
 
     # html is created from rst files or text files
-    'html.images': ('rst/*', ) + ALL_TXTS,
+    'html.images': ALL_HTM + ('rst/*', ) + ALL_TXTS,
 
     # utf txt is created from text files
     'txt.utf-8': ('rst/*', ) + NON_UTF_TXTS,
@@ -92,10 +92,11 @@ PREFERRED_INPUT_FORMATS['picsdir.noimages']   = PREFERRED_INPUT_FORMATS['picsdir
 PREFERRED_INPUT_FORMATS['cover.small']        = PREFERRED_INPUT_FORMATS['cover.medium']
 PREFERRED_INPUT_FORMATS['null']               = PREFERRED_INPUT_FORMATS['epub.images']
 
+# don't build a type if we've already made one
 EXCLUSIONS = {
     'epub.images':     ('epub.dp',   ),
     'epub.noimages':   ('epub.dp',   ),
-    'html.images':     ('html/*',    ),
+    #'html.images':     ('html/*',    ),
     'html.noimages':   ('html/*',    ),
     'txt.utf-8':       ('txt/utf-8', ),
 }
@@ -124,8 +125,7 @@ FILENAMES = {
 
 DEPENDENCIES = collections.OrderedDict ((
     ('everything',      ('all', 'facebook', 'twitter')),
-    ('all',             ('html', 'epub', 'kindle', 'pdf', 'txt', 'rst',
-                         'cover', 'qrcode', 'rdf')),
+    ('all',             ('html', 'epub', 'kindle', 'pdf', 'rst', 'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',    'html.noimages')),
     ('epub',            ('epub.images',    'epub.noimages')),
     ('kindle',          ('kindle.images',  'kindle.noimages')),
