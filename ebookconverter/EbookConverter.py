@@ -26,10 +26,16 @@ import sys
 from six.moves import builtins, urllib, cPickle
 import setproctitle
 
-from libgutenberg import GutenbergDatabase, GutenbergDatabaseDublinCore, \
-     DummyConnectionPool, Logger
+from sqlalchemy import not_
+from sqlalchemy import select
+from sqlalchemy.sql import func
+from sqlalchemy.ext.serializer import loads, dumps
+
+from libgutenberg import DublinCoreMapping, GutenbergDatabase, Logger
 from libgutenberg.GutenbergGlobals import Struct
 from libgutenberg.Logger import info, debug, warning, error, exception
+from libgutenberg import Models
+
 
 from ebookmaker import CommonCode
 from ebookmaker.CommonCode import Options
@@ -150,6 +156,7 @@ facebook twitter
 null
 """.split ()
 
+OB = GutenbergDatabase.Objectbase(False)
 
 def make_output_filename (type_, ebook = 0):
     """ Make a suitable filename for output type. """
@@ -160,9 +167,8 @@ def make_output_filename (type_, ebook = 0):
 class Maker (object):
     """ Helper class """
 
-    def __init__ (self, ebook, dc):
+    def __init__ (self, ebook):
         self.ebook = ebook
-        self.dc = dc
 
 
     def get_cache_dir (self):
@@ -180,7 +186,7 @@ class Maker (object):
         path = os.path.join (job.outputdir, job.outputfile)
 
         if os.path.isfile (path):
-            mtime_cand = candidate.mtime
+            mtime_cand = candidate.modified
             mtime_epub = datetime.datetime.fromtimestamp (os.path.getmtime (path))
 
             debug ('mtime cand:  %s' % mtime_cand)
@@ -221,7 +227,8 @@ class Maker (object):
         if options.shadow:
             debug ("If not in shadow, would have removed file from database: %s" % fn)
         else:
-            self.dc.remove_file_from_database (fn)
+            dc = DublinCoreMapping.DublinCoreObject()
+            dc.remove_file_from_database (fn)
             debug ("Removed file from database: %s" % fn)
 
 
@@ -239,7 +246,6 @@ class Maker (object):
 
             job = CommonCode.Job (type_)
             job.ebook = self.ebook
-            job.dc = self.dc
             job.outputdir  = self.get_cache_dir ()
             job.outputfile = make_output_filename (type_, self.ebook)
             job.logfile = make_output_filename ('logfile', self.ebook)
@@ -255,7 +261,11 @@ class Maker (object):
                 continue
 
             if needs_source:
-                if not 'Text' in self.dc.categories:
+                session = OB.get_session()
+                is_not_text = session.query(Models.Book).filter(
+                    Models.Book.pk == self.ebook).first().categories
+
+                if is_not_text:
                     info ("Book is not a text book. Skipping %s ..." % type_)
                     continue
 
@@ -280,23 +290,24 @@ class Maker (object):
                     warning ('Skipping %s: file too big' % candidate.filename)
                     continue
 
-                job.url = os.path.join (options.config.FILESDIR, candidate.filename)
+                job.url = os.path.join (options.config.FILESDIR, candidate.archive_path)
+                info('type: %s; job.url: %s', type_, job.url)
                 # allow any file below basedir of ebook
                 job.include = [ os.path.join (
-                    options.config.FILESDIR, os.path.dirname (candidate.filename) + '/*') ]
+                    options.config.FILESDIR, os.path.dirname (candidate.archive_path) + '/*') ]
                 job.max_depth = 3
-                job.dc.source = urllib.parse.urljoin (options.config.PGURL, candidate.filename)
-                job.dc.opf_identifier = (urllib.parse.urljoin (
+                job.source = urllib.parse.urljoin (options.config.PGURL, candidate.archive_path)
+                job.opf_identifier = (urllib.parse.urljoin (
                     options.config.BIBREC + '/', str (self.ebook)))
 
             if not needs_source or self.target_outdated (job, candidate):
                 job_queue.append (job)
 
                 new_candidate = Struct ()
-                new_candidate.filename = os.path.join (job.outputdir, job.outputfile)
+                new_candidate.archive_path = os.path.join (job.outputdir, job.outputfile)
                 new_candidate.format = job.type + '/unknown'
-                new_candidate.mtime = datetime.datetime.now ()
-                new_candidate.size = 0
+                new_candidate.modified = datetime.datetime.now ()
+                new_candidate.extent = 0
                 new_candidate.generated = True
                 all_candidates.insert (0, new_candidate)
 
@@ -337,7 +348,7 @@ def run_job_queue (job_queue):
     debug ("Ebookmaker returned code: %d." % ebm.returncode)
     debug (stdout.decode (sys.stdout.encoding))
     debug (stderr.decode (sys.stderr.encoding))
-
+    dc = DublinCoreMapping.DublinCoreObject()
     if ebm.returncode == 0:
         for job in job_queue:
             filename = os.path.join (job.outputdir, job.outputfile)
@@ -554,36 +565,32 @@ def main ():
     info ("Program start")
 
     # find last book no.
-    GutenbergDatabase.DB = GutenbergDatabase.Database ()
-    GutenbergDatabase.DB.connect ()
-    cursor = GutenbergDatabase.DB.get_cursor ()
-    cursor.execute ('select max (pk) as last from books')
-    row = cursor.fetchone ()
-    last_ebook = int (row[0])
+    
+    session = OB.get_session()
+    last_ebook = session.execute(select(func.max(Models.Book.pk))).scalars().first()
+
     debug ("Last ebook: #%d" % last_ebook)
     fix_option_range (options, last_ebook)
-
+    cache_pattern = options.config.CACHEDIR
     if options.goback:
-        cursor.execute ("SELECT distinct fk_books from files "
-                        "where filename !~ '^cache/' and "
-                        "filemtime >= now () - interval '%d hours'"
-                        % options.goback)
-        pks = set ([row[0] for row in cursor.fetchall ()])
-        pks = pks.intersection (options.range)
+        interval = datetime.datetime.now() - datetime.timedelta(hours=options.goback)
+        pks = session.execute(select(Models.File.fk_books).where(
+            not_(Models.File.archive_path.regexp_match('^cache/')),
+            Models.File.modified >= interval,
+        ).distinct()).scalars().all()
         options.range = sorted (pks)
 
     if options.top:
-        cursor.execute ("SELECT pk from books order by downloads desc limit %d" % options.top)
-        pks = set ([row[0] for row in cursor.fetchall ()])
+        pks = session.execute(select(Models.Book.pk).order_by(
+            Models.Book.downloads.desc()).limit(options.top)).scalars().all()
         pks = pks.intersection (options.range)
         options.range = sorted (pks)
 
     if options.fk_filetype:
-        cursor.execute ("SELECT distinct fk_books from files "
-                        "where filename !~ '^cache/' and "
-                        "fk_filetypes = %(fk_filetype)s",
-                        { 'fk_filetype' : options.fk_filetype })
-        pks = set ([row[0] for row in cursor.fetchall ()])
+        pks = session.execute(select(Models.File.fk_books).where(
+            not_(Models.File.archive_path.regexp_match('^cache/')),
+            Models.File.fk_filetypes == options.fk_filetype ,
+        ).distinct()).scalars().all()
         pks = pks.intersection (options.range)
         options.range = sorted (pks)
 
@@ -616,20 +623,18 @@ def main ():
                     break
                 Logger.ebook = last = ebook
 
-                dc = GutenbergDatabaseDublinCore.GutenbergDatabaseDublinCore (
-                    DummyConnectionPool.ConnectionPool ())
-
                 try:
-                    dc.load_from_database (ebook)
+                    ebook_exists = session.execute(select(Models.Book).where(
+                        Models.Book.pk == ebook)).first()
                 except Exception:
-                    exception ("Error getting DublinCore info.")
+                    exception ("Error checking for book.")
                     continue
 
-                if dc.project_gutenberg_id is None:
-                    warning ("No ebook #%d (trying to get DublinCore info).", ebook)
+                if not ebook_exists:
+                    warning ("No ebook #%d in database.", ebook)
                     continue
 
-                maker = Maker (ebook, dc)
+                maker = Maker (ebook)
 
                 try:
                     job_queue += maker.mk_job_queue ()
