@@ -332,7 +332,7 @@ def run_job_queue (job_queue):
             [
                 options.config.EBOOKMAKER, verbosity,
                 "--extension-package", "ebookconverter.writers",
-                "--packager", "gzip",
+                #"--packager", "gzip",
                 "--jobs", "no_such_url",
             ],
             stdin  = subprocess.PIPE,
