@@ -125,7 +125,8 @@ FILENAMES = {
 
 DEPENDENCIES = collections.OrderedDict ((
     ('everything',      ('all', 'facebook', 'twitter')),
-    ('all',             ('html', 'epub', 'kindle', 'pdf', 'rst', 'cover', 'qrcode', 'rdf')),
+    ('all',             ('html', 'epub', 'kindle', 'pdf', 'txt', 'rst',
+                         'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',    'html.noimages')),
     ('epub',            ('epub.images',    'epub.noimages')),
     ('kindle',          ('kindle.images',  'kindle.noimages')),
