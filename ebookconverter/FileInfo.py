@@ -103,7 +103,8 @@ def scan_header (bytes_, filename):
     """ Scan pg header in file. """
 
     try:
-        dc = DublinCoreObject ()
+        dc = DublinCoreObject()
+        dc.get_my_session()
         ext = os.path.splitext (filename)[1]
 
         if ext in HTML_FILES:
