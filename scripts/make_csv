@@ -1,0 +1,14 @@
+#!/public/vhost/g/gutenberg/local/bin/python3.6
+#  -*- mode: python; indent-tabs-mode: nil; -*- coding: iso-8859-1 -*-
+
+"""
+
+make_csv script
+
+This script runs makes a csv file in FEEDS
+
+"""
+
+from ebookconverter import CSV
+
+CSV.main()
