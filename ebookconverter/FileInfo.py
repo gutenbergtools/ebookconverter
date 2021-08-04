@@ -70,34 +70,15 @@ def parseable_file (filename):
 
 
 def save_metadata(dc):
-    """ Save the metadata. """
-
-    def print_caption (caption, data):
-        """ Print one or more lines of metadata. """
-
-        if isinstance (data, list):
-            for d in data:
-                print ("%s: %s" % (caption, d))
-        else:
-            if data:
-                print ("%s: %s" % (caption, data))
-
-    for a in dc.authors:
-        if ',' not in a.name:
-            m = re.match (r'^(.+?)\s+([-\'\w]+)$', a.name, re.I | re.U)
-            if m:
-                a.name = "%s, %s" % (m.group (2), m.group (1))
+    """ Save the metadata. Assumes that there is no existing enty in the database. """
 
     if dc.title:
         dc.title = re.sub (r'\s*\n\s*', ' _ ', dc.title.strip ())
 
-    if dc.release_date:
-        dc.release_date = datetime.datetime.strftime(dc.release_date, '%b %d, %Y')
-
     if dc.rights.lower ().find ('copyright') > -1:
-        dc.rights = 1
+        dc.rights = 1 # ???
 
-    dc.session.commit()
+    dc.save()
 
 def scan_header (bytes_, filename, ebook):
     """ Scan pg header in file. """
