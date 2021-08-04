@@ -31,7 +31,7 @@ from sqlalchemy import select
 from sqlalchemy.sql import func
 from sqlalchemy.ext.serializer import loads, dumps
 
-from libgutenberg import DublinCoreMapping, GutenbergDatabase, Logger
+from libgutenberg import DBUtils, DublinCoreMapping, Logger
 from libgutenberg.GutenbergGlobals import Struct
 from libgutenberg.Logger import info, debug, warning, error, exception
 from libgutenberg import Models
@@ -157,7 +157,6 @@ facebook twitter
 null
 """.split ()
 
-OB = GutenbergDatabase.Objectbase(False)
 
 def make_output_filename (type_, ebook = 0):
     """ Make a suitable filename for output type. """
@@ -262,11 +261,7 @@ class Maker (object):
                 continue
 
             if needs_source:
-                session = OB.get_session()
-                is_not_text = session.query(Models.Book).filter(
-                    Models.Book.pk == self.ebook).first().categories
-
-                if is_not_text:
+                if DBUtils.is_not_text(self.ebook):
                     info ("Book is not a text book. Skipping %s ..." % type_)
                     continue
 
@@ -568,33 +563,20 @@ def main ():
 
     info ("Program start")
 
-    # find last book no.
-    
-    session = OB.get_session()
-    last_ebook = session.execute(select(func.max(Models.Book.pk))).scalars().first()
+    fix_option_range (options, DBUtils.last_ebook())
 
-    debug ("Last ebook: #%d" % last_ebook)
-    fix_option_range (options, last_ebook)
-    cache_pattern = options.config.CACHEDIR
     if options.goback:
         interval = datetime.datetime.now() - datetime.timedelta(hours=options.goback)
-        pks = session.execute(select(Models.File.fk_books).where(
-            not_(Models.File.archive_path.regexp_match('^cache/')),
-            Models.File.modified >= interval,
-        ).distinct()).scalars().all()
-        options.range = sorted (pks)
+        pks = recent_books(interval)
+        options.range = sorted(pks)
 
     if options.top:
-        pks = session.execute(select(Models.Book.pk).order_by(
-            Models.Book.downloads.desc()).limit(options.top)).scalars().all()
+        pks = DBUtils.top_books(options.top)
         pks = pks.intersection (options.range)
         options.range = sorted (pks)
 
     if options.fk_filetype:
-        pks = session.execute(select(Models.File.fk_books).where(
-            not_(Models.File.archive_path.regexp_match('^cache/')),
-            Models.File.fk_filetypes == options.fk_filetype ,
-        ).distinct()).scalars().all()
+        pks = DBUtils.filetype_books(options.fk_filetype)
         pks = pks.intersection (options.range)
         options.range = sorted (pks)
 
@@ -627,15 +609,7 @@ def main ():
                     break
                 Logger.ebook = last = ebook
 
-                try:
-                    ebook_exists = session.execute(select(Models.Book).where(
-                        Models.Book.pk == ebook)).first()
-                except Exception:
-                    exception ("Error checking for book.")
-                    continue
-
-                if not ebook_exists:
-                    warning ("No ebook #%d in database.", ebook)
+                if not DBUtils.ebook_exists(ebook):
                     continue
 
                 maker = Maker (ebook)
