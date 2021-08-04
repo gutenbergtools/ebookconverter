@@ -99,7 +99,7 @@ def save_metadata(dc):
 
     dc.session.commit()
 
-def scan_header (bytes_, filename):
+def scan_header (bytes_, filename, ebook):
     """ Scan pg header in file. """
 
     try:
@@ -154,10 +154,13 @@ def scan_header (bytes_, filename):
                     except UnicodeError:
                         return None
 
-        if dc.project_gutenberg_id:
+        if str(dc.project_gutenberg_id) == str(ebook):
             Logger.ebook = dc.project_gutenberg_id
             save_metadata(dc)
             return dc.project_gutenberg_id
+        elif dc.project_gutenberg_id:
+            error('loaded gutenberg id %s in %s did not match trigger id %s',
+                  dc.project_gutenberg_id, filename, ebook)
         return None
 
     except ValueError as what:
@@ -166,25 +169,24 @@ def scan_header (bytes_, filename):
         return None
 
 
-def scan_file (filename):
+def scan_file (filename, ebook):
     """ Scan one file. """
 
     if parseable_file (filename):
         with open (filename, 'rb') as fp:
-            if scan_header (fp.read (), filename):
+            if scan_header (fp.read (), filename, ebook):
                 return True
     return False
 
 
-def scan_zip (filename):
+def scan_zip (filename, ebook):
     """ Scan a zip file like a dir. """
 
     try:
         zip_ = zipfile.ZipFile (filename)
         for member in sorted (zip_.namelist (), key=file_sort_key):
             if parseable_file (member):
-                if scan_header (zip_.read (member), member):
-                    print ('Zipmemberfilename: %s' %  member)
+                if scan_header (zip_.read (member), member, ebook):
                     return True
 
     except (zipfile.error, NotImplementedError):
@@ -234,10 +236,11 @@ def file_sort_key (filename):
     return '99' + name + '-z'
 
 
-def scan_directory (dirname):
+def scan_directory(ebook_num):
     """ Scan one directory in the new archive filesystem. """
+    # is ebook_num in db?
 
-    # dirname = os.path.realpath (dirname)
+    dirname = os.path.join(FILES, str(ebook_num))
     debug ("Scanning directory %s ..." % dirname)
 
     found_files = []
@@ -249,13 +252,14 @@ def scan_directory (dirname):
 
     for filename in sorted (found_files, key=file_sort_key):
         debug ("Found file: %s" % filename)
-
-        if stat_file (filename):
-            if filename.endswith ('.zip'):
-                scan_zip (filename)
-            else:
-                scan_file (filename)
-            print ('-' * 10)
+        
+        # statfile adds the file to the database
+        if stat_file (filename, ebook_num):
+            if not ebook_exists(ebook_num):
+                if filename.endswith ('.zip'):
+                    scan_zip (filename, ebook_num)
+                else:
+                    scan_file (filename, ebook_num)
 
 
 def scan_dopush_log ():
@@ -277,12 +281,10 @@ def scan_dopush_log ():
 
         m = re.match (r'^(\d+)\.zip\.trig$', filename)
         if m:
-            Logger.ebook = int(m.group(1))
-            dirname = os.path.join (FILES, m.group (1))
-            scan_directory (dirname)
+            ebook_num = int(m.group(1))
+            Logger.ebook = ebook_num
+            scan_directory(ebook_num)
 
-            dirname = os.path.join (PUBLISH, m.group (1))
-            # scan_directory (dirname)
         else:
             # old archive /etextXX
             m = re.match (r'^(etext\d\d)-(\w+\.\w+).trig$', filename)
@@ -313,7 +315,7 @@ def main ():
         for arg in sys.argv[1:]:
             try:
                 Logger.ebook = int(arg)
-                scan_directory (os.path.join (FILES, str (int (arg))))
+                scan_directory (int (arg))
             except ValueError: # no int
                 scan_file (arg)
 
