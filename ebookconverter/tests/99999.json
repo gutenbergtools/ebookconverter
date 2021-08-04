@@ -1,0 +1,32 @@
+{
+    "GENERATED": "2021-07-07",
+    "VERSION": "1.00",
+    "DATA": {
+        "TITLE": "A Sagebrush Cinderella",
+        "CONTRIBUTOR": [
+            {
+                "name": "Max Brand",
+                "role": "author"
+            },
+            {
+                "name": "Alan True",
+                "role": "illustrator"
+            }
+        ],
+        "SCANS_ARCHIVE_URL": [
+            "https://archive.org/details/in.ernet.dli.2013.179137",
+            "https://babel.hathitrust.org/cgi/pt?id=uieg.30152019845839"
+        ],
+        "CREDIT": "Roger Frank and Sue Clark.",
+        "LANGUAGE": "English",
+        "PUBLISHER": "Frank A. Munsey Company",
+        "PUBLISHER_COUNTRY": "US",
+        "SOURCE_PUBLICATION_YEARS": [
+            "copyright:1920",
+            "reprint:1955",
+            "reprint:1972"
+        ],
+        "REQUEST_KEY": "20210623194947brand",
+        "EBOOK_NUMBER": "99999"
+    }
+}
