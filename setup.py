@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.6.9'
+VERSION = '0.7.0'
 
 setup (
     name = 'ebookconverter',
@@ -16,9 +16,10 @@ setup (
     ],
 
     scripts = [
-        'scripts/ebookconverter',
         'scripts/autodelete',
+        'scripts/ebookconverter',
         'scripts/fileinfo',
+        'scripts/make_csv',
         'scripts/cron-rebuild-files.sh',
         'scripts/cron-dopush-social.sh',
         'scripts/cron-dopush.sh',

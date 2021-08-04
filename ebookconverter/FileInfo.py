@@ -16,18 +16,12 @@ Notes: 10/28/2019
 - FileInfo.py looks for files named [number].zip.trig in the dopush "log" directory. If it finds 
   one, it looks for files in the in the FILES/[number] directory. 
 - FileInfo scans the files (or members of the zip file) for a source file containing a plain-text 
-  "PG header" and puts the metadata from the header into STDOUT. dopush pipes this metadata to 
-  autocat.php 
-  TODO: bring autocat.php functionality into EbookConverter so that metadata initialization can be 
-  smarter.
+  "PG header" and puts the metadata from the header into STDOUT. 
 - TODO: remove hash columns from the Postgres database.
 - When finished, the .trig files are moved to a 'backup' subdirectory.
 
 
 """
-
-from __future__ import unicode_literals
-from __future__ import print_function
 
 import base64
 import binascii
@@ -42,8 +36,9 @@ import zipfile
 
 import lxml
 
+from libgutenberg.DBUtils import ebook_exists
 from libgutenberg.GutenbergGlobals import xpath
-from libgutenberg.Logger import debug, exception
+from libgutenberg.Logger import debug, error, exception
 from libgutenberg import Logger
 from libgutenberg.DublinCoreMapping import DublinCoreObject
 
