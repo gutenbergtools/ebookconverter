@@ -219,9 +219,12 @@ def scan_directory(ebook_num):
 
     found_files = []
     for root, dummy_dirs, files in os.walk (dirname):
-        if '.hg' in root:
+        # don't catalog dot files
+        if '/.' in root or root.startswith('.'):
             continue
         for f in files:
+            if f.startswith('.'):
+                continue
             found_files.append (os.path.join (root, f))
 
     for filename in sorted (found_files, key=file_sort_key):
