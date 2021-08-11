@@ -26,6 +26,7 @@ Notes: 10/28/2019
 import base64
 import binascii
 import datetime
+import json
 import os
 import re
 import shutil
@@ -44,6 +45,7 @@ from libgutenberg.Models import Book, Filetype
 from libgutenberg.Logger import debug, error, exception
 from libgutenberg import Logger
 
+from .Notifier import ADDRESS_BOOK
 PRIVATE = os.getenv ('PRIVATE') or ''
 PUBLIC  = os.getenv ('PUBLIC')  or ''
 PUBLISH = os.getenv ('PUBLISH')  or ''
@@ -51,6 +53,7 @@ PUBLISH = os.getenv ('PUBLISH')  or ''
 DOPUSH_LOG_DIR = PRIVATE + '/logs/dopush'
 FILES = PUBLIC + '/files'
 FTP   = '/public/ftp/pub/docs/books/gutenberg/'
+WORKFLOW_LOG_DIR = os.path.join(PRIVATE, 'logs', 'json')
 
 
 PARSEABLE_FILES = '.rst .html .htm .tex .txt'.split ()
@@ -75,6 +78,43 @@ def save_metadata(dc):
 
     dc.save()
 
+def get_workflow_json(ebooknum):
+    """ return the workflow metadata file, if it exists"""
+    wf_file = os.path.join(WORKFLOW_LOG_DIR, str(ebooknum) + '.json')
+    debug('wf_file %s exists: %s', wf_file, os.path.exists(wf_file))
+    return wf_file if os.path.exists(wf_file) else None
+
+
+def archive_workflow_file(filename):
+    """ archive the workflow metadata file"""
+    try:
+        shutil.move(filename, os.path.join(WORKFLOW_LOG_DIR, 'backup'))
+    except shutil.Error:
+        filename_nopath = os.path.split(filename)[1]    
+        for rev in range(0, 10):
+            dest = os.path.join(WORKFLOW_LOG_DIR, 'backup', '%s.%s' % (filename_nopath, rev))
+            if not os.path.exists(dest):
+                shutil.copy(filename, dest)
+                break
+            if rev == 9:
+                warning('too many revisions, %s not archived', filename)
+        os.remove(filename)
+
+
+def handle_non_dc(data, ebook):
+    try:
+        non_dc = json.loads(data)
+        notify = non_dc['DATA']['NOTIFY']
+    except ValueError:
+        error("problem with json file for %s", ebook)
+        notify = None
+    except KeyError:
+        notify = None
+
+    if notify:
+        ADDRESS_BOOK.add_email(ebook, notify)
+
+
 def scan_header (bytes_, filename, ebook):
     """ Scan pg header in file. """
 
@@ -82,6 +122,18 @@ def scan_header (bytes_, filename, ebook):
         dc = DublinCoreObject()
         dc.get_my_session()
         ext = os.path.splitext (filename)[1]
+
+        workflow_file = get_workflow_json(ebook)
+        if  workflow_file:
+            data = ''
+            with open (workflow_file, 'r') as fp:
+                data = fp.read()
+                dc.load_from_pgheader(data)
+                if dc.project_gutenberg_id:
+                    dc.encoding = 'utf-8'
+                    handle_non_dc(data, dc.project_gutenberg_id)
+                    archive_workflow_file(workflow_file)
+                    return dc.project_gutenberg_id
 
         if ext in HTML_FILES:
             body = None
@@ -211,7 +263,6 @@ def scan_directory(ebook_num):
     # is ebook_num in db?
 
     dirname = os.path.join(FILES, str(ebook_num))
-    debug ("Scanning directory %s ..." % dirname)
 
     found_files = []
     for root, dummy_dirs, files in os.walk (dirname):
@@ -242,7 +293,6 @@ def scan_dopush_log ():
     """ Scan the dopush log directory for new files.
 
     Files in this directory are placeholders only. The real files are
-    in FILES/ and DIRS/ and PUBLISH/.
 
     """
 
