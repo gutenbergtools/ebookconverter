@@ -31,7 +31,8 @@ from sqlalchemy import select
 from sqlalchemy.sql import func
 from sqlalchemy.ext.serializer import loads, dumps
 
-from libgutenberg import DBUtils, DublinCoreMapping, Logger
+from libgutenberg import DBUtils, Logger
+from libgutenberg.GutenbergFiles import remove_file_from_database, store_file_in_database
 from libgutenberg.GutenbergGlobals import Struct
 from libgutenberg.Logger import info, debug, warning, error, exception
 from libgutenberg import Models
@@ -227,8 +228,7 @@ class Maker (object):
         if options.shadow:
             debug ("If not in shadow, would have removed file from database: %s" % fn)
         else:
-            dc = DublinCoreMapping.DublinCoreObject()
-            dc.remove_file_from_database (fn)
+            remove_file_from_database (fn)
             debug ("Removed file from database: %s" % fn)
 
 
@@ -344,7 +344,6 @@ def run_job_queue (job_queue):
     debug ("Ebookmaker returned code: %d." % ebm.returncode)
     debug (stdout.decode (sys.stdout.encoding))
     debug (stderr.decode (sys.stderr.encoding))
-    dc = DublinCoreMapping.DublinCoreObject()
     if ebm.returncode == 0:
         for job in job_queue:
             filename = os.path.join (job.outputdir, job.outputfile)
@@ -354,7 +353,7 @@ def run_job_queue (job_queue):
                     debug ('if not in shadow, would have stored %s in database.', filename)
                 else:
                     debug ('adding %s to database.', filename)
-                    dc.store_file_in_database (job.ebook, filename, job.type)
+                    store_file_in_database (job.ebook, filename, job.type)
                 mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
                 if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
                     warning ('Failed to build new file: %s', filename)
