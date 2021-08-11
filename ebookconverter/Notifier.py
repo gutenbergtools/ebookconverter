@@ -55,7 +55,6 @@ class AddressBook:
 
     def __del__(self):
         """ save the data before destroying the object """
-        print('dumping ' + NOTIFY_FILE)
         with open (NOTIFY_FILE, 'w+') as json_file:
             json.dump(self.address_book, json_file)
 

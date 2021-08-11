@@ -5,7 +5,7 @@
 
 Candidates.py
 
-Copyright 2009-2010 by Marcello Perathoner
+Copyright 2009-2021 by Marcello Perathoner and Project Gutenberg
 
 Distributable under the GNU General Public License Version 3 or newer.
 
@@ -16,7 +16,7 @@ Utility class to find candidate files for conversion operations.
 import os.path
 import fnmatch
 
-from libgutenberg import DublinCoreMapping, GutenbergDatabase
+from libgutenberg import GutenbergDatabase
 from libgutenberg import GutenbergGlobals as gg
 from libgutenberg.Logger import info, debug, warning, error, exception
 from libgutenberg.Models import File
@@ -45,7 +45,7 @@ class Candidates (object):
                 and not os.path.basename (file_.archive_path).startswith (str (ebook))):
                 # must have the form 12345-h.htm (not eg. glossary.htm)
                 continue
-            if file_.file_type == None:
+            if file_.file_type is None:
                 continue
 
             adir = gg.archive_dir (ebook)

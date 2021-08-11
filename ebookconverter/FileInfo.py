@@ -13,25 +13,21 @@ Extract metadata from posted PG ebook.
 
 Notes: 10/28/2019
 
-- FileInfo.py looks for files named [number].zip.trig in the dopush "log" directory. If it finds 
-  one, it looks for files in the in the FILES/[number] directory. 
-- FileInfo scans the files (or members of the zip file) for a source file containing a plain-text 
-  "PG header" and puts the metadata from the header into STDOUT. 
+- FileInfo.py looks for files named [number].zip.trig in the dopush "log" directory. If it finds
+  one, it looks for files in the in the FILES/[number] directory.
+- FileInfo scans the files (or members of the zip file) for a source file containing a plain-text
+  "PG header" and puts the metadata from the header into STDOUT.
 - TODO: remove hash columns from the Postgres database.
 - When finished, the .trig files are moved to a 'backup' subdirectory.
 
 
 """
 
-import base64
-import binascii
-import datetime
 import json
 import os
 import re
 import shutil
 import stat
-import subprocess
 import sys
 import zipfile
 
@@ -41,8 +37,8 @@ from libgutenberg.DBUtils import check_session, ebook_exists
 from libgutenberg.DublinCoreMapping import DublinCoreObject
 from libgutenberg.GutenbergFiles import store_file_in_database
 from libgutenberg.GutenbergGlobals import xpath
-from libgutenberg.Models import Book, Filetype
-from libgutenberg.Logger import debug, error, exception
+from libgutenberg.Models import Book
+from libgutenberg.Logger import debug, error, exception, warning
 from libgutenberg import Logger
 
 from .Notifier import ADDRESS_BOOK
@@ -50,11 +46,11 @@ PRIVATE = os.getenv ('PRIVATE') or ''
 PUBLIC  = os.getenv ('PUBLIC')  or ''
 PUBLISH = os.getenv ('PUBLISH')  or ''
 
-DOPUSH_LOG_DIR = PRIVATE + '/logs/dopush'
-FILES = PUBLIC + '/files'
-FTP   = '/public/ftp/pub/docs/books/gutenberg/'
+DOPUSH_LOG_DIR = os.path.join(PRIVATE, 'logs', 'dopush')
 WORKFLOW_LOG_DIR = os.path.join(PRIVATE, 'logs', 'json')
 
+FILES = os.path.join(PUBLIC, 'files')
+FTP   = '/public/ftp/pub/docs/books/gutenberg/'
 
 PARSEABLE_FILES = '.rst .html .htm .tex .txt'.split ()
 HTML_FILES = '.html .htm'.split ()
@@ -80,6 +76,8 @@ def save_metadata(dc):
 
 def get_workflow_json(ebooknum):
     """ return the workflow metadata file, if it exists"""
+    if not ebook:
+        return None
     wf_file = os.path.join(WORKFLOW_LOG_DIR, str(ebooknum) + '.json')
     debug('wf_file %s exists: %s', wf_file, os.path.exists(wf_file))
     return wf_file if os.path.exists(wf_file) else None
@@ -90,7 +88,7 @@ def archive_workflow_file(filename):
     try:
         shutil.move(filename, os.path.join(WORKFLOW_LOG_DIR, 'backup'))
     except shutil.Error:
-        filename_nopath = os.path.split(filename)[1]    
+        filename_nopath = os.path.split(filename)[1]
         for rev in range(0, 10):
             dest = os.path.join(WORKFLOW_LOG_DIR, 'backup', '%s.%s' % (filename_nopath, rev))
             if not os.path.exists(dest):
@@ -115,18 +113,18 @@ def handle_non_dc(data, ebook):
         ADDRESS_BOOK.add_email(ebook, notify)
 
 
-def scan_header (bytes_, filename, ebook):
-    """ Scan pg header in file. """
+def scan_header(bytes_, filename, ebook):
+    """ Scan pg header in file. Or see if there is a workflow json file. """
 
     try:
         dc = DublinCoreObject()
         dc.get_my_session()
-        ext = os.path.splitext (filename)[1]
+        ext = os.path.splitext(filename)[1]
 
         workflow_file = get_workflow_json(ebook)
         if  workflow_file:
             data = ''
-            with open (workflow_file, 'r') as fp:
+            with open(workflow_file, 'r') as fp:
                 data = fp.read()
                 dc.load_from_pgheader(data)
                 if dc.project_gutenberg_id:
@@ -137,48 +135,48 @@ def scan_header (bytes_, filename, ebook):
 
         if ext in HTML_FILES:
             body = None
-            if bytes_.startswith (b'<?xml'):
+            if bytes_.startswith(b'<?xml'):
                 try:
                     # use XML parser
-                    html = lxml.etree.fromstring (bytes_, lxml.etree.XMLParser (load_dtd = True))
+                    html = lxml.etree.fromstring(bytes_, lxml.etree.XMLParser(load_dtd = True))
                     if html is not None:
-                        body = xpath (html, "//xhtml:body")[0]
-                        for p in xpath (body, "//xhtml:p"): # fix PGTEI
+                        body = xpath(html, "//xhtml:body")[0]
+                        for p in xpath(body, "//xhtml:p"): # fix PGTEI
                             p.tail = "\n"
                 except (lxml.etree.ParseError, IndexError) as what:
-                    debug ("# lxml XMLParser: %s" % what)
+                    debug("# lxml XMLParser: %s" % what)
 
             else:
                 try:
                     # use HTML parser
-                    html = lxml.etree.fromstring (bytes_, lxml.etree.HTMLParser ())
+                    html = lxml.etree.fromstring(bytes_, lxml.etree.HTMLParser())
                     if html is not None:
-                        body = xpath (html, "//body")[0]
+                        body = xpath(html, "//body")[0]
                 except (lxml.etree.ParseError, IndexError) as what:
-                    debug ("# lxml HTMLParser: %s" % what)
+                    debug("# lxml HTMLParser: %s" % what)
 
             if body is not None:
                 try:
-                    s = lxml.etree.tostring (
+                    s = lxml.etree.tostring(
                         body,
                         encoding='unicode',
                         method='text')
-                    dc.load_from_pgheader (s)
+                    dc.load_from_pgheader(s)
                 except UnicodeError:
                     return None
 
         elif ext == '.rst':
-            dc.load_from_rstheader (bytes_.decode ('utf-8'))
+            dc.load_from_rstheader(bytes_.decode('utf-8'))
 
         else:
             try:
-                dc.load_from_pgheader (bytes_.decode ('us-ascii'))
+                dc.load_from_pgheader(bytes_.decode('us-ascii'))
             except UnicodeError:
                 try:
-                    dc.load_from_pgheader (bytes_.decode ('utf-8'))
+                    dc.load_from_pgheader(bytes_.decode('utf-8'))
                 except UnicodeError:
                     try:
-                        dc.load_from_pgheader (bytes_.decode ('windows-1252'))
+                        dc.load_from_pgheader(bytes_.decode('windows-1252'))
                     except UnicodeError:
                         return None
 
@@ -186,35 +184,35 @@ def scan_header (bytes_, filename, ebook):
             Logger.ebook = dc.project_gutenberg_id
             save_metadata(dc)
             return dc.project_gutenberg_id
-        elif dc.project_gutenberg_id:
+        if dc.project_gutenberg_id:
             error('loaded gutenberg id %s in %s did not match trigger id %s',
                   dc.project_gutenberg_id, filename, ebook)
         return None
 
     except ValueError as what:
         exception (what)
-        debug ("Could not scan header of %s" % filename)
+        debug("Could not scan header of %s" % filename)
         return None
 
 
-def scan_file (filename, ebook):
+def scan_file(filename, ebook):
     """ Scan one file. """
 
-    if parseable_file (filename):
-        with open (filename, 'rb') as fp:
-            if scan_header (fp.read (), filename, ebook):
+    if parseable_file(filename):
+        with open(filename, 'rb') as fp:
+            if scan_header(fp.read(), filename, ebook):
                 return True
     return False
 
 
-def scan_zip (filename, ebook):
+def scan_zip(filename, ebook):
     """ Scan a zip file like a dir. """
 
     try:
-        zip_ = zipfile.ZipFile (filename)
-        for member in sorted (zip_.namelist (), key=file_sort_key):
-            if parseable_file (member):
-                if scan_header (zip_.read (member), member, ebook):
+        zip_ = zipfile.ZipFile(filename)
+        for member in sorted(zip_.namelist(), key=file_sort_key):
+            if parseable_file(member):
+                if scan_header(zip_.read(member), member, ebook):
                     return True
 
     except (zipfile.error, NotImplementedError):
@@ -227,30 +225,30 @@ def is_readable(filename):
     """ Used to be "stat_file. The 'stat' part has been refactored into libgutenberg """
     try:
         # is file readable? else raise IOError
-        fp = open (filename, 'r')
-        fp.close ()
+        fp = open(filename, 'r')
+        fp.close()
         return 1
 
     except IOError:
         return 0
 
 
-def file_sort_key (filename):
+def file_sort_key(filename):
     """ Sort files according to metadata quality.
 
     Files with best metadata first. """
 
-    name, ext = os.path.splitext (filename)
+    name, ext = os.path.splitext(filename)
 
     # sort parseable files first
     if ext in PARSEABLE_FILES:
         # -z sorts ascii text files last
-        return "%02d %s-z" % (PARSEABLE_FILES.index (ext), name)
+        return "%02d %s-z" % (PARSEABLE_FILES.index(ext), name)
     return '99' + name + '-z'
 
 
 def create_ebook(ebook_num, session=None):
-    """ create an ebook, only info will be the number 
+    """ create an ebook, only info will be the number
     release_date=today() autoassigned by server"""
     session = check_session(session)
     new_ebook = Book(pk=ebook_num)
@@ -263,79 +261,81 @@ def scan_directory(ebook_num):
     # is ebook_num in db?
 
     dirname = os.path.join(FILES, str(ebook_num))
+    debug("Scanning directory %s ...", dirname)
 
     found_files = []
-    for root, dummy_dirs, files in os.walk (dirname):
+    for root, dummy_dirs, files in os.walk(dirname):
         # don't catalog dot files
         if '/.' in root or root.startswith('.'):
             continue
         for f in files:
             if f.startswith('.'):
                 continue
-            found_files.append (os.path.join (root, f))
+            found_files.append(os.path.join(root, f))
 
     header_found = False
-    for filename in sorted (found_files, key=file_sort_key):
+    for filename in sorted(found_files, key=file_sort_key):
         if is_readable(filename):
             if not ebook_exists(ebook_num):
                 create_ebook(ebook_num)
             if not header_found:
-                if filename.endswith ('.zip'):
-                    header_found = scan_zip (filename, ebook_num)
+                if filename.endswith('.zip'):
+                    header_found = scan_zip(filename, ebook_num)
                 else:
-                    header_found = scan_file (filename, ebook_num)
-            
+                    header_found = scan_file(filename, ebook_num)
+
             store_file_in_database(ebook_num, filename, None)
         else:
             warning(filename + 'is not readable')
 
-def scan_dopush_log ():
+def scan_dopush_log():
     """ Scan the dopush log directory for new files.
 
     Files in this directory are placeholders only. The real files are
+    in FILES/  and PUBLISH/.
 
     """
 
     retcode = 1
 
-    for filename in sorted (os.listdir (DOPUSH_LOG_DIR)):
-        mode = os.stat (os.path.join (DOPUSH_LOG_DIR, filename))[stat.ST_MODE]
-        if stat.S_ISDIR (mode):
+    for filename in sorted(os.listdir(DOPUSH_LOG_DIR)):
+        mode = os.stat(os.path.join(DOPUSH_LOG_DIR, filename))[stat.ST_MODE]
+        if stat.S_ISDIR(mode):
             continue
 
-        debug ("Tag file: %s" % filename)
+        debug("Tag file: %s" % filename)
 
         ebook_num = 0
-        m = re.match (r'^(\d+)\.zip\.trig$', filename)
+        m = re.match(r'^(\d+)\.zip\.trig$', filename)
         if m:
             ebook_num = int(m.group(1))
             Logger.ebook = ebook_num
             scan_directory(ebook_num)
 
-        shutil.move (os.path.join (DOPUSH_LOG_DIR, filename),
-                     os.path.join (DOPUSH_LOG_DIR, 'backup', filename))
+        shutil.move(os.path.join(DOPUSH_LOG_DIR, filename),
+                     os.path.join(DOPUSH_LOG_DIR, 'backup', filename))
         retcode = 0
 
     return retcode
 
-def main ():
-    Logger.setup (Logger.LOGFORMAT, 'fileinfo.log')
-    Logger.set_log_level (2)
+def main():
+    Logger.setup(Logger.LOGFORMAT, 'fileinfo.log')
+    Logger.set_log_level(2)
 
     # This is the only encoding used at PG/ibiblio.
     # Bail out early if the environment is misconfigured.
-    assert sys.stdout.encoding.lower () == 'utf-8'
+    assert str(sys.stdout.encoding).lower() == 'utf-8'
 
-    if len (sys.argv) > 1:
+    if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
             try:
                 Logger.ebook = int(arg)
-                scan_directory (int (arg))
+                scan_directory(int(arg))
             except ValueError: # no int
-                scan_file (arg)
+                scan_file(arg, None)
 
     else:
-        sys.exit (scan_dopush_log ())
+        sys.exit(scan_dopush_log())
 
 if __name__ == '__main__':
     main()

@@ -1,3 +1,5 @@
+'''export a CSV file '''
+
 import csv
 import gzip
 import os
@@ -14,7 +16,8 @@ CSV_FN = 'pg_catalog.csv'
 OB = GutenbergDatabase.Objectbase(False)
 
 def books():
-    yield ['Text#', 'Type', 'Issued', 'Title', 'Language', 'Authors', 'Subjects', 'LoCC', 'Bookshelves',]
+    yield ['Text#', 'Type', 'Issued', 'Title', 'Language', 'Authors',
+           'Subjects', 'LoCC', 'Bookshelves',]
     session = OB.get_session()
     booknums = session.query(Book.pk).where(Book.pk < 99999).order_by(Book.pk).all()
     for booknum in booknums:
@@ -33,7 +36,6 @@ def books():
                '; '.join([shelf.bookshelf for shelf in dc.bookshelves]),
               ]
         yield row
-
 
 
 def main():
