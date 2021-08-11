@@ -36,11 +36,13 @@ import zipfile
 
 import lxml
 
-from libgutenberg.DBUtils import ebook_exists
+from libgutenberg.DBUtils import check_session, ebook_exists
+from libgutenberg.DublinCoreMapping import DublinCoreObject
+from libgutenberg.GutenbergFiles import store_file_in_database
 from libgutenberg.GutenbergGlobals import xpath
+from libgutenberg.Models import Book, Filetype
 from libgutenberg.Logger import debug, error, exception
 from libgutenberg import Logger
-from libgutenberg.DublinCoreMapping import DublinCoreObject
 
 PRIVATE = os.getenv ('PRIVATE') or ''
 PUBLIC  = os.getenv ('PUBLIC')  or ''
@@ -169,30 +171,15 @@ def scan_zip (filename, ebook):
     return False
 
 
-def stat_file (filename):
-    """ Stat file. """
-
+def is_readable(filename):
+    """ Used to be "stat_file. The 'stat' part has been refactored into libgutenberg """
     try:
         # is file readable? else raise IOError
         fp = open (filename, 'r')
         fp.close ()
-
-        st = os.stat (filename)
-
-        print ('filename: %s'  % os.path.split (filename)[1])
-
-        directory = os.path.split (filename)[0]
-        directory = os.path.realpath (directory)
-        directory = directory.replace (FTP, '')
-
-        print ('directory: %s' % directory)
-
-        print ('mtime: %d' % st.st_mtime)
-        print ('size: %d'  % st.st_size)
-
         return 1
 
-    except (OSError, IOError):
+    except IOError:
         return 0
 
 
@@ -208,6 +195,15 @@ def file_sort_key (filename):
         # -z sorts ascii text files last
         return "%02d %s-z" % (PARSEABLE_FILES.index (ext), name)
     return '99' + name + '-z'
+
+
+def create_ebook(ebook_num, session=None):
+    """ create an ebook, only info will be the number 
+    release_date=today() autoassigned by server"""
+    session = check_session(session)
+    new_ebook = Book(pk=ebook_num)
+    session.add(new_ebook)
+    session.commit()
 
 
 def scan_directory(ebook_num):
@@ -227,17 +223,20 @@ def scan_directory(ebook_num):
                 continue
             found_files.append (os.path.join (root, f))
 
+    header_found = False
     for filename in sorted (found_files, key=file_sort_key):
-        debug ("Found file: %s" % filename)
-        
-        # statfile adds the file to the database
-        if stat_file (filename, ebook_num):
+        if is_readable(filename):
             if not ebook_exists(ebook_num):
+                create_ebook(ebook_num)
+            if not header_found:
                 if filename.endswith ('.zip'):
-                    scan_zip (filename, ebook_num)
+                    header_found = scan_zip (filename, ebook_num)
                 else:
-                    scan_file (filename, ebook_num)
-
+                    header_found = scan_file (filename, ebook_num)
+            
+            store_file_in_database(ebook_num, filename, None)
+        else:
+            warning(filename + 'is not readable')
 
 def scan_dopush_log ():
     """ Scan the dopush log directory for new files.
@@ -256,6 +255,7 @@ def scan_dopush_log ():
 
         debug ("Tag file: %s" % filename)
 
+        ebook_num = 0
         m = re.match (r'^(\d+)\.zip\.trig$', filename)
         if m:
             ebook_num = int(m.group(1))
