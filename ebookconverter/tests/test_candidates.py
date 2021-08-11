@@ -20,5 +20,3 @@ class TestCandidates(unittest.TestCase):
         candidates = Candidates.Candidates()
         files = candidates.read_from_database(self.ebook)
         filtered = Candidates.Candidates.filter_sort(typeglob_list, files, lambda x: x.format)
-        print(filtered[0])
-
