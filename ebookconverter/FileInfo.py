@@ -47,11 +47,9 @@ PUBLIC  = os.getenv ('PUBLIC')  or ''
 PUBLISH = os.getenv ('PUBLISH')  or ''
 
 DOPUSH_LOG_DIR = PRIVATE + '/logs/dopush'
-DIRS  = PUBLIC + '/dirs'
 FILES = PUBLIC + '/files'
 FTP   = '/public/ftp/pub/docs/books/gutenberg/'
 
-BITCOLLIDER_EXECUTABLE = PRIVATE + '/bin/bitcollider-0.6.0'
 
 PARSEABLE_FILES = '.rst .html .htm .tex .txt'.split ()
 HTML_FILES = '.html .htm'.split ()
@@ -260,18 +258,6 @@ def scan_dopush_log ():
             ebook_num = int(m.group(1))
             Logger.ebook = ebook_num
             scan_directory(ebook_num)
-
-        else:
-            # old archive /etextXX
-            m = re.match (r'^(etext\d\d)-(\w+\.\w+).trig$', filename)
-            if m:
-                fn = os.path.join (DIRS, m.group (1), m.group (2))
-                if stat_file (fn):
-                    if filename.endswith ('.zip'):
-                        scan_zip (fn)
-                    else:
-                        scan_file (fn)
-                    print ('-' * 10)
 
         shutil.move (os.path.join (DOPUSH_LOG_DIR, filename),
                      os.path.join (DOPUSH_LOG_DIR, 'backup', filename))
