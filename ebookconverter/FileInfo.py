@@ -83,7 +83,7 @@ def get_workflow_file(ebook):
     debug('wf_file %s exists: %s', wf_file, os.path.exists(wf_file))
     if os.path.exists(wf_file):
         return wf_file
-    elif os.path.exists(non_wf_file):
+    if os.path.exists(non_wf_file):
         return non_wf_file
     return None
 
@@ -144,13 +144,12 @@ def scan_header(bytes_, filename, ebook):
                     handle_non_dc(data, dc.project_gutenberg_id)
             archive_workflow_file(workflow_file)
             return dc.project_gutenberg_id
-        elif workflow_file and workflow_file.endswith('.txt'):
+        if workflow_file and workflow_file.endswith('.txt'):
             """ get text from the non-workflow txt file, if it exists"""
             with open(workflow_file, 'r') as fp:
                 ww = fp.read()
                 ADDRESS_BOOK.set_email(ebook, ww, role='ww')
             archive_workflow_file(workflow_file)
-            
 
         if ext in HTML_FILES:
             body = None

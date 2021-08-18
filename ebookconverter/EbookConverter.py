@@ -115,7 +115,7 @@ FILENAMES = {
     'cover.small':      'pg{id}.cover.small.jpg',
     'cover.medium':     'pg{id}.cover.medium.jpg',
     'qrcode':           'pg{id}.qrcode.png',
-    'logfile':          'pg{id}.converter.log',      # .converter because of latex log conflicts 
+    'logfile':          'pg{id}.converter.log',      # .converter because of latex log conflicts
 }
 
 DEPENDENCIES = collections.OrderedDict((
