@@ -29,13 +29,13 @@ import setproctitle
 from libgutenberg import DBUtils, Logger
 from libgutenberg.GutenbergFiles import remove_file_from_database, store_file_in_database
 from libgutenberg.GutenbergGlobals import Struct
-from libgutenberg.Logger import info, debug, warning, error, exception
+from libgutenberg.Logger import critical, info, debug, warning, error, exception
 
 
 from ebookmaker import CommonCode
 from ebookmaker.CommonCode import Options
 
-from ebookconverter import Candidates
+from ebookconverter import Candidates, Notifier
 from ebookconverter.Version import VERSION
 
 options = Options()
@@ -349,11 +349,11 @@ def run_job_queue(job_queue):
                     store_file_in_database(job.ebook, filename, job.type)
                 mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
                 if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
-                    warning('Failed to build new file: %s', filename)
+                    critical('Failed to build new file: %s', filename)
             elif filename.split('.')[-1] not in {'facebook', 'twitter', 'picsdir'}:
-                error('Failed to build file: %s', filename)
+                critical('Failed to build file: %s', filename)
     else:
-        error('returncode was %s', ebm.returncode)
+        critical('returncode was %s', ebm.returncode)
 
 
 def add_local_options(ap):
@@ -450,6 +450,12 @@ def add_local_options(ap):
         action  = "store_true",
         help    = "stop immediately on errors.")
 
+    ap.add_argument(
+        "--notify",
+        dest    = "notify",
+        action  = "store_true",
+        help    = "send processing notifications to poster addresses.")
+
 
 def fix_option_range(options, last_ebook):
     """ Convert a range from user input into list of ebook nos. """
@@ -535,8 +541,12 @@ def main():
         error("Error in configuration file: %s", str(what))
         return 1
 
-    Logger.setup(Logger.LOGFORMAT, options.config.LOGFILE)
-    Logger.set_log_level(options.verbose)
+    Logger.setup(
+        Logger.LOGFORMAT,
+        logfile=options.config.LOGFILE,
+        loglevel=options.verbose,
+        notifier=CommonCode.queue_notifications,
+    )
     if options.verbose >= 1 and options.config.LOGFILE:
         print("Logging to: %s" % options.config.LOGFILE)
 
@@ -586,13 +596,13 @@ def main():
     info("Making:   %s" % " ".join(options.make))
     info("Building: %s" % " ".join(options.build))
 
-    done_books  = 0
+    done_books  = []
 
     try:
         for group in grouper(options.range, options.jobs):
             job_queue = []
             last = 0
-            progress = done_books * 100 // len(options.range)
+            progress = len(done_books) * 100 // len(options.range)
             info("Progress: %d%% done", progress)
 
             for ebook in group:
@@ -613,7 +623,7 @@ def main():
                     if options.stop_on_errors:
                         return 1
 
-                done_books += 1
+                done_books.append(ebook)
 
             # send up group
             if options.dry_run:
@@ -640,6 +650,7 @@ def main():
     finally:
         os.remove(options.pidfile)
 
+    Notifier.send_notifications(done_books if options.notify else [])
     setproctitle.setproctitle("Cleaning Up")
     info("Program end")
     logging.shutdown()

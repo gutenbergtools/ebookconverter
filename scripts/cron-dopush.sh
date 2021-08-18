@@ -51,7 +51,7 @@ fi
 # will expicitly rebuild every item in the LIST:
 # ~/.local/bin/pipenv run ebookconverter -v --range=1- --goback=24 --make=all
 for i in ${LIST}; do
-    ~/.local/bin/pipenv run ebookconverter -v --range=${i} --build=all
+    ~/.local/bin/pipenv run ebookconverter -v --range=${i} --build=all --notify
 done
 
 

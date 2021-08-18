@@ -28,6 +28,7 @@
         ],
         "REQUEST_KEY": "20210623194947brand",
         "EBOOK_NUMBER": "99999",
-        "NOTIFY": "webmaster@gutenberg.org"
+        "NOTIFY": "webmaster@gutenberg.org",
+        "WW": "eric@hellman.net"
     }
 }

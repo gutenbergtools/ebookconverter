@@ -74,14 +74,18 @@ def save_metadata(dc):
 
     dc.save()
 
-def get_workflow_json(ebooknum):
+def get_workflow_file(ebook):
     """ return the workflow metadata file, if it exists"""
     if not ebook:
         return None
-    wf_file = os.path.join(WORKFLOW_LOG_DIR, str(ebooknum) + '.json')
+    wf_file = os.path.join(WORKFLOW_LOG_DIR, str(ebook) + '.json')
+    non_wf_file = os.path.join(WORKFLOW_LOG_DIR, str(ebook) + '.txt')
     debug('wf_file %s exists: %s', wf_file, os.path.exists(wf_file))
-    return wf_file if os.path.exists(wf_file) else None
-
+    if os.path.exists(wf_file):
+        return wf_file
+    elif os.path.exists(non_wf_file):
+        return non_wf_file
+    return None
 
 def archive_workflow_file(filename):
     """ archive the workflow metadata file"""
@@ -102,15 +106,23 @@ def archive_workflow_file(filename):
 def handle_non_dc(data, ebook):
     try:
         non_dc = json.loads(data)
-        notify = non_dc['DATA']['NOTIFY']
+        try:
+            notify = non_dc['DATA']['NOTIFY']
+        except KeyError:
+            warning("no notify address for %s", ebook)
+            notify = None
+        try:
+            ww = non_dc['DATA']['WW']
+        except KeyError:
+            ww = get_wwtxt_email(ebook)
     except ValueError:
-        error("problem with json file for %s", ebook)
-        notify = None
-    except KeyError:
+        error("bad json file for %s", ebook)
         notify = None
 
     if notify:
-        ADDRESS_BOOK.add_email(ebook, notify)
+        ADDRESS_BOOK.set_email(ebook, notify)
+    if ww:
+        ADDRESS_BOOK.set_email(ebook, ww, role='ww')
 
 
 def scan_header(bytes_, filename, ebook):
@@ -121,8 +133,8 @@ def scan_header(bytes_, filename, ebook):
         dc.get_my_session()
         ext = os.path.splitext(filename)[1]
 
-        workflow_file = get_workflow_json(ebook)
-        if  workflow_file:
+        workflow_file = get_workflow_file(ebook)
+        if workflow_file and workflow_file.endswith('.json'):
             data = ''
             with open(workflow_file, 'r') as fp:
                 data = fp.read()
@@ -130,8 +142,15 @@ def scan_header(bytes_, filename, ebook):
                 if dc.project_gutenberg_id:
                     dc.encoding = 'utf-8'
                     handle_non_dc(data, dc.project_gutenberg_id)
-                    archive_workflow_file(workflow_file)
-                    return dc.project_gutenberg_id
+            archive_workflow_file(workflow_file)
+            return dc.project_gutenberg_id
+        elif workflow_file and workflow_file.endswith('.txt'):
+            """ get text from the non-workflow txt file, if it exists"""
+            with open(workflow_file, 'r') as fp:
+                ww = fp.read()
+                ADDRESS_BOOK.set_email(ebook, ww, role='ww')
+            archive_workflow_file(workflow_file)
+            
 
         if ext in HTML_FILES:
             body = None
