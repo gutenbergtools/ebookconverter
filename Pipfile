@@ -15,9 +15,9 @@ jaraco-functools = "*"
 requests-oauthlib = "*"
 rdflib = "*"
 qrcode = "*"
-libgutenberg = ">=0.6.2"
-ebookmaker = "==0.10.2"
 ebookconverter = {editable = true,path = "."}
+pylint = "*"
+ebookmaker = "==0.11.3"
 
 [requires]
 python_version = "3.6"
