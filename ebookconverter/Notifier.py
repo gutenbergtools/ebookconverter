@@ -52,12 +52,19 @@ class AddressBook:
         and other roles that may be invented in the future
     """
     def __init__(self):
-        self.address_book = {}
-        try:
-            with open(NOTIFY_FILE, 'r') as json_file:
-                self.address_book = json.loads(json_file.read())
-        except FileNotFoundError:
-            error('could not find %s', NOTIFY_FILE)
+        self._address_book = None
+        
+    @property
+    def address_book(self):
+        if self._address_book == None:
+            try:
+                with open(NOTIFY_FILE, 'r') as json_file:
+                    self._address_book = json.loads(json_file.read())
+            except FileNotFoundError:
+                error('could not find %s', NOTIFY_FILE)
+                self._address_book = {}
+                self.save()
+        return self._address_book
 
     def set_email(self, ebook, email, role='notify'):
         try:
