@@ -31,7 +31,7 @@ setup (
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',
         'qrcode>=6.1',
-        'libgutenberg[postgres]>=0.7.2',
+        'libgutenberg[postgres]>=0.8.1',
     ],
     
     package_data = {
