@@ -125,7 +125,7 @@ def handle_non_dc(data, ebook):
         ADDRESS_BOOK.set_email(ebook, ww, role='ww')
 
 
-def scan_header(bytes_, filename, ebook):
+def scan_header(data, filename, ebook):
     """ Scan pg header in file. Or see if there is a workflow json file. """
 
     try:
@@ -142,6 +142,9 @@ def scan_header(bytes_, filename, ebook):
                 if dc.project_gutenberg_id:
                     dc.encoding = 'utf-8'
                     handle_non_dc(data, dc.project_gutenberg_id)
+            if dc.project_gutenberg_id:
+                dc.encoding = 'utf-8'
+                handle_non_dc(data, dc.project_gutenberg_id)
             archive_workflow_file(workflow_file)
             return dc.project_gutenberg_id
         if workflow_file and workflow_file.endswith('.txt'):
@@ -153,10 +156,10 @@ def scan_header(bytes_, filename, ebook):
 
         if ext in HTML_FILES:
             body = None
-            if bytes_.startswith(b'<?xml'):
+            if data.startswith('<?xml'):
                 try:
                     # use XML parser
-                    html = lxml.etree.fromstring(bytes_, lxml.etree.XMLParser(load_dtd = True))
+                    html = lxml.etree.fromstring(data, lxml.etree.XMLParser(load_dtd = True))
                     if html is not None:
                         body = xpath(html, "//xhtml:body")[0]
                         for p in xpath(body, "//xhtml:p"): # fix PGTEI
@@ -167,7 +170,7 @@ def scan_header(bytes_, filename, ebook):
             else:
                 try:
                     # use HTML parser
-                    html = lxml.etree.fromstring(bytes_, lxml.etree.HTMLParser())
+                    html = lxml.etree.fromstring(data, lxml.etree.HTMLParser())
                     if html is not None:
                         body = xpath(html, "//body")[0]
                 except (lxml.etree.ParseError, IndexError) as what:
@@ -184,19 +187,10 @@ def scan_header(bytes_, filename, ebook):
                     return None
 
         elif ext == '.rst':
-            dc.load_from_rstheader(bytes_.decode('utf-8'))
+            dc.load_from_rstheader(data)
 
         else:
-            try:
-                dc.load_from_pgheader(bytes_.decode('us-ascii'))
-            except UnicodeError:
-                try:
-                    dc.load_from_pgheader(bytes_.decode('utf-8'))
-                except UnicodeError:
-                    try:
-                        dc.load_from_pgheader(bytes_.decode('windows-1252'))
-                    except UnicodeError:
-                        return None
+            dc.load_from_pgheader(data)
 
         if str(dc.project_gutenberg_id) == str(ebook):
             Logger.ebook = dc.project_gutenberg_id
@@ -215,11 +209,12 @@ def scan_header(bytes_, filename, ebook):
 
 def scan_file(filename, ebook):
     """ Scan one file. """
-
+    data = ''
     if parseable_file(filename):
         with open(filename, 'rb') as fp:
-            if scan_header(fp.read(), filename, ebook):
-                return True
+            data = read_string(fp.read())
+    if scan_header(data, filename, ebook):
+        return True
     return False
 
 
@@ -229,8 +224,8 @@ def scan_zip(filename, ebook):
     try:
         zip_ = zipfile.ZipFile(filename)
         for member in sorted(zip_.namelist(), key=file_sort_key):
-            if parseable_file(member):
-                if scan_header(zip_.read(member), member, ebook):
+            if parseable_file(member):                
+                if scan_header(read_string(zip_.read(member)), member, ebook):
                     return True
 
     except (zipfile.error, NotImplementedError):
@@ -238,6 +233,14 @@ def scan_zip(filename, ebook):
 
     return False
 
+def read_string(bytes_data):
+    for encoding in ['utf-8', 'iso-8859-1']:
+        try:
+            data = bytes_data.decode(encoding)
+            return data
+        except UnicodeError:
+            pass
+    return ''
 
 def is_readable(filename):
     """ Used to be "stat_file. The 'stat' part has been refactored into libgutenberg """
