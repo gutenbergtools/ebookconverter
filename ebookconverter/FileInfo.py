@@ -130,7 +130,7 @@ def scan_header(bytes_, filename, ebook):
 
     try:
         dc = DublinCoreObject()
-        dc.get_my_session()
+        dc.load_book(ebook)
         ext = os.path.splitext(filename)[1]
 
         workflow_file = get_workflow_file(ebook)
