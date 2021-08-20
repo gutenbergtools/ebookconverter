@@ -227,7 +227,7 @@ def scan_zip(filename, ebook):
     try:
         zip_ = zipfile.ZipFile(filename)
         for member in sorted(zip_.namelist(), key=file_sort_key):
-            if parseable_file(member):                
+            if parseable_file(member):
                 if scan_header(read_string(zip_.read(member)), member, ebook):
                     return True
     except (zipfile.error, NotImplementedError):

@@ -32,7 +32,7 @@ class TestNotifier(unittest.TestCase):
     def test_notify_queue(self):
         """
             notifications to an unused ebook number should save in queue
-            199 is a reserved ebook number 
+            199 is a reserved ebook number
         """
         message =  "Message sent %s" % datetime.date.today().isoformat()
         Notifier.notify(199, message)

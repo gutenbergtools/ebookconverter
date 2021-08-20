@@ -1,6 +1,5 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-import os
 import unittest
 
 
@@ -19,4 +18,4 @@ class TestCandidates(unittest.TestCase):
         typeglob_list = ('html/utf-8', 'html/iso-8859-*', 'html/*', '*/*')
         candidates = Candidates.Candidates()
         files = candidates.read_from_database(self.ebook)
-        filtered = Candidates.Candidates.filter_sort(typeglob_list, files, lambda x: x.format)
+        Candidates.Candidates.filter_sort(typeglob_list, files, lambda x: x.format)
