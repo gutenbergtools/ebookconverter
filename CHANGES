@@ -1,7 +1,7 @@
 0.7.1 (August 20, 2021)
 - Notify no longer initializes on import. This is because if it tries to log on import, an unwanted StreamHandler is attached to the logger.
 - corrected libgutenberg version requirement
-- as new files are expected to be utf-8 or *maybe* iso-8879-1, support for metadata scanning of new files with other encodings has been removed from fileinfo. Files with other encodings can still be processed if accompanied by a utf8 workflow file.
+- as new files are expected to be utf-8 or *maybe* iso-8859-1, support for metadata scanning of new files with other encodings has been removed from fileinfo. Files with other encodings can still be processed if accompanied by a utf8 workflow file.
 - misc bugfixes, delint and logging enhancements
 
 
