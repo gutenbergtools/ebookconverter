@@ -27,7 +27,7 @@ class TestFileInfo(unittest.TestCase):
          result = FileInfo.scan_file(self.test_file3, 4554)
          self.assertTrue(result)
          result = FileInfo.scan_file(self.test_file3, 99999)
-         self.assertFalse(result)
+         self.assertNotEqual(result, 99999)
 
     def test_save_metadata(self):
         result = FileInfo.scan_file(self.test_fakebook, 99999)
@@ -77,3 +77,7 @@ class TestFileInfo(unittest.TestCase):
         remove_ebook(99999, session=session)
         self.assertTrue(session.query(File.id).filter_by(fk_books=99999).count() == 0)
         self.assertTrue(session.query(File.id).filter_by(fk_books=4554).count() == nfiles_test)
+        
+    def tearDown(self):        
+        remove_file_from_database(os.path.join(FileInfo.FILES, '4554', '4554-h.htm'))
+

@@ -38,7 +38,7 @@ from libgutenberg.DublinCoreMapping import DublinCoreObject
 from libgutenberg.GutenbergFiles import store_file_in_database
 from libgutenberg.GutenbergGlobals import xpath
 from libgutenberg.Models import Book
-from libgutenberg.Logger import debug, error, exception, warning
+from libgutenberg.Logger import critical, debug, error, exception, info, warning
 from libgutenberg import Logger
 
 from .Notifier import ADDRESS_BOOK
@@ -64,7 +64,7 @@ def parseable_file (filename):
 
 
 def save_metadata(dc):
-    """ Save the metadata. Assumes that there is no existing enty in the database. """
+    """ Save the metadata. """
 
     if dc.title:
         dc.title = re.sub (r'\s*\n\s*', ' _ ', dc.title.strip ())
@@ -109,12 +109,13 @@ def handle_non_dc(data, ebook):
         try:
             notify = non_dc['DATA']['NOTIFY']
         except KeyError:
-            warning("no notify address for %s", ebook)
+            info("no notify address for %s", ebook)
             notify = None
         try:
             ww = non_dc['DATA']['WW']
         except KeyError:
-            ww = get_wwtxt_email(ebook)
+            info("no ww address for %s", ebook)
+            ww = None
     except ValueError:
         error("bad json file for %s", ebook)
         notify = None
@@ -134,18 +135,21 @@ def scan_header(data, filename, ebook):
         ext = os.path.splitext(filename)[1]
 
         workflow_file = get_workflow_file(ebook)
+        info('workflow file found: %s', workflow_file)
+
         if workflow_file and workflow_file.endswith('.json'):
             data = ''
             with open(workflow_file, 'r') as fp:
                 data = fp.read()
+            try:
                 dc.load_from_pgheader(data)
-                if dc.project_gutenberg_id:
-                    dc.encoding = 'utf-8'
-                    handle_non_dc(data, dc.project_gutenberg_id)
+            except ValueError:
+                critical("%s was not a valid workflow file", workflow_file)
             if dc.project_gutenberg_id:
                 dc.encoding = 'utf-8'
                 handle_non_dc(data, dc.project_gutenberg_id)
             archive_workflow_file(workflow_file)
+            save_metadata(dc)
             return dc.project_gutenberg_id
         if workflow_file and workflow_file.endswith('.txt'):
             """ get text from the non-workflow txt file, if it exists"""
@@ -193,7 +197,6 @@ def scan_header(data, filename, ebook):
             dc.load_from_pgheader(data)
 
         if str(dc.project_gutenberg_id) == str(ebook):
-            Logger.ebook = dc.project_gutenberg_id
             save_metadata(dc)
             return dc.project_gutenberg_id
         if dc.project_gutenberg_id:
@@ -227,10 +230,8 @@ def scan_zip(filename, ebook):
             if parseable_file(member):                
                 if scan_header(read_string(zip_.read(member)), member, ebook):
                     return True
-
     except (zipfile.error, NotImplementedError):
         pass
-
     return False
 
 def read_string(bytes_data):
