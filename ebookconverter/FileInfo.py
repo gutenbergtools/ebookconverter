@@ -152,7 +152,7 @@ def scan_header(data, filename, ebook):
             save_metadata(dc)
             return dc.project_gutenberg_id
         if workflow_file and workflow_file.endswith('.txt'):
-            """ get text from the non-workflow txt file, if it exists"""
+            # get text from the non-workflow txt file, if it exists
             with open(workflow_file, 'r') as fp:
                 ww = fp.read()
                 ADDRESS_BOOK.set_email(ebook, ww, role='ww')
