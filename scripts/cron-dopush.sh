@@ -38,7 +38,7 @@ fi
 
 # This does the basic identification of files and metadata,
 # extracted from the .zip files identified by the .trig files:
-~/.local/bin/pipenv --bare run fileinfo | ${PHP} ${PRIVATE}/lib/python/autocat/autocat.php || exit 1
+~/.local/bin/pipenv --bare run fileinfo
 
 # We have work to do! 
 # echo "do_push: making files ..."
