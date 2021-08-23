@@ -67,6 +67,8 @@ class AddressBook:
         return self._address_book
 
     def set_email(self, ebook, email, role='notify'):
+        if not email:
+            return False
         try:
             ebook = str(int(ebook))
         except ValueError:
@@ -76,6 +78,8 @@ class AddressBook:
         else:
             addresses = {}
             self.address_book[ebook] = addresses
+        if email and not "@" in email:
+            email = email.strip() + "@pglaf.org"
         addresses[role] = email
         self.save()
         return True
