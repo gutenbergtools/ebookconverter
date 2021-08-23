@@ -1,3 +1,7 @@
+0.7.2 (August 23, 2021)
+- handle bare usernames for pglaf addresses
+
+
 0.7.1 (August 20, 2021)
 - Notify no longer initializes on import. This is because if it tries to log on import, an unwanted StreamHandler is attached to the logger.
 - corrected libgutenberg version requirement
