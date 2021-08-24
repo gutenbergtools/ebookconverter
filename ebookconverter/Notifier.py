@@ -124,7 +124,7 @@ def notify(ebook, message, role='notify', subject='Gutenberg backend notificatio
         server.quit()
         return 2
     except ConnectionError as e:
-        print(e)
+        error(e)
         return 0
 
 

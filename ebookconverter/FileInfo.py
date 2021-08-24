@@ -231,7 +231,7 @@ def scan_zip(filename, ebook):
                 if scan_header(read_string(zip_.read(member)), member, ebook):
                     return True
     except (zipfile.error, NotImplementedError):
-        pass
+        warning('zipfile opening error for %s', filename)
     return False
 
 def read_string(bytes_data):
