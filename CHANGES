@@ -1,3 +1,7 @@
+0.7.3 (August 24, 2021)
+- improve logging/remove debug statements
+- update libgutenberg
+
 0.7.2 (August 23, 2021)
 - handle bare usernames for pglaf addresses
 

@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "4bea3a754074cdaeb43a0d32517f54d3e3427d9feac291628fc6249667c324e0"
+            "sha256": "b881e41c8565a18d0df17283d46151dd9b1a05aaad6b555c5db79dddf62f8ddf"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -306,10 +306,10 @@
                 "postgres"
             ],
             "hashes": [
-                "sha256:d2690722a97ac0af5ce7a5eeacb1f25c3996e4f1a983e6c43b1c5a6823b3352f"
+                "sha256:5817db31191ea968fa256044b10d973fc2e456de030399c6b829258eeb2c1817"
             ],
             "index": "pypi",
-            "version": "==0.8.3"
+            "version": "==0.8.4"
         },
         "lxml": {
             "hashes": [
