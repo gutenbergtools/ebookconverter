@@ -16,6 +16,12 @@ ebookconverter has been tested on Python 3.6.7. It's not expected to run on pyth
 
 ## Installing
 
-
-
 `pipenv install ebookconverter`
+
+The following directories should exist:
+    - $PRIVATE/logs
+    - $PRIVATE/logs/json
+    - $PRIVATE/logs/json/backup
+    - $PRIVATE/logs/notifications
+    - $PRIVATE/logs/dopush
+    - $PRIVATE/logs/dopush/backup

@@ -15,9 +15,6 @@ checks if any of the known files of that ebook have been deleted.
 
 """
 
-from __future__ import unicode_literals
-from __future__ import print_function
-
 import os
 
 from six.moves import builtins

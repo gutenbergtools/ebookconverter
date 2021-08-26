@@ -17,7 +17,7 @@ SED=/usr/bin/sed
 CP=/usr/bin/cp
 # Where to build (we might need to have multiple dev v. production locations
 # in the future)
-BUILD=/public/vhost/g/gutenberg/dev/gutenbergsite
+BUILD=/public/vhost/g/gutenberg/gutenbergsite
 
 # Fetch input, the latest covers:
 wget -O ${BUILD}/_includes/latest_covers.html "http://gutenberg1:8000/covers/small/latest/10"

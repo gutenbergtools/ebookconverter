@@ -16,11 +16,12 @@ cd /export/sunsite/users/gutenbackend/converter
 # Load environment variables:
 # gbn 2020-05-07: This confuses things due to multiple Python installs
 # on login2. Instead, let ~gutenbackend/.bashrc take care of this:
-. ./.env
-export VHOST="/public/vhost/g/gutenberg"
-export PRIVATE="${VHOST}/private"
-export PUBLIC="${VHOST}/html"
-export PHP="php -c ${PRIVATE}/lib/php/"
+# esh 2021-08-24 setting environment variable in .env which gets loaded by pipenv#
+#. ./.env
+#export VHOST="/public/vhost/g/gutenberg"
+#export PRIVATE="${VHOST}/private"
+#export PUBLIC="${VHOST}/html"
+#export PHP="php -c ${PRIVATE}/lib/php/"
 
 
 # First check whether there are any .trig files in 
@@ -38,7 +39,7 @@ fi
 
 # This does the basic identification of files and metadata,
 # extracted from the .zip files identified by the .trig files:
-~/.local/bin/pipenv --bare run fileinfo | ${PHP} ${PRIVATE}/lib/python/autocat/autocat.php || exit 1
+~/.local/bin/pipenv --bare run fileinfo
 
 # We have work to do! 
 # echo "do_push: making files ..."
@@ -51,7 +52,5 @@ fi
 # will expicitly rebuild every item in the LIST:
 # ~/.local/bin/pipenv run ebookconverter -v --range=1- --goback=24 --make=all
 for i in ${LIST}; do
-    ~/.local/bin/pipenv run ebookconverter -v --range=${i} --build=all
+    ~/.local/bin/pipenv run ebookconverter -v --range=${i} --build=all --notify
 done
-
-

@@ -3,12 +3,12 @@
 
 """
 
-ebookconverter script
+make_csv script
 
-This script starts epubmaker.
+This script runs makes a csv file in FEEDS
 
 """
 
-from ebookconverter import EbookConverter
+from ebookconverter import CSV
 
-EbookConverter.main ()
+CSV.main()

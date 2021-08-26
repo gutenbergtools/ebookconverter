@@ -5,7 +5,7 @@
 
 Candidates.py
 
-Copyright 2009-2010 by Marcello Perathoner
+Copyright 2009-2021 by Marcello Perathoner and Project Gutenberg
 
 Distributable under the GNU General Public License Version 3 or newer.
 
@@ -18,7 +18,10 @@ import fnmatch
 
 from libgutenberg import GutenbergDatabase
 from libgutenberg import GutenbergGlobals as gg
+from libgutenberg.Logger import info, debug, warning, error, exception
+from libgutenberg.Models import File
 
+ob = GutenbergDatabase.Objectbase(False)
 
 class Candidates (object):
     """ Class to get build candidates from the PG database.
@@ -29,37 +32,29 @@ class Candidates (object):
         """ Read candidates from PG database. """
 
         candidates = []
+        session = ob.get_session()
+        files = session.query(File).filter(
+            File.fk_books == ebook,
+            File.compression == 'none',
+            File.diskstatus == 0,
+            File.obsoleted == 0
+        ).order_by(File.fk_filetypes, File.fk_encodings, File.modified.desc())
 
-        c = GutenbergDatabase.DB.get_cursor ()
-
-        c.execute ("""
-select filename, fk_encodings as encoding, fk_filetypes as type, filemtime as mtime, filesize as size, mediatype, generated
-from files
-  left join filetypes on (files.fk_filetypes = filetypes.pk)
-where fk_books = %(ebook)s
-  and fk_compressions = 'none'
-  and diskstatus = 0
-  and obsoleted = 0
-order by fk_filetypes, fk_encodings, filemtime DESC""", {'ebook': ebook} )
-
-        for row in c.fetchall ():
-            file_ = GutenbergDatabase.xl (c, row)
-
-            if (ebook > 10000 and file_.type == 'html'
-                and not os.path.basename (file_.filename).startswith (str (ebook))):
+        for file_ in files:
+            if (ebook > 10000 and file_.file_type == 'html'
+                and not os.path.basename (file_.archive_path).startswith (str (ebook))):
                 # must have the form 12345-h.htm (not eg. glossary.htm)
+                continue
+            if file_.file_type is None:
                 continue
 
             adir = gg.archive_dir (ebook)
-            if file_.filename.startswith (adir):
-                file_.filename = file_.filename.replace (adir, 'files/%d' % ebook)
-            elif file_.filename.startswith ('etext'):
-                file_.filename = 'dirs/' + file_.filename
+            if file_.archive_path.startswith (adir):
+                file_.archive_path = file_.archive_path.replace (adir, 'files/%d' % ebook)
+            elif file_.archive_path.startswith ('etext'):
+                file_.archive_path = 'dirs/' + file_.archive_path
 
-            file_.format = "%s/%s" % (file_.type, file_.encoding or 'unknown')
-
-            file_.mediatype = str (gg.DCIMT (file_.mediatype, file_.encoding))
-
+            file_.format = "%s/%s" % (file_.fk_filetypes, file_.encoding or 'unknown')
             candidates.append (file_)
 
         return candidates
@@ -86,5 +81,6 @@ order by fk_filetypes, fk_encodings, filemtime DESC""", {'ebook': ebook} )
                 if fnmatch.fnmatch (f (candidate), typeglob):
                     if candidate not in result:
                         result.append (candidate)
+                        info (candidate)
 
         return result
