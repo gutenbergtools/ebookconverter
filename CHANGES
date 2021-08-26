@@ -1,3 +1,9 @@
+0.7.4 (August 26, 2021)
+- add cron-csv-catalog.sh
+- updadate cron-dopush.sh to omit redundant sourcing
+- synch shell scripts with production
+- update libgutenberg
+
 0.7.3 (August 24, 2021)
 - improve logging/remove debug statements
 - update libgutenberg
