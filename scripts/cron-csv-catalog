@@ -1,0 +1,5 @@
+#!/bin/bash
+# 
+
+cd /export/sunsite/users/gutenbackend/converter
+~/.local/bin/pipenv run make_csv
