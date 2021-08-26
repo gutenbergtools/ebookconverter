@@ -4,7 +4,7 @@
 D=$(date +"%-d")
 
 # will rebuild up to PG 65100 in a 31 day month
-BOOKS_PER_DAY=2100
+BOOKS_PER_DAY=2200
 
 START=$((($D-1)*$BOOKS_PER_DAY))
 STOP=$(($D*$BOOKS_PER_DAY-1))

@@ -11,7 +11,7 @@
 
 # Where to build (we might need to have multiple dev v. production locations
 # in the future)
-BUILD=/public/vhost/g/gutenberg/dev/gutenbergsite
+BUILD=/public/vhost/g/gutenberg/gutenbergsite
 cd ${BUILD}
 
 ## proposed update from github
