@@ -67,7 +67,7 @@ def save_metadata(dc):
     """ Save the metadata. """
 
     if dc.title:
-        dc.title = re.sub (r'\s*\n\s*', ' _ ', dc.title.strip ())
+        dc.title = re.sub (r'\s*\n\s*', '\n', dc.title.strip ())
 
     if dc.rights.lower ().find ('copyright') > -1:
         dc.rights = 1 # ???
