@@ -1,3 +1,9 @@
+0.7.5 (September 2, 2021)
+- The encoding for all python source files was changed to UTF8. A mis-encoded python file caused a problem with mdashes in titles.
+- multi-line titles had _ instead of \r. This was a relic of the hack needed to pass the title from python to PHP
+- updated ebookmaker and libgutenberg requirements
+
+
 0.7.4 (August 26, 2021)
 - add cron-csv-catalog.sh
 - updadate cron-dopush.sh to omit redundant sourcing
