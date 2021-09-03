@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  -*- mode: python; indent-tabs-mode: nil; -*- coding: iso-8859-1 -*-
+#  -*- mode: python; indent-tabs-mode: nil; -*- coding: UTF8 -*-
 
 """
 
@@ -67,7 +67,7 @@ def save_metadata(dc):
     """ Save the metadata. """
 
     if dc.title:
-        dc.title = re.sub (r'\s*\n\s*', ' _ ', dc.title.strip ())
+        dc.title = re.sub (r'\s*\n\s*', '\n', dc.title.strip ())
 
     if dc.rights.lower ().find ('copyright') > -1:
         dc.rights = 1 # ???

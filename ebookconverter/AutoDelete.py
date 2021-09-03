@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-#  -*- mode: python; indent-tabs-mode: nil; -*- coding: iso-8859-1 -*-
+#  -*- mode: python; indent-tabs-mode: nil; -*- coding: UTF8 -*-
 
 """
 
