@@ -17,8 +17,8 @@ rdflib = "*"
 qrcode = "*"
 ebookconverter = {editable = true,path = "."}
 pylint = "*"
-ebookmaker = "==0.11.7"
 libgutenberg = ">=0.8.7"
+ebookmaker = ">=0.11.12"
 
 [requires]
 python_version = "3.6"
