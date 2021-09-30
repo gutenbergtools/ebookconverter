@@ -4,10 +4,12 @@ import unittest
 
 
 from .. import Candidates
+from ebookconverter.EbookConverter import PREFERRED_INPUT_FORMATS
 
 class TestCandidates(unittest.TestCase):
     def setUp(self):
         self.ebook = 4554
+        self.ebook2 = 9846
 
     def test_read_from_database(self):
         candidates = Candidates.Candidates()
@@ -15,7 +17,9 @@ class TestCandidates(unittest.TestCase):
         self.assertTrue(len(result) > 2)
 
     def test_filter_sort(self):
-        typeglob_list = ('html/utf-8', 'html/iso-8859-*', 'html/*', '*/*')
+        typeglob_list = PREFERRED_INPUT_FORMATS['html.images']
         candidates = Candidates.Candidates()
-        files = candidates.read_from_database(self.ebook)
-        Candidates.Candidates.filter_sort(typeglob_list, files, lambda x: x.format)
+        files = candidates.read_from_database(self.ebook2)
+        cf = Candidates.Candidates.filter_sort(typeglob_list, files, lambda x: x.format)
+        print ([f.archive_path for f in cf])
+        self.assertEqual(cf[0].format, 'html/utf-8')
