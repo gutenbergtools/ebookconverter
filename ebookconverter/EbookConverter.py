@@ -350,8 +350,9 @@ def run_job_queue(job_queue):
                 mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
                 if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
                     critical('Failed to build new file: %s', filename)
-                if os.access(filename + '.gz', os.W_OK):
-                    os.remove(filename + '.gz')
+                for ext in ['.gz', '.gzip']:
+                    if os.access(filename + ext, os.W_OK):
+                        os.remove(filename + ext)
             elif filename.split('.')[-1] not in {'facebook', 'twitter', 'picsdir'}:
                 critical('Failed to build file: %s', filename)
     else:
