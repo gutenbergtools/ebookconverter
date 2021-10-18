@@ -18,7 +18,7 @@ qrcode = "*"
 ebookconverter = {editable = true,path = "."}
 pylint = "*"
 libgutenberg = ">=0.8.7"
-ebookmaker = ">=0.11.12"
+ebookmaker = ">=0.11.15"
 
 [requires]
 python_version = "3.6"

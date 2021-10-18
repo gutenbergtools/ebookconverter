@@ -1,3 +1,7 @@
+0.7.8 (October 18, 2021)
+- add ebookmaker CRITICAL notifications to ebookconverter.log
+- in FileInfo, simplify is_readable to align with method used in ebookmaker
+
 0.7.7 (October 11, 2021)
 - add check for outdated gzip files and remove them
 
