@@ -43,7 +43,7 @@ class Writer (writers.BaseWriter):
 
         try:
             for p in job.spider.parsers:
-                if hasattr (p, 'resize_image') and 'coverpage' in p.attribs.rel:
+                if hasattr (p, 'resize_image') and 'icon' in p.attribs.rel:
                     dimen = self.dimensions [job.type]
                     np = p.resize_image (dimen[0], dimen[1], 'jpeg')
 
