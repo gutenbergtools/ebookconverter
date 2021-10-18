@@ -100,6 +100,7 @@ class AddressBook:
 ADDRESS_BOOK = AddressBook()
 
 def notify(ebook, message, role='notify', subject='Gutenberg backend notifications'):
+    info(message)
     address = ADDRESS_BOOK.get_email(ebook, role=role)
     if not address:
         # archive unsent message
