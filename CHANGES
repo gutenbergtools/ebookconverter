@@ -1,6 +1,9 @@
-0.7.8 (October 18, 2021)
+0.7.9 (October 18, 2021)
 - add ebookmaker CRITICAL notifications to ebookconverter.log
 - in FileInfo, simplify is_readable to align with method used in ebookmaker
+- change coverpage rel to icon to synch with ebookmaker; requires 0.11.16
+
+0.7.8 not deployed
 
 0.7.7 (October 11, 2021)
 - add check for outdated gzip files and remove them
