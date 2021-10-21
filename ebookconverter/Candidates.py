@@ -81,6 +81,5 @@ class Candidates (object):
                 if fnmatch.fnmatch (f (candidate), typeglob):
                     if candidate not in result:
                         result.append (candidate)
-                        info (candidate)
 
         return result
