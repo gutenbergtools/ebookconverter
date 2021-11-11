@@ -143,10 +143,9 @@ picsdir.images picsdir.noimages
 rst.gen
 txt.utf-8
 html.images html.noimages
-epub.images epub.noimages
-kindle.images kindle.noimages
+epub.noimages kindle.noimages pdf.noimages
 cover.small cover.medium
-pdf.images pdf.noimages
+epub.images kindle.images pdf.images
 qrcode rdf
 facebook twitter
 null
