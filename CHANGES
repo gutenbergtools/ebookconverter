@@ -1,3 +1,9 @@
+0.7.10 (November 11, 2021)
+- change build order - epub.images can mess up the nomages and covers builds
+- adjusted logging
+- delint
+- update Ebookmaker to 0.11.26
+
 0.7.9 (October 18, 2021)
 - add ebookmaker CRITICAL notifications to ebookconverter.log
 - in FileInfo, simplify is_readable to align with method used in ebookmaker

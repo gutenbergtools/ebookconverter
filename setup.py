@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.7.9'
+VERSION = '0.7.10'
 
 setup (
     name = 'ebookconverter',
@@ -26,7 +26,7 @@ setup (
     ],
 
     install_requires = [
-        'ebookmaker>=0.11.16',
+        'ebookmaker>=0.11.26',
         'setproctitle==1.1.10',
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',
