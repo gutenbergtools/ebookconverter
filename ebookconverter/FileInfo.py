@@ -41,6 +41,8 @@ from libgutenberg.Models import Book
 from libgutenberg.Logger import critical, debug, error, exception, info, warning
 from libgutenberg import Logger
 
+from ebookmaker.CommonCode import find_candidates
+
 from .Notifier import ADDRESS_BOOK
 PRIVATE = os.getenv ('PRIVATE') or ''
 PUBLIC  = os.getenv ('PUBLIC')  or ''
@@ -245,14 +247,7 @@ def read_string(bytes_data):
 
 def is_readable(filename):
     """ Used to be "stat_file. The 'stat' part has been refactored into libgutenberg """
-    try:
-        # is file readable? else raise IOError
-        fp = open(filename, 'r')
-        fp.close()
-        return 1
-
-    except IOError:
-        return 0
+    return os.access(filename, os.R_OK)
 
 
 def file_sort_key(filename):
@@ -285,30 +280,19 @@ def scan_directory(ebook_num):
     dirname = os.path.join(FILES, str(ebook_num))
     debug("Scanning directory %s ...", dirname)
 
-    found_files = []
-    for root, dummy_dirs, files in os.walk(dirname):
-        # don't catalog dot files
-        if '/.' in root or root.startswith('.'):
-            continue
-        for f in files:
-            if f.startswith('.'):
-                continue
-            found_files.append(os.path.join(root, f))
+    found_files = find_candidates(dirname, file_filter=is_readable)
 
     header_found = False
     for filename in sorted(found_files, key=file_sort_key):
-        if is_readable(filename):
-            if not ebook_exists(ebook_num):
-                create_ebook(ebook_num)
-            if not header_found:
-                if filename.endswith('.zip'):
-                    header_found = scan_zip(filename, ebook_num)
-                else:
-                    header_found = scan_file(filename, ebook_num)
+        if not ebook_exists(ebook_num):
+            create_ebook(ebook_num)
+        if not header_found:
+            if filename.endswith('.zip'):
+                header_found = scan_zip(filename, ebook_num)
+            else:
+                header_found = scan_file(filename, ebook_num)
 
-            store_file_in_database(ebook_num, filename, None)
-        else:
-            warning(filename + 'is not readable')
+        store_file_in_database(ebook_num, filename, None)
 
 def scan_dopush_log():
     """ Scan the dopush log directory for new files.

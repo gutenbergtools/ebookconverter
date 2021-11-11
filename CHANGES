@@ -1,8 +1,28 @@
+0.7.10 (November 11, 2021)
+- change build order - epub.images can mess up the nomages and covers builds
+- adjusted logging
+- delint
+- update Ebookmaker to 0.11.26
+
+0.7.9 (October 18, 2021)
+- add ebookmaker CRITICAL notifications to ebookconverter.log
+- in FileInfo, simplify is_readable to align with method used in ebookmaker
+- change coverpage rel to icon to synch with ebookmaker; requires 0.11.16
+
+0.7.8 not deployed
+
+0.7.7 (October 11, 2021)
+- add check for outdated gzip files and remove them
+
+0.7.6 (September 30, 2021)
+- added some testing of candidates
+- check for outdated gz files and remove them
+- updated ebookmaker and libgutenberg requirements
+
 0.7.5 (September 2, 2021)
 - The encoding for all python source files was changed to UTF8. A mis-encoded python file caused a problem with mdashes in titles.
 - multi-line titles had _ instead of \r. This was a relic of the hack needed to pass the title from python to PHP
 - updated ebookmaker and libgutenberg requirements
-
 
 0.7.4 (August 26, 2021)
 - add cron-csv-catalog.sh

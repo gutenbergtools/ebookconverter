@@ -53,10 +53,10 @@ class AddressBook:
     """
     def __init__(self):
         self._address_book = None
-        
+
     @property
     def address_book(self):
-        if self._address_book == None:
+        if self._address_book is None:
             try:
                 with open(NOTIFY_FILE, 'r') as json_file:
                     self._address_book = json.loads(json_file.read())
@@ -100,13 +100,14 @@ class AddressBook:
 ADDRESS_BOOK = AddressBook()
 
 def notify(ebook, message, role='notify', subject='Gutenberg backend notifications'):
+    info(message)
     address = ADDRESS_BOOK.get_email(ebook, role=role)
     if not address:
         # archive unsent message
-        message_archive = '{}/{}.messages'.format(ARCHIVE_DIR, ebook)
+        message_archive = f'{ARCHIVE_DIR}/{ebook}.messages'
         now = datetime.now().isoformat()
         with open(message_archive, 'a+') as messagefile:
-            messagefile.write('%s: %s\nSubject: %s\n%s\n' % (role, now, subject, message))
+            messagefile.write(f'{role}: {now}\nSubject: {subject}\n{message}\n')
         return 1
     try:
         if SMTP_SSL:

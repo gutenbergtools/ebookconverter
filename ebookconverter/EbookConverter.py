@@ -143,10 +143,9 @@ picsdir.images picsdir.noimages
 rst.gen
 txt.utf-8
 html.images html.noimages
-epub.images epub.noimages
-kindle.images kindle.noimages
+epub.noimages kindle.noimages pdf.noimages
 cover.small cover.medium
-pdf.images pdf.noimages
+epub.images kindle.images pdf.images
 qrcode rdf
 facebook twitter
 null
@@ -350,6 +349,9 @@ def run_job_queue(job_queue):
                 mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
                 if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
                     critical('Failed to build new file: %s', filename)
+                for ext in ['.gz', '.gzip']:
+                    if os.access(filename + ext, os.W_OK):
+                        os.remove(filename + ext)
             elif filename.split('.')[-1] not in {'facebook', 'twitter', 'picsdir'}:
                 critical('Failed to build file: %s', filename)
     else:
