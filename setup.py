@@ -26,12 +26,12 @@ setup (
     ],
 
     install_requires = [
-        'ebookmaker>=0.11.26',
+        'ebookmaker>=0.11.26,<0.12',
         'setproctitle==1.1.10',
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',
         'qrcode>=6.1',
-        'libgutenberg[postgres]>=0.8.11',
+        'libgutenberg[postgres]>=0.8.11,<0.9',
     ],
     
     package_data = {
