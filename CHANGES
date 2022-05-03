@@ -1,3 +1,10 @@
+0.7.11 (April 28, 2022)
+- update facebook API version
+- update dependencies for last gasp py 3.6 environments; 0.8 will be py 3.7+
+- fix exception handling to be more useful when there's already a pid file
+- fix a test
+- updates for 2022
+
 0.7.10 (November 11, 2021)
 - change build order - epub.images can mess up the nomages and covers builds
 - adjusted logging

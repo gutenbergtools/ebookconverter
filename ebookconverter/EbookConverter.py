@@ -470,21 +470,25 @@ def fix_option_range(options, last_ebook):
     try:
         for value in options.range.split(','):
             r = value.split('-')
-            if len(r) == 2:
-                r[0] = int(r[0]) if r[0] else 1
-                if r[1] == '':
-                    r[1] = last_ebook
+            try:
+                if len(r) == 2:
+                    r[0] = int(r[0]) if r[0] else 1
+                    if r[1] == '':
+                        r[1] = last_ebook
+                    else:
+                        r[1] = int(r[1])
+
+                    if r[0] > r[1]:
+                        raise ValueError
+
+                    res.extend(range(r[0], r[1] + 1))
+                elif len(r) == 1:
+                    res.append(int(value))
                 else:
-                    r[1] = int(r [1])
-
-                if r[0] > r[1]:
                     raise ValueError
-
-                res.extend(range(r[0], r[1] + 1))
-            elif len(r) == 1:
-                res.append(int(value))
-            else:
-                raise ValueError
+            except ValueError:
+                error("error in range item %s", value)
+                continue
 
     except ValueError:
         raise ValueError("error in range parameter")
@@ -566,7 +570,12 @@ def main():
 
     info("Program start")
 
-    fix_option_range(options, DBUtils.last_ebook())
+    try:
+        fix_option_range(options, DBUtils.last_ebook())
+    except ValueError:
+        info("Not running: pidfile exists.")
+        sys.exit(2)
+        
 
     if options.goback:
         interval = datetime.datetime.now() - datetime.timedelta(hours=options.goback)
