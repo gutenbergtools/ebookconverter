@@ -20,6 +20,7 @@ setup (
         'scripts/ebookconverter',
         'scripts/fileinfo',
         'scripts/make_csv',
+        'scripts/reload_workflow',
         'scripts/cron-rebuild-files.sh',
         'scripts/cron-dopush-social.sh',
         'scripts/cron-dopush.sh',

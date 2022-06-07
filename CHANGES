@@ -1,3 +1,6 @@
+0.7.12 (June 7, 2022)
+- added a script to reload a workflow file. Usage: reload_workflow [list of ebook numbers]
+
 0.7.11 (April 28, 2022)
 - update facebook API version
 - update dependencies for last gasp py 3.6 environments; 0.8 will be py 3.7+
