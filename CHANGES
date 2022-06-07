@@ -1,5 +1,6 @@
 0.7.12 (June 7, 2022)
 - added a script to reload a workflow file. Usage: reload_workflow [list of ebook numbers]
+- add requirement for lxml<4.7
 
 0.7.11 (April 28, 2022)
 - update facebook API version
