@@ -54,9 +54,11 @@ PREFERRED_INPUT_FORMATS = {
     # epub readers should be able to handle unicode,
     # prefer the big charsets but accept any charset
     'epub.images': ALL_SRCS,
+    'epub3.images': ALL_SRCS,
 
     'kindle.images': ('epub.images/*', ),
     'kindle.noimages': ('epub.noimages/*', ),
+    'kf8.images': ('epub3.images/*', ),
 
     # html is created from rst files or text files
     'html.images': ALL_HTM + ('rst/*', ) + ALL_TXTS,
@@ -101,8 +103,10 @@ FILENAMES = {
     'html.images':      'pg{id}-images.html.utf8',
     'epub.noimages':    'pg{id}.epub',
     'epub.images':      'pg{id}-images.epub',
+    'epub3.images':     'pg{id}-images-3.epub',
     'kindle.noimages':  'pg{id}.mobi',
     'kindle.images':    'pg{id}-images.mobi',
+    'kf8.images':       'pg{id}-images-kf8.mobi',
     'pdf.noimages':     'pg{id}.pdf',
     'pdf.images':       'pg{id}-images.pdf',
     'txt.utf-8':        'pg{id}.txt.utf8',
@@ -120,11 +124,13 @@ FILENAMES = {
 
 DEPENDENCIES = collections.OrderedDict((
     ('everything',      ('all', 'facebook', 'twitter')),
-    ('all',             ('html', 'epub', 'kindle', 'pdf', 'txt', 'rst',
+    ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
                          'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',    'html.noimages')),
     ('epub',            ('epub.images',    'epub.noimages')),
+    ('epub3',           ('epub3.images', )),
     ('kindle',          ('kindle.images',  'kindle.noimages')),
+    ('kf8',             ('kf8.images', )),
     ('pdf',             ('pdf.images',     'pdf.noimages')),
     ('txt',             ('txt.utf-8',      'txt.iso-8859-1', 'txt.us-ascii')),
     ('rst',             ('rst.gen', )),
@@ -146,6 +152,7 @@ html.images html.noimages
 epub.noimages kindle.noimages pdf.noimages
 cover.small cover.medium
 epub.images kindle.images pdf.images
+epub3.images kf8.images
 qrcode rdf
 facebook twitter
 null
@@ -334,7 +341,7 @@ def run_job_queue(job_queue):
 
     debug("Calling Ebookmaker ...")
     stdout, stderr = ebm.communicate(cPickle.dumps(job_queue))
-    debug("Ebookmaker returned code: %d." % ebm.returncode)
+    info("Ebookmaker returned code: %d." % ebm.returncode)
     debug(stdout.decode(sys.stdout.encoding))
     debug(stderr.decode(sys.stderr.encoding))
     if ebm.returncode == 0:

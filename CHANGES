@@ -2,6 +2,7 @@
 - now using ebookmaker 0.12 (beta),
 - use new notifier API
 - refactored/added --notify and --validate command-line options
+- add epub3 and kf8 filetypes
 
 
 0.7.12 (June 7, 2022)
