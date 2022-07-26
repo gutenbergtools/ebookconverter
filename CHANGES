@@ -1,5 +1,6 @@
 0.8.0b0 (July 26, 2022) beta
 - now using ebookmaker 0.12 (beta),
+- use new notifier API
 
 
 0.7.12 (June 7, 2022)

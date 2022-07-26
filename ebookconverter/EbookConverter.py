@@ -547,12 +547,13 @@ def main():
         error("Error in configuration file: %s", str(what))
         return 1
 
+    Logger.base_logfile = options.config.LOGFILE
+    Logger.notifier = CommonCode.queue_notifications,
     Logger.setup(
         Logger.LOGFORMAT,
-        logfile=options.config.LOGFILE,
         loglevel=options.verbose,
-        notifier=CommonCode.queue_notifications,
     )
+
     if options.verbose >= 1 and options.config.LOGFILE:
         print("Logging to: %s" % options.config.LOGFILE)
 
