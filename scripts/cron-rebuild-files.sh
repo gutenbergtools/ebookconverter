@@ -13,5 +13,5 @@ STOP=$(($D*$BOOKS_PER_DAY-1))
 echo "Invoking ebookconverter for range $START to $STOP ..."
 
 cd /export/sunsite/users/gutenbackend/converter
-~/.local/bin/pipenv run ebookconverter -v -v --range=$START-$STOP --build=all --jobs=50 --pidfile=/tmp/pg-cron-rebuild.pid
+~/.local/bin/pipenv run ebookconverter -v -v --range=$START-$STOP --build=all --jobs=50 --notify=1 --validate=0 --pidfile=/tmp/pg-cron-rebuild.pid
 
