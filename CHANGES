@@ -1,3 +1,7 @@
+0.8.0b0 (July 26, 2022) beta
+- now using ebookmaker 0.12 (beta),
+
+
 0.7.12 (June 7, 2022)
 - added a script to reload a workflow file. Usage: reload_workflow [list of ebook numbers]
 - add requirement for lxml<4.7
