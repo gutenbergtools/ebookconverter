@@ -320,7 +320,8 @@ def run_job_queue(job_queue):
             [
                 options.config.EBOOKMAKER, verbosity,
                 "--extension-package", "ebookconverter.writers",
-                #"--packager", "gzip",
+                "--validate", str(options.validate),
+                "--notify", str(options.notify),
                 "--jobs", "no_such_url",
             ],
             stdin  = subprocess.PIPE,
@@ -451,12 +452,6 @@ def add_local_options(ap):
         dest    = "stop_on_errors",
         action  = "store_true",
         help    = "stop immediately on errors.")
-
-    ap.add_argument(
-        "--notify",
-        dest    = "notify",
-        action  = "store_true",
-        help    = "send processing notifications to poster addresses.")
 
 
 def fix_option_range(options, last_ebook):
