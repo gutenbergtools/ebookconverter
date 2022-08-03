@@ -655,6 +655,7 @@ def main():
                 )
                 run_job_queue(job_queue)
 
+        Notifier.send_notifications(done_books if options.notify else [])
 
     except KeyboardInterrupt as what:
         # also triggered by: kill -INT(or: kill -2)
@@ -664,7 +665,6 @@ def main():
     finally:
         os.remove(options.pidfile)
 
-    Notifier.send_notifications(done_books if options.notify else [])
     setproctitle.setproctitle("Cleaning Up")
     info("Program end")
     logging.shutdown()
