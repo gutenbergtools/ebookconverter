@@ -1,4 +1,4 @@
-0.8.0b1 (August 3, 2022) beta
+0.8.0b1 (August 4, 2022) final candidate?
 - exceptions in verifier would cause stuck pid Files
 
 0.8.0b0 (July 26, 2022) beta
