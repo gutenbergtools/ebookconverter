@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "cafc6e3c86f7a409aec1669d67612f90ae011b0715fecc3698ed00ab3034f38a"
+            "sha256": "e77d1d15dd395207b5eab402eb85d4ebc25b6263a03f1a15a30aad3541b920a6"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -202,10 +202,10 @@
         },
         "ebookmaker": {
             "hashes": [
-                "sha256:bb2e59e451474e7a317606cadb11e2c71e00c0147f8ffb1801c3b7aa260563cd"
+                "sha256:d8c4d6bb6ab3671bfce8e5f06d7a0f279845a9642d980af70b84c2b39f0398ac"
             ],
             "index": "pypi",
-            "version": "==0.12.0b1"
+            "version": "==0.12.0b2"
         },
         "greenlet": {
             "hashes": [
@@ -341,11 +341,11 @@
         },
         "keyring": {
             "hashes": [
-                "sha256:782e1cd1132e91bf459fcd243bcf25b326015c1ac0b198e4408f91fa6791062b",
-                "sha256:e67fc91a7955785fd2efcbccdd72d7dacf136dbc381d27de305b2b660b3de886"
+                "sha256:4aa2521b8fccf602342c85fc2edcb0b9e055557a4fcdc28ce447c2d608e13abb",
+                "sha256:a6aa0af82bafa882810e2402cebe6b8152786cd6e4e4f0416b0f2c3bf0d043a4"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==23.7.0"
+            "version": "==23.8.0"
         },
         "libgutenberg": {
             "extras": [
@@ -598,11 +598,11 @@
         },
         "readme-renderer": {
             "hashes": [
-                "sha256:73b84905d091c31f36e50b4ae05ae2acead661f6a09a9abb4df7d2ddcdb6a698",
-                "sha256:a727999acfc222fc21d82a12ed48c957c4989785e5865807c65a487d21677497"
+                "sha256:2c37e472ca96755caba6cc58bcbf673a5574bc033385a2ac91d85dfef2799876",
+                "sha256:f71aeef9a588fcbed1f4cc001ba611370e94a0cd27c75b1140537618ec78f0a2"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==35.0"
+            "version": "==36.0"
         },
         "requests": {
             "hashes": [
@@ -660,11 +660,11 @@
         },
         "setuptools": {
             "hashes": [
-                "sha256:7c7854ee1429a240090297628dc9f75b35318d193537968e2dc14010ee2f5bca",
-                "sha256:dc2662692f47d99cb8ae15a784529adeed535bcd7c277fee0beccf961522baf6"
+                "sha256:73bfae4791da7c1c56882ab17577d00f7a37a0347162aeb9360058de0dc25083",
+                "sha256:abcb76aa4decd7a17cbe0e4b31bdf549d106ba7f668e87e0860f5f7b84b9b3fe"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==63.4.1"
+            "version": "==63.4.2"
         },
         "six": {
             "hashes": [

@@ -323,14 +323,16 @@ def run_job_queue(job_queue):
         verbosity = '-' + 'v' * options.verbose
 
     try:
+        ebm_params = [
+            options.config.EBOOKMAKER, verbosity,
+            "--extension-package", "ebookconverter.writers",
+            "--validate" if options.validate else None,
+            "--notify" if options.notify else None,
+            "--jobs", "no_such_url",
+        ]
+        ebm_params = [prm for prm in ebm_params if prm]
         ebm = subprocess.Popen(
-            [
-                options.config.EBOOKMAKER, verbosity,
-                "--extension-package", "ebookconverter.writers",
-                "--validate", str(options.validate),
-                "--notify", str(options.notify),
-                "--jobs", "no_such_url",
-            ],
+            ebm_params,
             stdin  = subprocess.PIPE,
             stdout = subprocess.PIPE,
             stderr = subprocess.PIPE
@@ -550,7 +552,7 @@ def main():
         return 1
 
     Logger.base_logfile = options.config.LOGFILE
-    Logger.notifier = CommonCode.queue_notifications,
+    Logger.notifier = CommonCode.queue_notifications
     Logger.setup(
         Logger.LOGFORMAT,
         loglevel=options.verbose,

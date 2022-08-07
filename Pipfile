@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 ebookconverter = {editable = true, path = "."}
-ebookmaker = ">=0.12.0b1"
+ebookmaker = ">=0.12.0b2"
 
 [dev-packages]
 
