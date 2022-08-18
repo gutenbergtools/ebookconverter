@@ -1,10 +1,13 @@
+0.8.0 (August 18, 2022)
+- production directory moves from ~/converter to ~/ebookconverter to accomplish the python version migration.
+
 0.8.0b2 (August 7, 2022) final candidate
 - `--notify` and `--validate` are now flags that turn on validation and notification
 - use simpler CLI to call Ebookmaker
 - update requirements
 
 0.8.0b1 (August 4, 2022) final candidate?
-- exceptions in verifier would cause stuck pid Files
+- exceptions in notifier would cause stuck pid Files
 
 0.8.0b0 (July 26, 2022) beta
 - now using ebookmaker 0.12 (beta),

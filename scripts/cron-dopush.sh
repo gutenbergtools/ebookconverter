@@ -11,7 +11,7 @@ fi
 
 # echo "cron-dopush: checking for files ..."
 
-cd /export/sunsite/users/gutenbackend/converter
+cd /export/sunsite/users/gutenbackend/ebookconverter
 
 # Load environment variables:
 # gbn 2020-05-07: This confuses things due to multiple Python installs
@@ -50,7 +50,7 @@ fi
 
 # gbn 2020-04-03: "goback-24" runs the last 24 hours. Instead, we
 # will expicitly rebuild every item in the LIST:
-# ~/.local/bin/pipenv run ebookconverter -v --range=1- --goback=24 --make=all
+# ~/.local/bin/pipenv run ebookconverter -v --range=1- --goback=24 --build=all
 for i in ${LIST}; do
-    ~/.local/bin/pipenv run ebookconverter -v --range=${i} --build=all --notify=1 --validate=1
+    ~/.local/bin/pipenv run ebookconverter -v --range=${i} --build=all --validate --notify
 done

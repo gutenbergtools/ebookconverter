@@ -1,7 +1,7 @@
 #!/bin/bash
 # 
 
-cd /export/sunsite/users/gutenbackend/converter
+cd /export/sunsite/users/gutenbackend/ebookconverter
 . ./.env
 
 TMP=$PRIVATE/tmp/rdf
