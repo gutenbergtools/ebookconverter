@@ -1,24 +1,13 @@
 [[source]]
-name = "pypi"
 url = "https://pypi.org/simple"
 verify_ssl = true
-
-[dev-packages]
-pylint = "*"
-v = {editable = true,version = "*"}
+name = "pypi"
 
 [packages]
-e1839a8 = {editable = true,path = "."}
-setproctitle = "*"
-psycopg2 = "*"
-jaraco-functools = "*"
-requests-oauthlib = "*"
-rdflib = "*"
-qrcode = "*"
-ebookconverter = {editable = true,path = "."}
-pylint = "*"
-libgutenberg = ">=0.8.13"
-ebookmaker = ">=0.11.30"
+ebookconverter = {editable = true, path = "."}
+ebookmaker = ">=0.12.0b2"
+
+[dev-packages]
 
 [requires]
-python_version = "3.6"
+python_version = "3.8"

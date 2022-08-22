@@ -1,3 +1,24 @@
+0.8.0 (August 18, 2022)
+- production directory moves from ~/converter to ~/ebookconverter to accomplish the python version migration.
+
+0.8.0b2 (August 7, 2022) final candidate
+- `--notify` and `--validate` are now flags that turn on validation and notification
+- use simpler CLI to call Ebookmaker
+- update requirements
+
+0.8.0b1 (August 4, 2022) final candidate?
+- exceptions in notifier would cause stuck pid Files
+
+0.8.0b0 (July 26, 2022) beta
+- now using ebookmaker 0.12 (beta),
+- use new notifier API
+- refactored/added --notify and --validate command-line options
+- add epub3 and kf8 filetypes
+
+0.7.12 (June 7, 2022)
+- added a script to reload a workflow file. Usage: reload_workflow [list of ebook numbers]
+- add requirement for lxml<4.7
+
 0.7.11 (April 28, 2022)
 - update facebook API version
 - update dependencies for last gasp py 3.6 environments; 0.8 will be py 3.7+

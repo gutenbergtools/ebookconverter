@@ -42,7 +42,8 @@ class TestNotifier(unittest.TestCase):
             self.assertTrue(message in messages)
 
     def test_log_notifier(self):
-        Logger.setup(Logger.LOGFORMAT, notifier=CommonCode.queue_notifications)
+        Logger.notifier = CommonCode.queue_notifications
+        Logger.setup(Logger.LOGFORMAT)
         Logger.ebook = 99999
         Notifier.ADDRESS_BOOK.set_email(99999, self.notify_email)
         Notifier.ADDRESS_BOOK.set_email(99999, self.ww_email, role='ww')

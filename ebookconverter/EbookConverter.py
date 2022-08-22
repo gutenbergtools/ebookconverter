@@ -54,9 +54,11 @@ PREFERRED_INPUT_FORMATS = {
     # epub readers should be able to handle unicode,
     # prefer the big charsets but accept any charset
     'epub.images': ALL_SRCS,
+    'epub3.images': ALL_SRCS,
 
     'kindle.images': ('epub.images/*', ),
     'kindle.noimages': ('epub.noimages/*', ),
+    'kf8.images': ('epub3.images/*', ),
 
     # html is created from rst files or text files
     'html.images': ALL_HTM + ('rst/*', ) + ALL_TXTS,
@@ -101,8 +103,10 @@ FILENAMES = {
     'html.images':      'pg{id}-images.html.utf8',
     'epub.noimages':    'pg{id}.epub',
     'epub.images':      'pg{id}-images.epub',
+    'epub3.images':     'pg{id}-images-3.epub',
     'kindle.noimages':  'pg{id}.mobi',
     'kindle.images':    'pg{id}-images.mobi',
+    'kf8.images':       'pg{id}-images-kf8.mobi',
     'pdf.noimages':     'pg{id}.pdf',
     'pdf.images':       'pg{id}-images.pdf',
     'txt.utf-8':        'pg{id}.txt.utf8',
@@ -120,11 +124,13 @@ FILENAMES = {
 
 DEPENDENCIES = collections.OrderedDict((
     ('everything',      ('all', 'facebook', 'twitter')),
-    ('all',             ('html', 'epub', 'kindle', 'pdf', 'txt', 'rst',
+    ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
                          'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',    'html.noimages')),
     ('epub',            ('epub.images',    'epub.noimages')),
+    ('epub3',           ('epub3.images', )),
     ('kindle',          ('kindle.images',  'kindle.noimages')),
+    ('kf8',             ('kf8.images', )),
     ('pdf',             ('pdf.images',     'pdf.noimages')),
     ('txt',             ('txt.utf-8',      'txt.iso-8859-1', 'txt.us-ascii')),
     ('rst',             ('rst.gen', )),
@@ -146,6 +152,7 @@ html.images html.noimages
 epub.noimages kindle.noimages pdf.noimages
 cover.small cover.medium
 epub.images kindle.images pdf.images
+epub3.images kf8.images
 qrcode rdf
 facebook twitter
 null
@@ -316,13 +323,16 @@ def run_job_queue(job_queue):
         verbosity = '-' + 'v' * options.verbose
 
     try:
+        ebm_params = [
+            options.config.EBOOKMAKER, verbosity,
+            "--extension-package", "ebookconverter.writers",
+            "--validate" if options.validate else None,
+            "--notify" if options.notify else None,
+            "--jobs", "no_such_url",
+        ]
+        ebm_params = [prm for prm in ebm_params if prm]
         ebm = subprocess.Popen(
-            [
-                options.config.EBOOKMAKER, verbosity,
-                "--extension-package", "ebookconverter.writers",
-                #"--packager", "gzip",
-                "--jobs", "no_such_url",
-            ],
+            ebm_params,
             stdin  = subprocess.PIPE,
             stdout = subprocess.PIPE,
             stderr = subprocess.PIPE
@@ -333,7 +343,7 @@ def run_job_queue(job_queue):
 
     debug("Calling Ebookmaker ...")
     stdout, stderr = ebm.communicate(cPickle.dumps(job_queue))
-    debug("Ebookmaker returned code: %d." % ebm.returncode)
+    info("Ebookmaker returned code: %d." % ebm.returncode)
     debug(stdout.decode(sys.stdout.encoding))
     debug(stderr.decode(sys.stderr.encoding))
     if ebm.returncode == 0:
@@ -452,12 +462,6 @@ def add_local_options(ap):
         action  = "store_true",
         help    = "stop immediately on errors.")
 
-    ap.add_argument(
-        "--notify",
-        dest    = "notify",
-        action  = "store_true",
-        help    = "send processing notifications to poster addresses.")
-
 
 def fix_option_range(options, last_ebook):
     """ Convert a range from user input into list of ebook nos. """
@@ -547,12 +551,13 @@ def main():
         error("Error in configuration file: %s", str(what))
         return 1
 
+    Logger.base_logfile = options.config.LOGFILE
+    Logger.notifier = CommonCode.queue_notifications
     Logger.setup(
         Logger.LOGFORMAT,
-        logfile=options.config.LOGFILE,
         loglevel=options.verbose,
-        notifier=CommonCode.queue_notifications,
     )
+
     if options.verbose >= 1 and options.config.LOGFILE:
         print("Logging to: %s" % options.config.LOGFILE)
 
@@ -652,6 +657,7 @@ def main():
                 )
                 run_job_queue(job_queue)
 
+        Notifier.send_notifications(done_books if options.notify else [])
 
     except KeyboardInterrupt as what:
         # also triggered by: kill -INT(or: kill -2)
@@ -661,7 +667,6 @@ def main():
     finally:
         os.remove(options.pidfile)
 
-    Notifier.send_notifications(done_books if options.notify else [])
     setproctitle.setproctitle("Cleaning Up")
     info("Program end")
     logging.shutdown()

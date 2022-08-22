@@ -8,7 +8,7 @@
 # 20200529 - fix issue with incomplete output (gbnewby)
 
 # Set up our environment:
-cd /export/sunsite/users/gutenbackend/converter
+cd /export/sunsite/users/gutenbackend/ebookconverter
 . ./.env
 
 GREP=/usr/bin/grep
