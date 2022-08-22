@@ -1,3 +1,5 @@
+- stop trying to store qr codes in database
+
 0.8.0 (August 18, 2022)
 - production directory moves from ~/converter to ~/ebookconverter to accomplish the python version migration.
 

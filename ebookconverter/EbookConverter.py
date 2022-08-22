@@ -348,6 +348,8 @@ def run_job_queue(job_queue):
     debug(stderr.decode(sys.stderr.encoding))
     if ebm.returncode == 0:
         for job in job_queue:
+            if job.type == 'qrcode':
+                continue
             filename = os.path.join(job.outputdir, job.outputfile)
             Logger.ebook = job.ebook
             if os.access(filename, os.R_OK):
