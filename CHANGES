@@ -1,4 +1,6 @@
 0.8.1
+- when the html file is large (>16M), in most cases we don't really want to make an EPUB or a MOBI. Making the MOBI can take hours with our current infrastructure. Changed the source file size filters  so these formats are not made.
+- when the source EPUBs are >32M, only old-format MOBIs are not made.
 - add jekyll script
 - stop trying to store qr codes in database
 
