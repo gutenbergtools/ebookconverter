@@ -1,3 +1,5 @@
+0.8.1
+- add jekyll script
 - stop trying to store qr codes in database
 
 0.8.0 (August 18, 2022)

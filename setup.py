@@ -24,6 +24,7 @@ setup (
         'scripts/cron-rebuild-files.sh',
         'scripts/cron-dopush-social.sh',
         'scripts/cron-dopush.sh',
+        'scripts/cron-jekyll.sh',
     ],
 
     install_requires = [
