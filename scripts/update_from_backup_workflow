@@ -1,0 +1,16 @@
+#!/usr/bin/env python3
+#  -*- mode: python; indent-tabs-mode: nil; -*- coding: UTF8 -*-
+
+"""
+
+fileinfo script
+
+Distributable under the GNU General Public License Version 3 or newer.
+
+This script runs UpdateFromWorkflow.
+
+"""
+
+from ebookconverter import UpdateFromWorkflow
+
+UpdateFromWorkflow.main()

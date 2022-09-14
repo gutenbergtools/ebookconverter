@@ -21,6 +21,7 @@ setup (
         'scripts/fileinfo',
         'scripts/make_csv',
         'scripts/reload_workflow',
+        'scripts/update_from_backup_workflow',
         'scripts/cron-rebuild-files.sh',
         'scripts/cron-dopush-social.sh',
         'scripts/cron-dopush.sh',
@@ -33,7 +34,7 @@ setup (
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',
         'qrcode>=6.1',
-        'libgutenberg[postgres]>=0.10.0',
+        'libgutenberg[postgres]>=0.10.2',
     ],
     
     package_data = {
