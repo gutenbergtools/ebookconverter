@@ -130,7 +130,7 @@ DEPENDENCIES = collections.OrderedDict((
     ('html',            ('html.images',    'html.noimages')),
     ('epub',            ('epub.images',    'epub.noimages')),
     ('epub3',           ('epub3.images', )),
-    ('kindle',          ('kindle.images',  'kindle.noimages')),
+    ('kindle',          ('kindle.images')),
     ('kf8',             ('kf8.images', )),
     ('pdf',             ('pdf.images',     'pdf.noimages')),
     ('txt',             ('txt.utf-8',      'txt.iso-8859-1', 'txt.us-ascii')),

@@ -1,6 +1,7 @@
 0.8.2
 - Adds UpdateWriter. It scans source files for metadata headers and adds to the database. Currently only looks for 'Credit:' or 'Produced by:'.
 - `.xhtml` added to parseable file extensions
+- stop producing kindle.noimages unless asked to
 
 0.8.1 (September 14, 2022)
 - when the html file is large (>16M), in most cases we don't really want to make an EPUB or a MOBI. Making the MOBI can take hours with our current infrastructure. Changed the source file size filters  so these formats are not made.
