@@ -1,4 +1,5 @@
 0.8.2
+- Adds UpdateWriter. It scans source files for metadata headers and adds to the database. Currently only looks for 'Credit:' or 'Produced by:'.
 - `.xhtml` added to parseable file extensions
 
 0.8.1 (September 14, 2022)

@@ -80,6 +80,7 @@ PREFERRED_INPUT_FORMATS = {
     'qrcode': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
     'facebook': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
     'twitter': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
+    'update': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
 }
 
 PREFERRED_INPUT_FORMATS['html.noimages']      = PREFERRED_INPUT_FORMATS['html.images']
@@ -155,6 +156,7 @@ epub.images kindle.images pdf.images
 epub3.images kf8.images
 qrcode rdf
 facebook twitter
+update
 null
 """.split()
 
