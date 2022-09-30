@@ -55,7 +55,7 @@ FILES = os.path.join(PUBLIC, 'files')
 FTP   = '/public/ftp/pub/docs/books/gutenberg/'
 
 PARSEABLE_FILES = '.rst .html .htm .tex .txt'.split ()
-HTML_FILES = '.html .htm'.split ()
+HTML_FILES = '.html .htm .xhtml'.split ()
 
 
 
