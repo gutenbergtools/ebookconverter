@@ -164,7 +164,7 @@ def make_output_filename(type_, ebook = 0):
     return FILENAMES.get(type_, GENERIC_FILENAME).format(id = ebook)
 
 
-class Maker(object):
+class Maker():
     """ Helper class """
 
     def __init__(self, ebook):
@@ -584,7 +584,7 @@ def main():
     except ValueError:
         info("Not running: pidfile exists.")
         sys.exit(2)
-        
+
 
     if options.goback:
         interval = datetime.datetime.now() - datetime.timedelta(hours=options.goback)
