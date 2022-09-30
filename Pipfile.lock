@@ -1,11 +1,11 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "a6ff6f76b194ebb844e75adba9bbec52c72728da166335cfbd90d68bbcac94cc"
+            "sha256": "f37a18b3c29beb7bfa13dc6188c665ede97eea333a184a3d88059755b07daf24"
         },
         "pipfile-spec": 6,
         "requires": {
-            "python_version": "3.9"
+            "python_version": ">3.7"
         },
         "sources": [
             {
@@ -73,11 +73,11 @@
         },
         "certifi": {
             "hashes": [
-                "sha256:36973885b9542e6bd01dea287b2b4b3b21236307c56324fcc3f1160f2d655ed5",
-                "sha256:e232343de1ab72c2aa521b625c80f699e356830fd0e2c620b465b304b17b0516"
+                "sha256:0d9c601124e5a6ba9712dbc60d9c53c21e34f5f641fe83002317394311bdce14",
+                "sha256:90c1a32f1d68f940488354e36370f6cca89f0f106db09518524c88d6ed83f382"
             ],
             "markers": "python_version >= '3.6'",
-            "version": "==2022.9.14"
+            "version": "==2022.9.24"
         },
         "cffi": {
             "hashes": [
@@ -194,9 +194,10 @@
         },
         "ebookmaker": {
             "hashes": [
-                "sha256:5992e1adb756f2aa8d6202822a93ea00832a9a8ad48554f458c6fbabcb009a3e"
+                "sha256:e4ad32247c36e12d0fd435afd2b1bb4dbab7a74c3e0ef23b02edeec3acc02e67"
             ],
-            "version": "==0.12.8"
+            "index": "pypi",
+            "version": "==0.12.14"
         },
         "greenlet": {
             "hashes": [
@@ -283,11 +284,11 @@
         },
         "jaraco.classes": {
             "hashes": [
-                "sha256:6745f113b0b588239ceb49532aa09c3ebb947433ce311ef2f8e3ad64ebb74594",
-                "sha256:e6ef6fd3fcf4579a7a019d87d1e56a883f4e4c35cfe925f86731abc58804e647"
+                "sha256:2353de3288bc6b82120752201c6b1c1a14b058267fa424ed5ce5984e3b922158",
+                "sha256:89559fa5c1d3c34eff6f631ad80bb21f378dbcbb35dd161fd2c6b93f5be2f98a"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==3.2.2"
+            "version": "==3.2.3"
         },
         "jaraco.collections": {
             "hashes": [
@@ -307,11 +308,11 @@
         },
         "jaraco.functools": {
             "hashes": [
-                "sha256:c8774f73323de42250a659934215da1d899b02c66a6133f1cb79f02a5aff4f38",
-                "sha256:d0adcf91710a0853efe9f23a78fad586bf67df572f0d6d8e0fa36d289ae1c1d9"
+                "sha256:163d6369dd2fc6590712677cbf83b06ee0e4a1a0c720f4b377eae04175ce458e",
+                "sha256:45b05c158f3ad28731075556ffd4749bd254ec67f91e1eb367dcfebff1151db4"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==3.5.1"
+            "version": "==3.5.2"
         },
         "jaraco.text": {
             "hashes": [
@@ -322,11 +323,12 @@
             "version": "==3.9.1"
         },
         "libgutenberg": {
+            "extras": [],
             "hashes": [
-                "sha256:ecf27e4bca5c265d1c37d2187ddec667079c96d53f5eb7e98555e3446754da22"
+                "sha256:6714996f1ffe55889a5c7aeef9e50dfbc9b8900fa6d3098accd86f112c2a81eb"
             ],
             "index": "pypi",
-            "version": "==0.10.2"
+            "version": "==0.10.4"
         },
         "lxml": {
             "hashes": [
@@ -627,11 +629,11 @@
         },
         "setuptools": {
             "hashes": [
-                "sha256:2e24e0bec025f035a2e72cdd1961119f557d78ad331bb00ff82efb2ab8da8e82",
-                "sha256:7732871f4f7fa58fb6bdcaeadb0161b2bd046c85905dbaa066bdcbcc81953b57"
+                "sha256:1b6bdc6161661409c5f21508763dc63ab20a9ac2f8ba20029aaaa7fdb9118012",
+                "sha256:3050e338e5871e70c72983072fe34f6032ae1cdeeeb67338199c2f74e083a80e"
             ],
             "markers": "python_version >= '3.7'",
-            "version": "==65.3.0"
+            "version": "==65.4.1"
         },
         "six": {
             "hashes": [
