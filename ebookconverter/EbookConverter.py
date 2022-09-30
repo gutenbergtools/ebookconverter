@@ -113,18 +113,15 @@ FILENAMES = {
     'txt.utf-8':        'pg{id}.txt.utf8',
     'rdf':              'pg{id}.rdf',
     'rst.gen':          'pg{id}.rst.utf8',
-    'twitter':          'pg{id}.twitter',            # FIXME: do we need these?
-    'facebook':         'pg{id}.facebook',           #
-    'picsdir.noimages': 'pg{id}-noimages.picsdir',   #
-    'picsdir.images':   'pg{id}-images.picsdir',     #
     'cover.small':      'pg{id}.cover.small.jpg',
     'cover.medium':     'pg{id}.cover.medium.jpg',
     'qrcode':           'pg{id}.qrcode.png',
     'logfile':          'pg{id}.converter.log',      # .converter because of latex log conflicts
 }
+GENERIC_FILENAME = 'pg{id}.generic'
 
 DEPENDENCIES = collections.OrderedDict((
-    ('everything',      ('all', 'facebook', 'twitter')),
+    ('everything',      ('all', 'kindle.noimages','facebook', 'twitter', 'update')),
     ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
                          'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',    'html.noimages')),
@@ -164,7 +161,7 @@ null
 def make_output_filename(type_, ebook = 0):
     """ Make a suitable filename for output type. """
 
-    return FILENAMES[type_].format(id = ebook)
+    return FILENAMES.get(type_, GENERIC_FILENAME).format(id = ebook)
 
 
 class Maker(object):
@@ -369,7 +366,7 @@ def run_job_queue(job_queue):
                 for ext in ['.gz', '.gzip']:
                     if os.access(filename + ext, os.W_OK):
                         os.remove(filename + ext)
-            elif filename.split('.')[-1] not in {'facebook', 'twitter', 'picsdir'}:
+            elif '.generic' not in filename:
                 critical('Failed to build file: %s', filename)
     else:
         critical('returncode was %s', ebm.returncode)
