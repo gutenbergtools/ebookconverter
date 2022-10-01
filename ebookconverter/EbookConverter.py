@@ -80,6 +80,7 @@ PREFERRED_INPUT_FORMATS = {
     'qrcode': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
     'facebook': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
     'twitter': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
+    'update': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
 }
 
 PREFERRED_INPUT_FORMATS['html.noimages']      = PREFERRED_INPUT_FORMATS['html.images']
@@ -112,24 +113,21 @@ FILENAMES = {
     'txt.utf-8':        'pg{id}.txt.utf8',
     'rdf':              'pg{id}.rdf',
     'rst.gen':          'pg{id}.rst.utf8',
-    'twitter':          'pg{id}.twitter',            # FIXME: do we need these?
-    'facebook':         'pg{id}.facebook',           #
-    'picsdir.noimages': 'pg{id}-noimages.picsdir',   #
-    'picsdir.images':   'pg{id}-images.picsdir',     #
     'cover.small':      'pg{id}.cover.small.jpg',
     'cover.medium':     'pg{id}.cover.medium.jpg',
     'qrcode':           'pg{id}.qrcode.png',
     'logfile':          'pg{id}.converter.log',      # .converter because of latex log conflicts
 }
+GENERIC_FILENAME = 'pg{id}.generic'
 
 DEPENDENCIES = collections.OrderedDict((
-    ('everything',      ('all', 'facebook', 'twitter')),
+    ('everything',      ('all', 'kindle.noimages','facebook', 'twitter', 'update')),
     ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
                          'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',    'html.noimages')),
     ('epub',            ('epub.images',    'epub.noimages')),
     ('epub3',           ('epub3.images', )),
-    ('kindle',          ('kindle.images',  'kindle.noimages')),
+    ('kindle',          ('kindle.images',)),
     ('kf8',             ('kf8.images', )),
     ('pdf',             ('pdf.images',     'pdf.noimages')),
     ('txt',             ('txt.utf-8',      'txt.iso-8859-1', 'txt.us-ascii')),
@@ -155,6 +153,7 @@ epub.images kindle.images pdf.images
 epub3.images kf8.images
 qrcode rdf
 facebook twitter
+update
 null
 """.split()
 
@@ -162,10 +161,10 @@ null
 def make_output_filename(type_, ebook = 0):
     """ Make a suitable filename for output type. """
 
-    return FILENAMES[type_].format(id = ebook)
+    return FILENAMES.get(type_, GENERIC_FILENAME).format(id = ebook)
 
 
-class Maker(object):
+class Maker():
     """ Helper class """
 
     def __init__(self, ebook):
@@ -280,8 +279,11 @@ class Maker(object):
                 if job.maintype == 'txt' and candidate.extent > 8 * 1024 * 1024:
                     warning('Skipping %s: file too big' % candidate.archive_path)
                     continue
-                if job.maintype != 'kindle' and candidate.extent > 32 * 1024 * 1024:
-                    # the candidates for kindle, epubs, can get quite big
+                if job.maintype in ['epub', 'epub3'] and candidate.extent > 16 * 1024 * 1024:
+                    warning('Skipping %s: file too big' % candidate.archive_path)
+                    continue
+                if job.maintype != 'kf8' and candidate.extent > 32 * 1024 * 1024:
+                    # the candidates for kf8, epubs, can get quite big
                     warning('Skipping %s: file too big' % candidate.archive_path)
                     continue
 
@@ -348,6 +350,8 @@ def run_job_queue(job_queue):
     debug(stderr.decode(sys.stderr.encoding))
     if ebm.returncode == 0:
         for job in job_queue:
+            if job.type == 'qrcode':
+                continue
             filename = os.path.join(job.outputdir, job.outputfile)
             Logger.ebook = job.ebook
             if os.access(filename, os.R_OK):
@@ -362,7 +366,7 @@ def run_job_queue(job_queue):
                 for ext in ['.gz', '.gzip']:
                     if os.access(filename + ext, os.W_OK):
                         os.remove(filename + ext)
-            elif filename.split('.')[-1] not in {'facebook', 'twitter', 'picsdir'}:
+            elif '.generic' not in filename:
                 critical('Failed to build file: %s', filename)
     else:
         critical('returncode was %s', ebm.returncode)
@@ -580,7 +584,7 @@ def main():
     except ValueError:
         info("Not running: pidfile exists.")
         sys.exit(2)
-        
+
 
     if options.goback:
         interval = datetime.datetime.now() - datetime.timedelta(hours=options.goback)

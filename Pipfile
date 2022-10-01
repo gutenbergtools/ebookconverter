@@ -4,10 +4,11 @@ verify_ssl = true
 name = "pypi"
 
 [packages]
+libgutenberg = ">=0.10.3"
+ebookmaker = ">=0.12.14"
 ebookconverter = {editable = true, path = "."}
-ebookmaker = ">=0.12.0b2"
 
 [dev-packages]
 
 [requires]
-python_version = "3.8"
+python_version = ">3.7"
