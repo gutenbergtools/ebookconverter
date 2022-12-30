@@ -157,6 +157,7 @@ update
 null
 """.split()
 
+MAX_CANDIDATE_SIZE = {'txt': 8, 'epub': 16, 'epub3': 16}
 
 def make_output_filename(type_, ebook = 0):
     """ Make a suitable filename for output type. """
@@ -179,9 +180,27 @@ class Maker():
         """ return the cache loc for this ebook """
         return os.path.join(options.config.CACHELOC, "%d" % self.ebook)
 
-    @staticmethod
-    def target_outdated(job, candidate):
-        """ Return True if outputfile newer than candidate exists. """
+    def should_do_job(self, job, candidate):
+        """ 
+        Return True if outputfile newer than candidate exists
+        and the candidate exists or if no candidate needed
+        """
+        if len(PREFERRED_INPUT_FORMATS[job.type]) == 0:
+            # doesn't need a source file
+            return True
+ 
+        if not candidate:
+            # should never happen
+            return True
+
+        if candidate.generated:
+            candidate_path = os.path.join('/', self.get_cache_dir(), candidate.archive_path)
+        else:
+            candidate_path = os.path.join(options.config.FILESDIR, candidate.archive_path)
+                   
+        if not candidate.generated and not os.path.exists(candidate_path[7:]):
+            warning('expected file %s not found. job skipped.', candidate_path[7:])
+            return False
 
         path = os.path.join(job.outputdir, job.outputfile)
 
@@ -242,6 +261,7 @@ class Maker():
         for type_ in options.make:
             debug("Trying: %s ..." % type_)
 
+            candidate_types = PREFERRED_INPUT_FORMATS[type_]
             job = CommonCode.Job(type_)
             job.ebook = self.ebook
             job.outputdir  = self.get_cache_dir()
@@ -249,7 +269,6 @@ class Maker():
             job.logfile = make_output_filename('logfile', self.ebook)
 
             candidates = all_candidates[:]
-            needs_source = len(PREFERRED_INPUT_FORMATS[type_]) > 0
 
             if type_ in EXCLUSIONS and cf.filter_sort(
                     EXCLUSIONS[type_], [c for c in candidates if not c.generated], f):
@@ -258,12 +277,13 @@ class Maker():
                     self.remove_type(type_)
                 continue
 
-            if needs_source:
+            candidate = None
+            if len(candidate_types) > 0:
                 if DBUtils.is_not_text(self.ebook):
                     info("Book is not a text book. Skipping %s ..." % type_)
                     continue
 
-                candidates = cf.filter_sort(PREFERRED_INPUT_FORMATS[type_], candidates, f)
+                candidates = cf.filter_sort(candidate_types, candidates, f)
 
                 if not candidates:
                     info('No input file found for type: %s' % type_)
@@ -272,19 +292,9 @@ class Maker():
                     continue
 
                 candidate = candidates[0]
-
-                debug("Candidates: %s" % ' '.join(map(f, candidates)))
-
                 # oom-killer safeguard
-                if job.maintype == 'txt' and candidate.extent > 8 * 1024 * 1024:
-                    warning('Skipping %s: file too big' % candidate.archive_path)
-                    continue
-                if job.maintype in ['epub', 'epub3'] and candidate.extent > 16 * 1024 * 1024:
-                    warning('Skipping %s: file too big' % candidate.archive_path)
-                    continue
-                if job.maintype != 'kf8' and candidate.extent > 32 * 1024 * 1024:
-                    # the candidates for kf8, epubs, can get quite big
-                    warning('Skipping %s: file too big' % candidate.archive_path)
+                if candidate.extent > MAX_CANDIDATE_SIZE.get(job.maintype, 32) * 1024 * 1024:
+                    warning('Skipping %s: file too big', candidate.archive_path)
                     continue
 
                 job.url = os.path.join(options.config.FILESDIR, candidate.archive_path)
@@ -297,7 +307,7 @@ class Maker():
                 job.opf_identifier = (urllib.parse.urljoin(
                     options.config.BIBREC + '/', str(self.ebook)))
 
-            if not needs_source or self.target_outdated(job, candidate):
+            if self.should_do_job(job, candidate):
                 job_queue.append(job)
 
                 new_candidate = Struct()

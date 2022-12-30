@@ -25,3 +25,22 @@ The following directories should exist:
     - $PRIVATE/logs/notifications
     - $PRIVATE/logs/dopush
     - $PRIVATE/logs/dopush/backup
+
+## Using the EbookConverter Scripts
+
+you can run these commands either by first entering a `pipenv shell` or on a single line using `pipenv run <command> <args>`
+
+Rebuild one or more books
+`ebookconverter --range=<start>-<finish> --build=all`
+`ebookconverter --range=<booknumber>  --build=all`
+`ebookconverter --range=<booknumber>  --build=all --validate`
+
+Reload metadata from a workflow json file (use with care, it will overwrite any metadata in the DB)
+`reload_workflow <booknumber>`
+
+Regenerate the csv file
+`make_csv`
+
+Look for any ebooks with changed files in the last X days and then check if any of the previously known files of that ebook have been deleted.
+
+`autodelete`

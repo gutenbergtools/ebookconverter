@@ -21,5 +21,4 @@ class TestCandidates(unittest.TestCase):
         candidates = Candidates.Candidates()
         files = candidates.read_from_database(self.ebook2)
         cf = Candidates.Candidates.filter_sort(typeglob_list, files, lambda x: x.format)
-        print ([f.archive_path for f in cf])
-        self.assertEqual(cf[0].format, 'html/utf-8')
+        self.assertEqual(cf[0].archive_path, 'files/9846/9846-h/9846-h.htm')
