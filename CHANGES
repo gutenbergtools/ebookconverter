@@ -1,3 +1,6 @@
+0.8.4
+- refactor  PUBLIC, FILES, FTP into libgutenberg>=0.10.15
+
 0.8.3 (December 26, 2022)
 - added documentation for commands
 - add checking that a source file exists
