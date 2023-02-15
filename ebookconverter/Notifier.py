@@ -31,16 +31,24 @@ REPLY_TO_EMAIL = os.getenv('REPLY_TO_EMAIL') or 'help2022@pglaf.org'
 SMTP_SSL = os.getenv('SMTP_SSL') or False
 
 NOTIFY_PROCESSED = """
+Good news, PG whitewasher(s).
+
 Ebook #{ebook} has been processed and ebook files have been posted successfully at Project Gutenberg.
-"""
-NOTIFY_ISSUE = """
-Ebook #{ebook} has been processed and ebook files have been posted at Project Gutenberg. The posting team has been notified of a possible issue with the processing. You will be notified again when the issue is resolved.
+
+Thank you for helping with Project Gutenberg!
 """
 NOTIFY_CRITICAL = """
-Ebook #{ebook} has been processed and posted at Project Gutenberg. There may exist a critical issue with the ebook processing. Here is the log entry:
+We need help, PG whitewasher(s)!
+
+Ebook #{ebook} has been processed and posted at Project Gutenberg. 
+There seems to exist a critical issue with the ebook processing. Here is the log entry:
+
 {records}
 
-The full processing log for this ebook may be downloaded at https://www.gutenberg.org/cache/epub/{ebook}/pg{ebook}.converter.log
+The full processing log for this ebook may be downloaded at 
+https://www.gutenberg.org/cache/epub/{ebook}/pg{ebook}.converter.log
+
+Thank you for helping with Project Gutenberg!
 """
 
 
@@ -153,14 +161,12 @@ def send_notifications(ebooks=None):
                 if code:
                     os.remove(queued_file)
 
-    # send 'processed' notifications to notification address
+    # send 'processed' notifications to ww
     for ebook in ebooks:
         try:
             ebook = int(ebook)
         except ValueError:
             continue
-        if ebook in criticals:
-            message = NOTIFY_ISSUE.format(ebook=ebook)
-        else:
+        if ebook not in criticals:
             message = NOTIFY_PROCESSED.format(ebook=ebook)
-        notify(ebook, message)
+            notify(ebook, message, role='ww')

@@ -35,7 +35,7 @@ import lxml
 
 from libgutenberg.DBUtils import check_session, ebook_exists
 from libgutenberg.DublinCoreMapping import DublinCoreObject
-from libgutenberg.GutenbergFiles import store_file_in_database
+from libgutenberg.GutenbergFiles import store_file_in_database, PUBLIC, FILES, FTP
 from libgutenberg.GutenbergGlobals import xpath
 from libgutenberg.Models import Book
 from libgutenberg.Logger import critical, debug, error, exception, info, warning
@@ -45,14 +45,10 @@ from ebookmaker.CommonCode import find_candidates
 
 from .Notifier import ADDRESS_BOOK
 PRIVATE = os.getenv ('PRIVATE') or ''
-PUBLIC  = os.getenv ('PUBLIC')  or ''
 PUBLISH = os.getenv ('PUBLISH')  or ''
 
 DOPUSH_LOG_DIR = os.path.join(PRIVATE, 'logs', 'dopush')
 WORKFLOW_LOG_DIR = os.path.join(PRIVATE, 'logs', 'json')
-
-FILES = os.path.join(PUBLIC, 'files')
-FTP   = '/public/ftp/pub/docs/books/gutenberg/'
 
 PARSEABLE_FILES = '.rst .html .htm .tex .txt'.split ()
 HTML_FILES = '.html .htm .xhtml'.split ()
@@ -298,7 +294,7 @@ def scan_dopush_log():
     """ Scan the dopush log directory for new files.
 
     Files in this directory are placeholders only. The real files are
-    in FILES/  and PUBLISH/.
+    in FILES  and PUBLISH/.
 
     """
 

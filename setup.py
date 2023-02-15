@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.8.3'
+VERSION = '0.8.4'
 
 setup (
     name = 'ebookconverter',
@@ -29,12 +29,12 @@ setup (
     ],
 
     install_requires = [
-        'ebookmaker>=0.12.23',
+        'ebookmaker>=0.12.28',
         'setproctitle==1.1.10',
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',
         'qrcode>=6.1',
-        'libgutenberg[postgres]>=0.10.13',
+        'libgutenberg[postgres]>=0.10.15',
     ],
     
     package_data = {
