@@ -1,5 +1,9 @@
 0.8.4
-- refactor  PUBLIC, FILES, FTP into libgutenberg>=0.10.15
+- notifications, both success and problem alerts, are now sent only to the whitewasher.
+- notification texts have been cleaned up to be more readable and more friendly
+- refactored  PUBLIC, FILES, FTP into libgutenberg>=0.10.15
+- CACHDIR and FILESDIR now need to be set in ~/.ebookmaker as well as ~/.ebookconverter, Probably these belong in an environment variable.
+
 
 0.8.3 (December 26, 2022)
 - added documentation for commands
