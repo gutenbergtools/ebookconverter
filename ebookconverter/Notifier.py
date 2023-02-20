@@ -33,19 +33,19 @@ SMTP_SSL = os.getenv('SMTP_SSL') or False
 NOTIFY_PROCESSED = """
 Good news, PG whitewasher(s).
 
-Ebook #{ebook} has been processed and ebook files have been posted successfully at Project Gutenberg.
+EBook #{ebook} has been processed and eBook files have been posted successfully at Project Gutenberg.
 
 Thank you for helping with Project Gutenberg!
 """
 NOTIFY_CRITICAL = """
 We need help, PG whitewasher(s)!
 
-Ebook #{ebook} has been processed and posted at Project Gutenberg. 
-There seems to exist a critical issue with the ebook processing. Here is the log entry:
+EBook #{ebook} has been processed and posted at Project Gutenberg. 
+There seems to exist a critical issue with the eBook processing. Here is the log entry:
 
 {records}
 
-The full processing log for this ebook may be downloaded at 
+The full processing log for this eBook may be downloaded at 
 https://www.gutenberg.org/cache/epub/{ebook}/pg{ebook}.converter.log
 
 Thank you for helping with Project Gutenberg!
