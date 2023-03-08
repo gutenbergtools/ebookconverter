@@ -1,8 +1,8 @@
-0.8.5
+0.8.5 (March 8, 2023
 - normalize capitalization of "eBook"
 - only send notification for CRITICAL errors #33
 
-0.8.4 (February 15.2023)
+0.8.4 (February 15, 2023)
 - notifications, both success and problem alerts, are now sent only to the whitewasher.
 - notification texts have been cleaned up to be more readable and more friendly
 - refactored  PUBLIC, FILES, FTP into libgutenberg>=0.10.15
