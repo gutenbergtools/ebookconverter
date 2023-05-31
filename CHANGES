@@ -1,4 +1,7 @@
-0.8.5 (March 8, 2023
+0.8.6 (May 31, 2023)
+- adds MastodonWriter, to replicate TwitterWriter (posting on @gutenberg_new@mastodon.social)
+
+0.8.5 (March 8, 2023)
 - normalize capitalization of "eBook"
 - only send notification for CRITICAL errors #33
 

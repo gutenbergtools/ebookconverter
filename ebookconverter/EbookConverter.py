@@ -80,6 +80,7 @@ PREFERRED_INPUT_FORMATS = {
     'qrcode': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
     'facebook': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
     'twitter': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
+    'mastodon': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
     'update': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
 }
 
@@ -121,7 +122,7 @@ FILENAMES = {
 GENERIC_FILENAME = 'pg{id}.generic'
 
 DEPENDENCIES = collections.OrderedDict((
-    ('everything',      ('all', 'kindle.noimages','facebook', 'twitter', 'update')),
+    ('everything',      ('all', 'kindle.noimages','facebook', 'twitter', 'mastodon', 'update')),
     ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
                          'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',    'html.noimages')),
@@ -152,7 +153,7 @@ cover.small cover.medium
 epub.images kindle.images pdf.images
 epub3.images kf8.images
 qrcode rdf
-facebook twitter
+facebook twitter mastodon
 update
 null
 """.split()
