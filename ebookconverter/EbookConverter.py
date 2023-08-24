@@ -95,9 +95,7 @@ PREFERRED_INPUT_FORMATS['null']               = PREFERRED_INPUT_FORMATS['epub.im
 EXCLUSIONS = {
     'epub.images': ('epub.dp',   ),
     'epub.noimages': ('epub.dp',   ),
-    #'html.images': ('html/*',    ),
     'html.noimages': ('html/*',    ),
-    'txt.utf-8': ('txt/utf-8', ),
 }
 
 FILENAMES = {
