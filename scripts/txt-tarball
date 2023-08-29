@@ -1,0 +1,27 @@
+#!/bin/bash
+# 
+
+
+TMP=$PRIVATE/tmp/txt
+mkdir -p $TMP
+
+cd $PUBLIC
+
+header "getting list of txt files"
+
+find cache/epub -name '*.delete' -prune -o -name 'DELETE*' -prune -o -regex '.*/[0-9]+/pg[0-9]+\.txt\.utf8' -print | sort -n > $TMP/txt-files.txt
+
+
+echo -n "count: "
+wc -l < $TMP/txt-files.txt
+
+header "making tarball of txt files"
+tar -cf $TMP/txt-files.tar -T $TMP/txt-files.txt
+
+cd $TMP
+
+header "zip the tarball"
+zip txt-files.tar.zip txt-files.tar
+mv -f txt-files.tar.* $FEEDS/
+
+rm $TMP/*
