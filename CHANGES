@@ -1,6 +1,7 @@
 0.9.0 (September ??, 2023)
 - Removed a txt exclusion. Ebookmaker is now putting headers on txt files, but this was not being done for the 20,000 or so books with source named 99999-0.txt due to the obsolete exclusion. 
 - add a script that packages txt files to a tarball
+- add an HTMLWriter that extends Ebookmaker's HTMLWriter to package up a zip file of the html5 with images. 
 
 0.8.6 (May 31, 2023)
 - adds MastodonWriter, to replicate TwitterWriter (posting on @gutenberg_new@mastodon.social)

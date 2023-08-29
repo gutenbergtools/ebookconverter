@@ -115,6 +115,7 @@ FILENAMES = {
     'cover.small':      'pg{id}.cover.small.jpg',
     'cover.medium':     'pg{id}.cover.medium.jpg',
     'qrcode':           'pg{id}.qrcode.png',
+    'zip':              'pg{id}.zip',
     'logfile':          'pg{id}.converter.log',      # .converter because of latex log conflicts
 }
 GENERIC_FILENAME = 'pg{id}.generic'
