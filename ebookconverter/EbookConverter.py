@@ -115,7 +115,7 @@ FILENAMES = {
     'cover.small':      'pg{id}.cover.small.jpg',
     'cover.medium':     'pg{id}.cover.medium.jpg',
     'qrcode':           'pg{id}.qrcode.png',
-    'zip':              'pg{id}.zip',
+    'zip':              'pg{id}-h.zip',
     'logfile':          'pg{id}.converter.log',      # .converter because of latex log conflicts
 }
 GENERIC_FILENAME = 'pg{id}.generic'
@@ -322,6 +322,23 @@ class Maker():
 
 
 def run_job_queue(job_queue):
+    def add_file_to_db(filename, filetype, ebook_no):
+        if os.access(filename, os.R_OK):
+            if options.shadow:
+                debug('if not in shadow, would have stored %s in database.', filename)
+            else:
+                debug('adding %s to database.', filename)
+                store_file_in_database(ebook_no, filename, filetype)
+            mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
+            if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
+                critical('Failed to build new file: %s', filename)
+            for ext in ['.gz', '.gzip']:
+                if os.access(filename + ext, os.W_OK):
+                    os.remove(filename + ext)
+        elif '.generic' not in filename:
+            critical('Failed to build file: %s', filename)
+
+
     """ Run EbookMaker for all jobs in the queue. """
 
     for job in job_queue:
@@ -364,20 +381,12 @@ def run_job_queue(job_queue):
                 continue
             filename = os.path.join(job.outputdir, job.outputfile)
             Logger.ebook = job.ebook
-            if os.access(filename, os.R_OK):
-                if options.shadow:
-                    debug('if not in shadow, would have stored %s in database.', filename)
-                else:
-                    debug('adding %s to database.', filename)
-                    store_file_in_database(job.ebook, filename, job.type)
-                mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
-                if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
-                    critical('Failed to build new file: %s', filename)
-                for ext in ['.gz', '.gzip']:
-                    if os.access(filename + ext, os.W_OK):
-                        os.remove(filename + ext)
-            elif '.generic' not in filename:
-                critical('Failed to build file: %s', filename)
+            add_file_to_db(filename, job.type, job.ebook)
+            if job.type == 'html.images':
+                zipfilename = os.path.join(job.outputdir, make_output_filename('zip', job.ebook))
+                # also add the zip
+                add_file_to_db(zipfilename, None, job.ebook)
+                
     else:
         critical('returncode was %s', ebm.returncode)
 
