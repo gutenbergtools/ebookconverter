@@ -3,6 +3,7 @@
 - add a script that packages txt files to a tarball
 - add an HTMLWriter that extends Ebookmaker's HTMLWriter to package up a zip file of the html5 with images named pg99999-h.zip Addresses #38
 - don't require a sourcefile for products that are built from the database. Require ebbokmaker>0.12.35. Fixes #39.
+- save credit metadata to the data
 
 0.8.6 (May 31, 2023)
 - adds MastodonWriter, to replicate TwitterWriter (posting on @gutenberg_new@mastodon.social)
