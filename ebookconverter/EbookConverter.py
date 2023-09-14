@@ -46,6 +46,7 @@ NON_UTF_TXTS = ('txt/windows-125*', 'txt/iso-8859-*', 'txt/big5', 'txt/ibm*', 't
 ALL_TXTS = ('txt/utf-8', ) + NON_UTF_TXTS
 ALL_HTM =  ('html/utf-8', 'html/windows-125*', 'html/iso-8859-*', 'html/*')
 ALL_SRCS = ('rst/*',) + ALL_HTM + ALL_TXTS
+
 PREFERRED_INPUT_FORMATS = {
 
     # current practice is not to upload rst.master yet
@@ -71,24 +72,12 @@ PREFERRED_INPUT_FORMATS = {
 
     # picsdir only if pdf or html are created
     'picsdir.images': ('rst/*', ),
-
-    # coverpage (a cover will be generated, whatever)
-    'cover.medium': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
-
-    # only make these if there's a source file registered in the database
-    'rdf': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
-    'qrcode': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
-    'facebook': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
-    'twitter': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
-    'mastodon': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
-    'update': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
 }
 
 PREFERRED_INPUT_FORMATS['html.noimages']      = PREFERRED_INPUT_FORMATS['html.images']
 PREFERRED_INPUT_FORMATS['epub.noimages']      = PREFERRED_INPUT_FORMATS['epub.images']
 PREFERRED_INPUT_FORMATS['pdf.noimages']       = PREFERRED_INPUT_FORMATS['pdf.images']
 PREFERRED_INPUT_FORMATS['picsdir.noimages']   = PREFERRED_INPUT_FORMATS['picsdir.images']
-PREFERRED_INPUT_FORMATS['cover.small']        = PREFERRED_INPUT_FORMATS['cover.medium']
 PREFERRED_INPUT_FORMATS['null']               = PREFERRED_INPUT_FORMATS['epub.images']
 
 # don't build a type if we've already made one
@@ -185,7 +174,7 @@ class Maker():
         Return True if outputfile newer than candidate exists
         and the candidate exists or if no candidate needed
         """
-        if len(PREFERRED_INPUT_FORMATS[job.type]) == 0:
+        if len(PREFERRED_INPUT_FORMATS.get(job.type, {})) == 0:
             # doesn't need a source file
             return True
  
@@ -261,7 +250,7 @@ class Maker():
         for type_ in options.make:
             debug("Trying: %s ..." % type_)
 
-            candidate_types = PREFERRED_INPUT_FORMATS[type_]
+            candidate_types = PREFERRED_INPUT_FORMATS.get(type_, {})
             job = CommonCode.Job(type_)
             job.ebook = self.ebook
             job.outputdir  = self.get_cache_dir()
