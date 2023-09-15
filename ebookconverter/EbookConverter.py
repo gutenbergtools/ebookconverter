@@ -72,12 +72,17 @@ PREFERRED_INPUT_FORMATS = {
 
     # picsdir only if pdf or html are created
     'picsdir.images': ('rst/*', ),
+
+    # coverpage (a cover will be generated, whatever)
+    'cover.medium': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
+
 }
 
 PREFERRED_INPUT_FORMATS['html.noimages']      = PREFERRED_INPUT_FORMATS['html.images']
 PREFERRED_INPUT_FORMATS['epub.noimages']      = PREFERRED_INPUT_FORMATS['epub.images']
 PREFERRED_INPUT_FORMATS['pdf.noimages']       = PREFERRED_INPUT_FORMATS['pdf.images']
 PREFERRED_INPUT_FORMATS['picsdir.noimages']   = PREFERRED_INPUT_FORMATS['picsdir.images']
+PREFERRED_INPUT_FORMATS['cover.small']        = PREFERRED_INPUT_FORMATS['cover.medium']
 PREFERRED_INPUT_FORMATS['null']               = PREFERRED_INPUT_FORMATS['epub.images']
 
 # don't build a type if we've already made one
