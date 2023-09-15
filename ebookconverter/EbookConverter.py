@@ -57,9 +57,9 @@ PREFERRED_INPUT_FORMATS = {
     'epub.images': ALL_SRCS,
     'epub3.images': ALL_SRCS,
 
-    'kindle.images': ('epub.images/*', ),
-    'kindle.noimages': ('epub.noimages/*', ),
-    'kf8.images': ('epub3.images/*', ),
+    'kindle.images': ALL_SRCS,
+    'kindle.noimages': ALL_SRCS,
+    'kf8.images': ALL_SRCS,
 
     # html is created from rst files or text files
     'html.images': ALL_HTM + ('rst/*', ) + ALL_TXTS,
@@ -151,7 +151,7 @@ update
 null
 """.split()
 
-MAX_CANDIDATE_SIZE = {'txt': 8, 'epub': 16, 'epub3': 16}
+MAX_CANDIDATE_SIZE = {'epub': 16, 'epub3': 16, 'kindle': 16, 'kf8': 16}
 
 def make_output_filename(type_, ebook = 0):
     """ Make a suitable filename for output type. """
@@ -184,8 +184,8 @@ class Maker():
             return True
  
         if not candidate:
-            # should never happen
-            return True
+            # happens if the candidates are too large
+            return False
 
         if candidate.generated:
             candidate_path = os.path.join('/', self.get_cache_dir(), candidate.archive_path)
@@ -288,11 +288,11 @@ class Maker():
                 candidate = candidates[0]
                 # oom-killer safeguard
                 if candidate.extent > MAX_CANDIDATE_SIZE.get(job.maintype, 32) * 1024 * 1024:
-                    warning('Skipping %s: file too big', candidate.archive_path)
+                    warning(f'Skipping {candidate.archive_path} for {type_}: file too big' )
                     continue
 
                 job.url = os.path.join(options.config.FILESDIR, candidate.archive_path)
-                info('type: %s; job.url: %s', type_, job.url)
+                info(f'type: {type_}; job.url: {job.url}' )
                 # allow any file below basedir of ebook
                 job.include = [ os.path.join(
                     options.config.FILESDIR, os.path.dirname(candidate.archive_path) + '/*') ]
