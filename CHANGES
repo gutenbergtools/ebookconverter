@@ -5,6 +5,7 @@
 - don't require a sourcefile for products that are built from the database. Require ebookmaker>0.12.35. Fixes #39.
 - save credit metadata to the database. fixes #28.
 - corrected behavior of source file size limits
+- add ebook number to log even if the source file fails to parse
 
 
 0.8.6 (May 31, 2023)

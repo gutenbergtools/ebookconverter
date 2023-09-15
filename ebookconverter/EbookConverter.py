@@ -373,8 +373,8 @@ def run_job_queue(job_queue):
         for job in job_queue:
             if job.type == 'qrcode':
                 continue
-            filename = os.path.join(job.outputdir, job.outputfile)
             Logger.ebook = job.ebook
+            filename = os.path.join(job.outputdir, job.outputfile)
             add_file_to_db(filename, job.type, job.ebook)
             if job.type == 'html.images':
                 zipfilename = os.path.join(job.outputdir, make_output_filename('zip', job.ebook))
