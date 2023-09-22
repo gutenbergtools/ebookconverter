@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.8.5'
+VERSION = '0.9.0'
 
 setup (
     name = 'ebookconverter',
@@ -26,10 +26,11 @@ setup (
         'scripts/cron-dopush-social.sh',
         'scripts/cron-dopush.sh',
         'scripts/cron-jekyll.sh',
+        'scripts/txt-tarball'
     ],
 
     install_requires = [
-        'ebookmaker>=0.12.30',
+        'ebookmaker>=0.12.36',
         'setproctitle==1.1.10',
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',
@@ -60,7 +61,7 @@ setup (
         "Intended Audience :: Other Audience",
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3.7",
     ],
 
     platforms = 'OS-independent'

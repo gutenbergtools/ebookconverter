@@ -46,6 +46,7 @@ NON_UTF_TXTS = ('txt/windows-125*', 'txt/iso-8859-*', 'txt/big5', 'txt/ibm*', 't
 ALL_TXTS = ('txt/utf-8', ) + NON_UTF_TXTS
 ALL_HTM =  ('html/utf-8', 'html/windows-125*', 'html/iso-8859-*', 'html/*')
 ALL_SRCS = ('rst/*',) + ALL_HTM + ALL_TXTS
+
 PREFERRED_INPUT_FORMATS = {
 
     # current practice is not to upload rst.master yet
@@ -56,9 +57,9 @@ PREFERRED_INPUT_FORMATS = {
     'epub.images': ALL_SRCS,
     'epub3.images': ALL_SRCS,
 
-    'kindle.images': ('epub.images/*', ),
-    'kindle.noimages': ('epub.noimages/*', ),
-    'kf8.images': ('epub3.images/*', ),
+    'kindle.images': ALL_SRCS,
+    'kindle.noimages': ALL_SRCS,
+    'kf8.images': ALL_SRCS,
 
     # html is created from rst files or text files
     'html.images': ALL_HTM + ('rst/*', ) + ALL_TXTS,
@@ -75,12 +76,6 @@ PREFERRED_INPUT_FORMATS = {
     # coverpage (a cover will be generated, whatever)
     'cover.medium': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
 
-    # only make these if there's a source file registered in the database
-    'rdf': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
-    'qrcode': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
-    'facebook': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
-    'twitter': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
-    'update': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
 }
 
 PREFERRED_INPUT_FORMATS['html.noimages']      = PREFERRED_INPUT_FORMATS['html.images']
@@ -94,9 +89,7 @@ PREFERRED_INPUT_FORMATS['null']               = PREFERRED_INPUT_FORMATS['epub.im
 EXCLUSIONS = {
     'epub.images': ('epub.dp',   ),
     'epub.noimages': ('epub.dp',   ),
-    #'html.images': ('html/*',    ),
     'html.noimages': ('html/*',    ),
-    'txt.utf-8': ('txt/utf-8', ),
 }
 
 FILENAMES = {
@@ -116,12 +109,13 @@ FILENAMES = {
     'cover.small':      'pg{id}.cover.small.jpg',
     'cover.medium':     'pg{id}.cover.medium.jpg',
     'qrcode':           'pg{id}.qrcode.png',
+    'zip':              'pg{id}-h.zip',
     'logfile':          'pg{id}.converter.log',      # .converter because of latex log conflicts
 }
 GENERIC_FILENAME = 'pg{id}.generic'
 
 DEPENDENCIES = collections.OrderedDict((
-    ('everything',      ('all', 'kindle.noimages','facebook', 'twitter', 'update')),
+    ('everything',      ('all', 'kindle.noimages','facebook', 'twitter', 'mastodon', 'update')),
     ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
                          'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',    'html.noimages')),
@@ -152,12 +146,12 @@ cover.small cover.medium
 epub.images kindle.images pdf.images
 epub3.images kf8.images
 qrcode rdf
-facebook twitter
+facebook twitter mastodon
 update
 null
 """.split()
 
-MAX_CANDIDATE_SIZE = {'txt': 8, 'epub': 16, 'epub3': 16}
+MAX_CANDIDATE_SIZE = {'epub': 16, 'epub3': 16, 'kindle': 16, 'kf8': 16}
 
 def make_output_filename(type_, ebook = 0):
     """ Make a suitable filename for output type. """
@@ -185,13 +179,13 @@ class Maker():
         Return True if outputfile newer than candidate exists
         and the candidate exists or if no candidate needed
         """
-        if len(PREFERRED_INPUT_FORMATS[job.type]) == 0:
+        if len(PREFERRED_INPUT_FORMATS.get(job.type, {})) == 0:
             # doesn't need a source file
             return True
  
         if not candidate:
-            # should never happen
-            return True
+            # happens if the candidates are too large
+            return False
 
         if candidate.generated:
             candidate_path = os.path.join('/', self.get_cache_dir(), candidate.archive_path)
@@ -261,7 +255,7 @@ class Maker():
         for type_ in options.make:
             debug("Trying: %s ..." % type_)
 
-            candidate_types = PREFERRED_INPUT_FORMATS[type_]
+            candidate_types = PREFERRED_INPUT_FORMATS.get(type_, {})
             job = CommonCode.Job(type_)
             job.ebook = self.ebook
             job.outputdir  = self.get_cache_dir()
@@ -294,11 +288,11 @@ class Maker():
                 candidate = candidates[0]
                 # oom-killer safeguard
                 if candidate.extent > MAX_CANDIDATE_SIZE.get(job.maintype, 32) * 1024 * 1024:
-                    warning('Skipping %s: file too big', candidate.archive_path)
+                    warning(f'Skipping {candidate.archive_path} for {type_}: file too big' )
                     continue
 
                 job.url = os.path.join(options.config.FILESDIR, candidate.archive_path)
-                info('type: %s; job.url: %s', type_, job.url)
+                info(f'type: {type_}; job.url: {job.url}' )
                 # allow any file below basedir of ebook
                 job.include = [ os.path.join(
                     options.config.FILESDIR, os.path.dirname(candidate.archive_path) + '/*') ]
@@ -322,6 +316,23 @@ class Maker():
 
 
 def run_job_queue(job_queue):
+    def add_file_to_db(filename, filetype, ebook_no):
+        if os.access(filename, os.R_OK):
+            if options.shadow:
+                debug('if not in shadow, would have stored %s in database.', filename)
+            else:
+                debug('adding %s to database.', filename)
+                store_file_in_database(ebook_no, filename, filetype)
+            mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
+            if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
+                critical('Failed to build new file: %s', filename)
+            for ext in ['.gz', '.gzip']:
+                if os.access(filename + ext, os.W_OK):
+                    os.remove(filename + ext)
+        elif '.generic' not in filename:
+            critical('Failed to build file: %s', filename)
+
+
     """ Run EbookMaker for all jobs in the queue. """
 
     for job in job_queue:
@@ -362,22 +373,14 @@ def run_job_queue(job_queue):
         for job in job_queue:
             if job.type == 'qrcode':
                 continue
-            filename = os.path.join(job.outputdir, job.outputfile)
             Logger.ebook = job.ebook
-            if os.access(filename, os.R_OK):
-                if options.shadow:
-                    debug('if not in shadow, would have stored %s in database.', filename)
-                else:
-                    debug('adding %s to database.', filename)
-                    store_file_in_database(job.ebook, filename, job.type)
-                mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
-                if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
-                    critical('Failed to build new file: %s', filename)
-                for ext in ['.gz', '.gzip']:
-                    if os.access(filename + ext, os.W_OK):
-                        os.remove(filename + ext)
-            elif '.generic' not in filename:
-                critical('Failed to build file: %s', filename)
+            filename = os.path.join(job.outputdir, job.outputfile)
+            add_file_to_db(filename, job.type, job.ebook)
+            if job.type == 'html.images':
+                zipfilename = os.path.join(job.outputdir, make_output_filename('zip', job.ebook))
+                # also add the zip
+                add_file_to_db(zipfilename, None, job.ebook)
+                
     else:
         critical('returncode was %s', ebm.returncode)
 
