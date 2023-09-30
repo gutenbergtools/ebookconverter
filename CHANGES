@@ -1,3 +1,6 @@
+0.9.1 (September 29, 2023)
+- removed the `.utf8` extension from txt, html, and rst generated files
+
 0.9.0 (September 20, 2023)
 - Removed a txt exclusion. Ebookmaker is now putting headers on txt files, but this was not being done for the 20,000 or so books with source named 99999-0.txt due to the obsolete exclusion. 
 - add a script that packages txt files to a tarball

@@ -9,7 +9,7 @@ cd $PUBLIC
 
 header "getting list of txt files"
 
-find cache/epub -name '*.delete' -prune -o -name 'DELETE*' -prune -o -regex '.*/[0-9]+/pg[0-9]+\.txt\.utf8' -print | sort -n > $TMP/txt-files.txt
+find cache/epub -name '*.delete' -prune -o -name 'DELETE*' -prune -o -regex '.*/[0-9]+/pg[0-9]+\.txt' -print | sort -n > $TMP/txt-files.txt
 
 
 echo -n "count: "
