@@ -93,8 +93,8 @@ EXCLUSIONS = {
 }
 
 FILENAMES = {
-    'html.noimages':    'pg{id}.html.utf8',
-    'html.images':      'pg{id}-images.html.utf8',
+    'html.noimages':    'pg{id}.html',
+    'html.images':      'pg{id}-images.html',
     'epub.noimages':    'pg{id}.epub',
     'epub.images':      'pg{id}-images.epub',
     'epub3.images':     'pg{id}-images-3.epub',
@@ -103,9 +103,9 @@ FILENAMES = {
     'kf8.images':       'pg{id}-images-kf8.mobi',
     'pdf.noimages':     'pg{id}.pdf',
     'pdf.images':       'pg{id}-images.pdf',
-    'txt.utf-8':        'pg{id}.txt.utf8',
+    'txt.utf-8':        'pg{id}.txt',
     'rdf':              'pg{id}.rdf',
-    'rst.gen':          'pg{id}.rst.utf8',
+    'rst.gen':          'pg{id}.rst',
     'cover.small':      'pg{id}.cover.small.jpg',
     'cover.medium':     'pg{id}.cover.medium.jpg',
     'qrcode':           'pg{id}.qrcode.png',
