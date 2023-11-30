@@ -1,3 +1,6 @@
+0.9.2 (November 30, 2023)
+- fix RDFWriter to include the DCMIType ('Text') for books. It does not appear that this ever was done since the advent of EbookConverter.
+
 0.9.1 (September 29, 2023)
 - removed the `.utf8` extension from txt, html, and rst generated files
 
