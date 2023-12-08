@@ -193,9 +193,8 @@ class Writer (writers.BaseWriter):
         self.vocabulary (book, [locc.id for locc in dc.loccs],
                          RNS.dcterms.subject, RNS.dcterms.LCC)
 
-        # categories (vocabulary)
-
-        self.vocabulary (book, dc.categories,
+        # types (vocabulary)
+        self.vocabulary (book, [cat.id for cat in dc.dcmitypes],
                          RNS.dcterms.type, RNS.dcterms.DCMIType)
 
         # bookshelves (vocabulary)
