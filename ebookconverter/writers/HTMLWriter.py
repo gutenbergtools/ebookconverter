@@ -61,7 +61,7 @@ class Writer(BaseHTMLWriter.Writer):
         info("Done making zip: %s" % job.outputfile)
         
         if job.dc.credit:
-            job.dc.add_attribute(job.dc.book, [job.dc.credit], marc=508)
+            job.dc.add_attribute(job.dc.book, job.dc.credit, marc=508)
             job.dc.session.commit()
             info(f"set credit to db: {job.dc.credit}")
         
