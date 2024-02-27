@@ -102,21 +102,21 @@ def archive_workflow_file(filename):
 
 
 def handle_non_dc(data, ebook):
+    ww = None
+    notify = None
     try:
         non_dc = json.loads(data)
         try:
             notify = non_dc['DATA']['NOTIFY']
         except KeyError:
             info("no notify address for %s", ebook)
-            notify = None
         try:
             ww = non_dc['DATA']['WW']
         except KeyError:
             info("no ww address for %s", ebook)
-            ww = None
+
     except ValueError:
         error("bad json file for %s", ebook)
-        notify = None
 
     if notify:
         ADDRESS_BOOK.set_email(ebook, notify)
