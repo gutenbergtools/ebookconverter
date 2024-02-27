@@ -1,3 +1,10 @@
+0.9.4 (February 26, 2024)
+- fix bad error handling in FileInfo
+- don't save new credit unless it's new
+- libgutenberg 0.10.22 
+    - fixes bugs that resulted in duplicate credits
+    - fixes a problem that scraped credits overwrote the changes from json file
+
 0.9.3 (February 13, 2024)
 - credits should be changed, not appended. Fixes #35.
 - added a script to remove extraneous credits

@@ -32,6 +32,8 @@ class Writer(BaseHTMLWriter.Writer):
 
     def build(self, job):
         """ Build HTML file. """
+        old_credit = job.dc.credit
+        info(f"credit was db: {job.dc.credit}")
         super().build(job)
         try:
             # now zip up the files
@@ -60,7 +62,7 @@ class Writer(BaseHTMLWriter.Writer):
         
         info("Done making zip: %s" % job.outputfile)
         
-        if job.dc.credit:
+        if job.dc.credit and job.dc.credit != old_credit:
             job.dc.add_attribute(job.dc.book, job.dc.credit, marc=508)
             job.dc.session.commit()
             info(f"set credit to db: {job.dc.credit}")
