@@ -27,7 +27,7 @@ ARCHIVE_DIR = os.path.join(PRIVATE,'logs', 'json', 'backup')
 SMTP_HOST = os.getenv('SMTP_HOST') or 'localhost'
 SMTP_USER = os.getenv('SMTP_USER') or ''
 SMTP_PASSWORD = os.getenv('SMTP_PASSWORD') or ''
-REPLY_TO_EMAIL = os.getenv('REPLY_TO_EMAIL') or 'help2023@pglaf.org'
+REPLY_TO_EMAIL = os.getenv('REPLY_TO_EMAIL') or 'gutenbackend@pglaf.org'
 SMTP_SSL = os.getenv('SMTP_SSL') or False
 
 NOTIFY_PROCESSED = """
