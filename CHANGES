@@ -1,7 +1,7 @@
 0.9.5 (April 18, 2024)
 - Change Facebook graph API version to 19.0. No changes affect us.
 - update_from_backup_workflow changed to update_from_workflow to add pubinfo from json files made before version 0.7.0 was turned on (~ August 2021)
-
+- ReparseCredits looks at books without credits and checks to see if parsing the pg header helps.
 
 
 0.9.4 (February 26, 2024)
