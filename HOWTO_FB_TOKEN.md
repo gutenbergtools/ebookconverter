@@ -22,6 +22,8 @@ The Facebook access token needs to be updated every two months. This is because 
 
 - paste the token into a new file named `.fb_access_token`
 
-- copy the access token file to the gutenbackend home directory: `scp .fb_access_token gutenbackend@login2.ibiblio.org:~/.fb_access_token`
+- copy the access token file to the gutenbackend home directory: `scp .fb_access_token gutenbackend@gutenberg.login.ibiblio.org:~/.fb_access_token`
 
 put a reminder on your calendar for a few days before token expiration
+
+"New Project Gutenberg Books" is a Facebook "page."
