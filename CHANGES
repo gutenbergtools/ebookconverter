@@ -1,4 +1,4 @@
-0.9.6 (September 2024)
+0.9.6 (September 18, 2024)
 - fix OpenGraph URLs in html5
 - allow cover jobs for non-text texts (audio, data, etc.)
 
