@@ -273,7 +273,7 @@ class Maker():
 
             candidate = None
             if len(candidate_types) > 0:
-                if DBUtils.is_not_text(self.ebook):
+                if DBUtils.is_not_text(self.ebook) and job.maintype != 'cover':
                     info("Book is not a text book. Skipping %s ..." % type_)
                     continue
 

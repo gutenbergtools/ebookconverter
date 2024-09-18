@@ -1,5 +1,6 @@
 0.9.6 (September 2024)
 - fix OpenGraph URLs in html5
+- allow cover jobs for non-text texts (audio, data, etc.)
 
 0.9.5 (April 22, 2024)
 - Change Facebook graph API version to 19.0. No changes affect us.
