@@ -1,6 +1,9 @@
 #!/bin/bash
 # 
 
+cd /export/sunsite/users/gutenbackend/ebookconverter
+. ./.env
+
 
 TMP=$PRIVATE/tmp/txt
 mkdir -p $TMP

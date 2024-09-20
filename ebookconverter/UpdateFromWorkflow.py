@@ -19,7 +19,7 @@ from libgutenberg.DublinCore import handle_dc_languages
 from libgutenberg.DublinCoreMapping import DublinCoreObject
 from libgutenberg.GutenbergGlobals import Struct
 
-from ebookconverter.FileInfo import get_workflow_file, WORKFLOW_LOG_DIR
+from ebookconverter.FileInfo import get_workflow_file, WORKFLOW_LOG_DIR, archive_workflow_file
 
 WORKFLOW_BACKUP_DIR = os.path.join(WORKFLOW_LOG_DIR, 'backup')
 
@@ -74,8 +74,8 @@ def main():
     Logger.setup(Logger.LOGFORMAT, 'fileinfo.log')
     Logger.set_log_level(2)
 
-    for filename in sorted(os.listdir(WORKFLOW_BACKUP_DIR)):
-        workflow_file = os.path.join(WORKFLOW_BACKUP_DIR, filename)
+    for filename in sorted(os.listdir(WORKFLOW_LOG_DIR)):
+        workflow_file = os.path.join(WORKFLOW_LOG_DIR, filename)
         mode = os.stat(workflow_file)[stat.ST_MODE]
         if stat.S_ISDIR(mode):
             continue
@@ -96,6 +96,7 @@ def main():
         dc.load_from_database(ebook_num)
         if dc.book:
             update_from_workflow(dc, record)
+        archive_workflow_file(workflow_file)
 
 if __name__ == '__main__':
     main()

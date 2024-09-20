@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.9.4'
+VERSION = '0.9.6'
 
 setup (
     name = 'ebookconverter',
@@ -21,7 +21,7 @@ setup (
         'scripts/fileinfo',
         'scripts/make_csv',
         'scripts/reload_workflow',
-        'scripts/update_from_backup_workflow',
+        'scripts/update_from_workflow',
         'scripts/cron-rebuild-files.sh',
         'scripts/cron-dopush-social.sh',
         'scripts/cron-dopush.sh',
@@ -30,12 +30,12 @@ setup (
     ],
 
     install_requires = [
-        'ebookmaker>=0.12.40',
+        'ebookmaker>=0.12.45',
         'setproctitle==1.1.10',
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',
         'qrcode>=6.1',
-        'libgutenberg[postgres]>=0.10.22',
+        'libgutenberg[postgres]>=0.10.24',
     ],
     
     package_data = {

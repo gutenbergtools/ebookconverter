@@ -1,3 +1,13 @@
+0.9.6 (September 18, 2024)
+- fix OpenGraph URLs in html5
+- allow cover jobs for non-text texts (audio, data, etc.)
+
+0.9.5 (April 22, 2024)
+- Change Facebook graph API version to 19.0. No changes affect us.
+- update_from_backup_workflow changed to update_from_workflow to add pubinfo from json files made before version 0.7.0 was turned on (~ August 2021)
+- ReparseCredits looks at books without credits and checks to see if parsing the pg header helps.
+- update libgutenberg to 0.10.24, fixes author ordering
+
 0.9.4 (February 26, 2024)
 - fix bad error handling in FileInfo
 - don't save new credit unless it's new

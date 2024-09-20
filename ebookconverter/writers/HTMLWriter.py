@@ -17,7 +17,9 @@ from libgutenberg.Logger import debug, exception, info, error, warning
 import libgutenberg.GutenbergGlobals as gg
 
 from ebookmaker.writers import HTMLWriter as BaseHTMLWriter
-from ..EbookConverter import make_output_filename
+from ..EbookConverter import make_output_filename, FILENAMES
+
+BaseHTMLWriter.FILENAMES = FILENAMES
 
 def arcurl(job, outfile):
     if outfile.startswith(job.outputdir):

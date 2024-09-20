@@ -62,19 +62,19 @@ PREFERRED_INPUT_FORMATS = {
     'kf8.images': ALL_SRCS,
 
     # html is created from rst files or text files
-    'html.images': ALL_HTM + ('rst/*', ) + ALL_TXTS,
+    'html.images': ALL_HTM + ('rst/*',) + ALL_TXTS,
 
     # utf txt is created from text files
-    'txt.utf-8': ('rst/*', ) + NON_UTF_TXTS,
+    'txt.utf-8': ('rst/*',) + NON_UTF_TXTS,
 
     # pdf is created only from rst
-    'pdf.images': ('rst/*', ),
+    'pdf.images': ('rst/*',),
 
     # picsdir only if pdf or html are created
-    'picsdir.images': ('rst/*', ),
+    'picsdir.images': ('rst/*',),
 
     # coverpage (a cover will be generated, whatever)
-    'cover.medium': ('rst/*', 'html/*', 'txt/*', 'tex/*'),
+    'cover.medium': ('rst/*', 'html/*', 'readme/*', 'txt/*', 'tex/*',),
 
 }
 
@@ -273,7 +273,7 @@ class Maker():
 
             candidate = None
             if len(candidate_types) > 0:
-                if DBUtils.is_not_text(self.ebook):
+                if DBUtils.is_not_text(self.ebook) and job.maintype != 'cover':
                     info("Book is not a text book. Skipping %s ..." % type_)
                     continue
 
