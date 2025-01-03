@@ -68,7 +68,7 @@ class Writer(writers.BaseWriter):
     def build(self, job):
         """ Skeet. """
 
-        if job.dc.project_gutenberg_id < 74866:
+        if job.dc.project_gutenberg_id < 74860:
             # don't skeet about old books
             return
 
@@ -86,16 +86,28 @@ class Writer(writers.BaseWriter):
 
         try:
             session = self.get_session()
-            title = job.dc.make_pretty_title(300 - 84)  # 300 is max length
-            {"Authorization": "Bearer " + session["accessJwt"]}
+            title = job.dc.make_pretty_title(300 - 84).replace('"', '\\"')  # 300 is max length
+            pg_id = job.dc.project_gutenberg_id
             headers = {'Authorization': 'Bearer ' + session["accessJwt"]}
-            skeet = "New #ebook @new.gutenberg.org: %s https://www.gutenberg.org/ebooks/%d" % (
-                title, job.dc.project_gutenberg_id)
+            pg_url = f'https://www.gutenberg.org/ebooks/{pg_id}'
+            skeet = f"New #ebook at Project Gutenberg: {title} {pg_url}"
+            skeetlen = len(skeet.encode("UTF-8"))
+            facets =  [{
+                "index": {
+                    "byteStart": skeetlen - len(pg_url),
+                    "byteEnd": skeetlen
+                },
+                "features": [{
+                  "$type": "app.bsky.richtext.facet#link",
+                  "uri": pg_url
+                }]
+            }]
             lang_id = job.dc.languages[0].id if len(job.dc.languages) else 'en'
             post = {"$type": "app.bsky.feed.post",
                     "text": skeet,
                     "createdAt": datetime.now(timezone.utc).isoformat().replace("+00:00", "Z"),
-                    "langs": [lang_id]
+                    "langs": [lang_id],
+                    "facets": facets,
                     }
             data = {"repo": session["did"],
                     "collection": "app.bsky.feed.post",
