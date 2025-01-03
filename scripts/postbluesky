@@ -6,4 +6,4 @@ test = datetime.now()
 elapsed = test - start
 pgstart = 60586
 todo = pgstart + elapsed.days * 12 + elapsed.seconds // 7200
-subprocess.call(["ebookconverter", "-v", "-v", "--build=twitter", "--range=%s" % todo]) 
+subprocess.call(["ebookconverter", "-v", "-v", "--build=bluesky", "--range=%s" % todo]) 

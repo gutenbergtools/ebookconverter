@@ -115,7 +115,7 @@ FILENAMES = {
 GENERIC_FILENAME = 'pg{id}.generic'
 
 DEPENDENCIES = collections.OrderedDict((
-    ('everything',      ('all', 'kindle.noimages','facebook', 'twitter', 'mastodon', 'update')),
+    ('everything',      ('all', 'kindle.noimages','facebook', 'bluesky', 'mastodon', 'update')),
     ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
                          'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',    'html.noimages')),
@@ -146,7 +146,7 @@ cover.small cover.medium
 epub.images kindle.images pdf.images
 epub3.images kf8.images
 qrcode rdf
-facebook twitter mastodon
+facebook bluesky mastodon
 update
 null
 """.split()
