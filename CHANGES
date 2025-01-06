@@ -1,6 +1,7 @@
 0.9.7 (WIP)
 - add BlueskyWriter
 - expunge twitter
+- add '.utf8' to deprecated file cleanup. fixes #50
 
 0.9.6 (September 18, 2024)
 - fix OpenGraph URLs in html5
