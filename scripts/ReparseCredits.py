@@ -32,7 +32,6 @@ from ebookmaker.ParserFactory import load_parsers, ParserFactory
 from ebookconverter.Candidates import Candidates
 from ebookconverter.EbookConverter import PREFERRED_INPUT_FORMATS
 
-FILESDIR = 'file:///Users/Shared/Documents/pg/dev/html/files'
 Logger.setup(Logger.LOGFORMAT, 'fileinfo.log')
 
 options = Options()
