@@ -54,3 +54,5 @@ fi
 for i in ${LIST}; do
     ~/.local/bin/pipenv run ebookconverter -v --range=${i} --build=all --validate --notify
 done
+
+~/.local/bin/pipenv run autorebuild
