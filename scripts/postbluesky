@@ -1,9 +1,9 @@
 from datetime import datetime
 import subprocess
 
-start = datetime(2019,12,16,17)
+start = datetime(2025,1,7,12)
 test = datetime.now()
 elapsed = test - start
-pgstart = 60586
+pgstart = 75000
 todo = pgstart + elapsed.days * 12 + elapsed.seconds // 7200
 subprocess.call(["ebookconverter", "-v", "-v", "--build=bluesky", "--range=%s" % todo]) 

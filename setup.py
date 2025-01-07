@@ -21,6 +21,7 @@ setup (
         'scripts/ebookconverter',
         'scripts/fileinfo',
         'scripts/make_csv',
+        'scripts/postbluesky',
         'scripts/reload_workflow',
         'scripts/update_from_workflow',
         'scripts/cron-rebuild-files.sh',
