@@ -12,7 +12,7 @@ ebookconverter expects source files to be in numbered directories in a 'files' d
 
 Config parameters should be set in a file at /etc/ebookconverter.conf or ~/.ebookconverter
 
-ebookconverter has been tested on Python 3.6.7. It's not expected to run on python 2.7
+ebookconverter has been tested on Python 3.9.
 
 ## Installing
 

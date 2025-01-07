@@ -98,7 +98,7 @@ class Writer(writers.BaseWriter):
         coverfile = make_output_filename('cover.medium', pg_id)
         coverpath = os.path.join(job.outputdir, coverfile)
 
-        if pg_id < 74860:
+        if pg_id < 75000:
             # don't skeet about old books
             return
 

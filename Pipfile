@@ -5,11 +5,11 @@ name = "pypi"
 
 [packages]
 libgutenberg = ">=0.10.24"
-ebookmaker = "==0.12.45"
+ebookmaker = ">=0.12.48"
 sqlalchemy = "<2.0,>=1.4.0"
 ebookconverter = {file = ".", editable = true}
 
 [dev-packages]
 
 [requires]
-python_version = ">3.7"
+python_version = 3.9
