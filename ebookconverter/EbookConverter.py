@@ -115,7 +115,7 @@ FILENAMES = {
 GENERIC_FILENAME = 'pg{id}.generic'
 
 DEPENDENCIES = collections.OrderedDict((
-    ('everything',      ('all', 'kindle.noimages','facebook', 'twitter', 'mastodon', 'update')),
+    ('everything',      ('all', 'kindle.noimages','facebook', 'bluesky', 'mastodon', 'update')),
     ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
                          'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',    'html.noimages')),
@@ -146,7 +146,7 @@ cover.small cover.medium
 epub.images kindle.images pdf.images
 epub3.images kf8.images
 qrcode rdf
-facebook twitter mastodon
+facebook bluesky mastodon
 update
 null
 """.split()
@@ -326,7 +326,7 @@ def run_job_queue(job_queue):
             mod_timestamp = datetime.datetime.fromtimestamp(os.path.getmtime(filename))
             if datetime.date.today() - mod_timestamp.date() > datetime.timedelta(1):
                 critical('Failed to build new file: %s', filename)
-            for ext in ['.gz', '.gzip']:
+            for ext in ['.gz', '.gzip', '.utf8']:
                 if os.access(filename + ext, os.W_OK):
                     os.remove(filename + ext)
         elif '.generic' not in filename:

@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.9.6'
+VERSION = '0.9.7'
 
 setup (
     name = 'ebookconverter',
@@ -17,9 +17,11 @@ setup (
 
     scripts = [
         'scripts/autodelete',
+        'scripts/autorebuild',
         'scripts/ebookconverter',
         'scripts/fileinfo',
         'scripts/make_csv',
+        'scripts/postbluesky',
         'scripts/reload_workflow',
         'scripts/update_from_workflow',
         'scripts/cron-rebuild-files.sh',
@@ -61,7 +63,7 @@ setup (
         "Intended Audience :: Other Audience",
         "Development Status :: 4 - Beta",
         "Programming Language :: Python",
-        "Programming Language :: Python :: 3.7",
+        "Programming Language :: Python :: 3.9",
     ],
 
     platforms = 'OS-independent'

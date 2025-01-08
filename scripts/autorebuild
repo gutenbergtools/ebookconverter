@@ -1,0 +1,16 @@
+#!/public/vhost/g/gutenberg/local/bin/python3.6
+#  -*- mode: python; indent-tabs-mode: nil; -*- coding: UTF8 -*-
+
+"""
+
+autorebuild script
+
+Distributable under the GNU General Public License Version 3 or newer.
+
+This script runs AutoRebuild.
+
+"""
+
+from ebookconverter import AutoRebuild
+
+AutoRebuild.main()

@@ -17,7 +17,6 @@ Notes: 10/28/2019
   one, it looks for files in the in the FILES/[number] directory.
 - FileInfo scans the files (or members of the zip file) for a source file containing a plain-text
   "PG header" and puts the metadata from the header into STDOUT.
-- TODO: remove hash columns from the Postgres database.
 - When finished, the .trig files are moved to a 'backup' subdirectory.
 
 

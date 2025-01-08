@@ -1,3 +1,12 @@
+0.9.8 (WIP)
+- added scripts to setup.py
+
+0.9.7 (January 6, 2025)
+- adds BlueskyWriter
+- expunges twitter
+- adds '.utf8' to deprecated file cleanup. fixes #50
+- added AutoRebuild. Checks the database changelog to see if a title has been changed or an author has bees switched in the previous hour. If so, the book is rebuilt. Designed to be run by the cron-dopush script. Fixes #49
+
 0.9.6 (September 18, 2024)
 - fix OpenGraph URLs in html5
 - allow cover jobs for non-text texts (audio, data, etc.)
@@ -48,7 +57,7 @@
 - notifications, both success and problem alerts, are now sent only to the whitewasher.
 - notification texts have been cleaned up to be more readable and more friendly
 - refactored  PUBLIC, FILES, FTP into libgutenberg>=0.10.15
-- CACHDIR and FILESDIR now need to be set in ~/.ebookmaker as well as ~/.ebookconverter, Probably these belong in an environment variable.
+- CACHEDIR and FILESDIR now need to be set in ~/.ebookmaker as well as ~/.ebookconverter, Probably these belong in an environment variable.
 
 
 0.8.3 (December 26, 2022)
