@@ -1,5 +1,6 @@
 0.9.8 (WIP)
 - added scripts to setup.py
+- autorebuild also triggers on author adds and author deletions
 
 0.9.7 (January 6, 2025)
 - adds BlueskyWriter
