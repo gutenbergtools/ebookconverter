@@ -6,7 +6,6 @@ certifi==2019.9.11
 cffi==1.13.1
 chardet==3.0.4
 cheroot==8.2.1
-CherryPy==18.3.0
 cssutils==1.0.2
 docutils==0.15.2
 ebookmaker==0.7.7
