@@ -94,12 +94,13 @@ def main():
     for row in c.fetchall():
         row = GutenbergDatabase.xl(c, row)
         to_rebuild.add(check_sql(row.sql))
-    range = ''
-    for ebook in to_rebuild:
-        range = f'{range}{ebook},' if ebook else range
-    if range:
-        info(f'rebuilding {range}')
-        subprocess.call(["ebookconverter", "-v", "--build=all", "--range=%s" % to_rebuild])        
+    buildlist = ''
+    for ebook in to_rebuild):
+        buildlist = f'{buildlist}{ebook},' if ebook else buildlist
+    buildlist = buildlist.strip(',')
+    if buildlist:
+        info(f'rebuilding {buildlist}')
+        subprocess.call(["ebookconverter", "-v", "--build=all", "--range=%s" % buildlist])        
     Logger.ebook = 0
     debug("Done AutoRebuild.py")
 
