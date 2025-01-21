@@ -1,3 +1,6 @@
+0.9.9 (January 21, 2025)
+- fixed autorebuild range construction
+
 0.9.8 (January 20, 2025)
 - added scripts to setup.py
 - autorebuild also triggers on author adds and author deletions
