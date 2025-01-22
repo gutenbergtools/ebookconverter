@@ -5,7 +5,7 @@ name = "pypi"
 
 [packages]
 libgutenberg = ">=0.10.24"
-ebookmaker = ">=0.13.3"
+ebookmaker = ">=0.13.4"
 sqlalchemy = "<2.0,>=1.4.0"
 ebookconverter = {file = ".", editable = true}
 
