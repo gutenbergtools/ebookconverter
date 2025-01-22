@@ -1,7 +1,7 @@
 {
     "_meta": {
         "hash": {
-            "sha256": "20fae1b87290d1c3bebcec3628b801f7128ddecf4727a05aa6a673160bfb5ee2"
+            "sha256": "bdafc95209ef235458141de3313a952b58f50cc513c32a4314c03da90b87bdb9"
         },
         "pipfile-spec": 6,
         "requires": {
@@ -282,10 +282,10 @@
         },
         "ebookmaker": {
             "hashes": [
-                "sha256:b14412ae66c32882da1a07f639b2982d4fbe4958316871f551af5c37234a6f37"
+                "sha256:909a21b1f53ab025feb18a33f206b631b0fcff109762435d315eb7f105a44390"
             ],
             "index": "pypi",
-            "version": "==0.13.3"
+            "version": "==0.13.4"
         },
         "greenlet": {
             "hashes": [
