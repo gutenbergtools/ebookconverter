@@ -1,5 +1,11 @@
-0.9.8 (WIP)
+0.9.9 (January 21, 2025)
+- fixed autorebuild range construction
+
+0.9.8 (January 20, 2025)
 - added scripts to setup.py
+- autorebuild also triggers on author adds and author deletions
+- ebookmaker 0.13.1
+- removed html.noimages and pdf.noimages from the 'all' build
 
 0.9.7 (January 6, 2025)
 - adds BlueskyWriter
