@@ -1,4 +1,7 @@
-0.9.9 (January 22, 2025)
+0.9.11 (February 11, 2025)
+- utf8 txt files were disfavored sources for generated txt files. Now they are favored. (fix #57)
+
+0.9.10 (January 22, 2025)
 - fixed typo in autorebuild 
 
 0.9.9 (January 21, 2025)

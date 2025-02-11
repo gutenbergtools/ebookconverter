@@ -65,7 +65,7 @@ PREFERRED_INPUT_FORMATS = {
     'html.images': ALL_HTM + ('rst/*',) + ALL_TXTS,
 
     # utf txt is created from text files
-    'txt.utf-8': ('rst/*',) + NON_UTF_TXTS,
+    'txt.utf-8': ALL_TXTS + ('rst/*',),
 
     # pdf is created only from rst
     'pdf.images': ('rst/*',),
