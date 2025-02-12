@@ -95,7 +95,7 @@ def main():
         row = GutenbergDatabase.xl(c, row)
         to_rebuild.add(check_sql(row.sql))
     buildlist = ''
-    for ebook in to_rebuild):
+    for ebook in to_rebuild:
         buildlist = f'{buildlist}{ebook},' if ebook else buildlist
     buildlist = buildlist.strip(',')
     if buildlist:
