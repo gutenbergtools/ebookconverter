@@ -11,9 +11,9 @@ _____________________
 
 The MARC record extract is generated weekly from the Project Gutenberg Postgres database. This process uses a python script which recreates each MARC record from the entire collection of titles, excluding non-textual titles such as maps, audio files, data sets and so on.
 
-Summary on Cataloging Decisions Made.
+## Summary on Cataloging Decisions Made.
 
-## Description 2xx-5xx
+### Description 2xx-5xx
 (plus note on 008)
 
 Of the 73,000 records, 63,000 do not have data for a 260 or 264 MARC tag (nor is there a publication year). The option we decided upon is to use the 264 with the `1` indicator
@@ -53,12 +53,12 @@ There is no physical description of the item in the database.  We are using the 
 ```
 Any series statements are tagged with 490 and added an 830.
 
-## Access Points 1xx, 6xx, 7xx
+### Access Points 1xx, 6xx, 7xx
 The authors in the database are not delineated by personal, corporate or meeting names.  Neither is there any indication that whether the personal name is a forename or a surname.  Since the vast majority are personal surnames, We assigned MARC tags 100 and 700 to all authors regardless of author type.  Also, the 1st indicator is set at 1 for surname for all records.   Needless to say, this is far from ideal.  The database does have separate fields for birth and death dates and we were able to assign them to `$d`.  The Fuller Form of Name is in the name field but the script will assign a `$q` before the opening parenthesis.  
 
 Subject headings are assigned to the records, in either LCSH, personal and corporate names—but there is no distrintion in the database as to which headings are LCSH or not. In addition, they are not broken down by subfield—they are a continuous string of text (e.g., `\$aAmerican literature -- 19th century – Periodicals`). So, we decided to use 653 instead of 650/600/610.
 
-## Fixed Fields
+### Fixed Fields
 006 is `m` - Computer file/Electronic resource
 
 007 is `cr n` (c - Electronic resource, r - Remote, n - Not applicable)
