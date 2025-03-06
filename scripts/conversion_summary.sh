@@ -1,7 +1,7 @@
 #!/bin/bash
 #
 
-grep 'Missing file' ebookconverter.log > missingfiles.txt
+grep 'CRITICAL' ebookconverter.log > critical.log
+grep 'ERROR' ebookconverter.log > error.log
 grep 'Failed' ebookconverter.log > conversionfails.txt
-grep -C1 "kindlegen: E" ebookconverter.log > kindlegen.txt
-grep 'Omitted file' ebookconverter.log | sort --unique > too_deep.txt
+grep "This is an ERROR for white-washed files" -C2 ebookconverter.log > headfoot.log
