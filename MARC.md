@@ -4,7 +4,9 @@ Project Gutenberg has reconstituted their MARC record service.  Records are avai
 
 MARC records are the _lingua franca_ of library catalogs. Libraries can import these records, modify them, filter them, redistribute them and display them to patrons looking for free, digital versions of classic books, almost all of them in the public domain, all of them free to read and use.
 
-Project Gutenberg welcomes corrections and errata (https://gutenberg.org/help/errata.html) For questions specific to MARC records, please email Ray Schwartz (schwartz@panix.com), who worked with Eric Hellman of the Free Ebook Foundation (eric@ebookfoundation.org) to make this a reality. And of course none of this would be possible without the close collaboration of Project Gutenberg and its volunteers, who, over the course of many years, have built the up the database that powers the Project Gutenberg website and these MARC records.
+Project Gutenberg welcomes corrections and errata for its data. (https://gutenberg.org/help/errata.html). For questions specific to MARC records, please email Ray Schwartz (schwartz@panix.com), who worked with Eric Hellman of the Free Ebook Foundation (eric@ebookfoundation.org) to make this a reality. If you would like to make corrections or suggestions for the generating code, the repo is https://github.com/schwartzray/Project-Gutenberg-MARC/ 
+
+Of course none of this would be possible without the close collaboration of Project Gutenberg and its volunteers, who, over the course of many years, have built the up the database that powers the Project Gutenberg website and these MARC records. We are grateful for advice and suggestions from the larger community of library cataloguers.
 
 _____________________
 
