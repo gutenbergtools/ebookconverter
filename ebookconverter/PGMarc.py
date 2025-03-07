@@ -523,9 +523,9 @@ def main():
             minbooknum = int(sys.argv[1])
             maxbooknum = int(sys.argv[2])
     except ValueError:
-        print('syntax: python pgmarc.py # all records')
-        print('    or: python pgmarc.py [booknum]y # single record')
-        print('    or: python pgmarc.py [minbooknum] [maxbooknum] # record range')
+        print('syntax: pgmarc # all records')
+        print('    or: pgmarc [booknum]y # single record')
+        print('    or: pgmarc [minbooknum] [maxbooknum] # record range')
         exit()
 
     MARCFILE = os.path.join(FEEDS, f"{booknum or 'pgmarc'}.mrc")
