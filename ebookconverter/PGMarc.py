@@ -564,6 +564,7 @@ def main():
         except Exception as e:
             # keep going, but report the error
             error(f"problem making a record for {booknum.pk}:{e}")
+            session.rollback()
     with open(MARCFILE, "wb") as marc_file:
         marc_writer = MARCWriter(marc_file)
         for record in records:
