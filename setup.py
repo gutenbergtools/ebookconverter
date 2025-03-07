@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.9.11'
+VERSION = '0.10.0'
 
 setup (
     name = 'ebookconverter',
@@ -21,6 +21,7 @@ setup (
         'scripts/ebookconverter',
         'scripts/fileinfo',
         'scripts/make_csv',
+        'scripts/pgmarc',
         'scripts/postbluesky',
         'scripts/reload_workflow',
         'scripts/update_from_workflow',
@@ -38,6 +39,7 @@ setup (
         'rdflib>=4.2.2',
         'qrcode>=6.1',
         'libgutenberg[postgres]>=0.10.24',
+        'pymarc>=5.2.3',
     ],
     
     package_data = {
