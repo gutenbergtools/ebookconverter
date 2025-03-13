@@ -1,3 +1,10 @@
+0.10.0 (March 6, 2025)
+- This version adds a script to make MARC record files.
+    - PGMarc.py from https://github.com/schwartzray/Project-Gutenberg-MARC/
+    - runner scripts and tests
+    - MARC.md has library-specific details and background information https://github.com/gutenbergtools/ebookconverter/blob/v10/MARC.md
+- sync changes to conversion_summary.sh script
+
 0.9.11 (February 11, 2025)
 - utf8 txt files were disfavored sources for generated txt files. Now they are favored. (fix #57)
 - synced jekyll and rebuild files cron scripts
