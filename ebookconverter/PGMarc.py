@@ -292,7 +292,7 @@ def book_record(dc):
                 tag='856',
                 indicators=['4', ' '],
                 subfields=[
-                    Subfield(code='a', value=str(att.text)),
+                    Subfield(code='u', value=str(att.text)),
                     ]
                 )
             record.add_ordered_field(field856)
@@ -364,14 +364,14 @@ def book_record(dc):
             )
         record.add_ordered_field(field041)
 
-    field50 = pymarc.Field(
-        tag='50',
+    field050 = pymarc.Field(
+        tag='050',
         indicators=[' ', "4"],
         subfields=[
             Subfield(code='a', value=str(loccs.id)) for loccs in dc.loccs
             ]
         )
-    record.add_ordered_field(field50)
+    record.add_ordered_field(field050)
 
     field300 = pymarc.Field(
         tag='300',
@@ -441,7 +441,7 @@ def book_record(dc):
         indicators=['4', '0'],
         subfields=[
             Subfield(
-                code='a',
+                code='u',
                 value=f"https://www.gutenberg.org/ebooks/{str(dc.project_gutenberg_id)}"
                 )
             ]
