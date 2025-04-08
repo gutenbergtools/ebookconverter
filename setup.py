@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.10.1'
+VERSION = '0.10.2'
 
 setup (
     name = 'ebookconverter',
@@ -23,6 +23,7 @@ setup (
         'scripts/make_csv',
         'scripts/pgmarc',
         'scripts/postbluesky',
+        'scripts/push_website_assets.sh',
         'scripts/reload_workflow',
         'scripts/update_from_workflow',
         'scripts/cron-rebuild-files.sh',

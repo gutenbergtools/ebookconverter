@@ -1,3 +1,8 @@
+0.10.2 (April 8, 2025)
+- in PGMarc.py, don't make an 050 field if no content
+- add file zipping to pgmarc script
+- add push_website_assets.sh script
+
 0.10.1 (March 12, 2025)
 - fix typos in PGMarc.py (wrong subfields) and MARC.md
 
