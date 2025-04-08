@@ -12,7 +12,7 @@ MARCXMLFILE = os.path.join(FEEDS, 'pgmarc.xml')
 class TestMarc(unittest.TestCase):
 
     def test_10(self):
-        cmd = 'pgmarc 31105 31115'
+        cmd = 'pipenv run python -m ebookconverter.PGMarc 31105 31115'
 
         output = subprocess.check_output(cmd, shell=True)
 
