@@ -1,3 +1,16 @@
+0.10.3 (July 17, 2025)
+- added error handling to Fileinfo. Fileinfo did badly when pointed at a nonexistent directory. added a check to scan_directory and added testing
+- changed jekyll invocation in cron_jekyll.sh to improve reliability
+- added dev_jekyll.sh and prod_jekyll.sh to do dev and pod pulls from git
+- removed push_website_assets. this is now done in the jekyll scripts
+- Create process_img_log.py script to produce a csv file for use in alt text editing that:
+    - processes an log file from ebookconverter to list every img and src in PG generated html files.
+    - opens every image file referenced, computes a hash, records the dimensions of the file.
+- add forget_book.py and documentation. the process for removing a book from the database has been undocumented and is more complicated than it would seem, resulting in incomplete removals. The forget_book python script does it correctly.
+- moved utility python scripts into ebookconverter/utils
+- corrected test_pgmarc.py
+
+
 0.10.2 (April 8, 2025)
 - in PGMarc.py, don't make an 050 field if no content
 - add file zipping to pgmarc script
