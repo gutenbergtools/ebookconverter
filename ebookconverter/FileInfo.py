@@ -39,6 +39,7 @@ from libgutenberg.GutenbergGlobals import xpath
 from libgutenberg.Models import Book
 from libgutenberg.Logger import critical, debug, error, exception, info, warning
 from libgutenberg import Logger
+from libgutenberg.Logger import error
 
 from ebookmaker.CommonCode import find_candidates
 
@@ -273,6 +274,8 @@ def scan_directory(ebook_num):
     # is ebook_num in db?
 
     dirname = os.path.join(FILES, str(ebook_num))
+    if not os.path.isdir(dirname):
+        return 1
     debug("Scanning directory %s ...", dirname)
 
     found_files = find_candidates(dirname, file_filter=is_readable)
@@ -311,8 +314,8 @@ def scan_dopush_log():
         if m:
             ebook_num = int(m.group(1))
             Logger.ebook = ebook_num
-            scan_directory(ebook_num)
-
+            if scan_directory(scan_directory(ebook_num)):
+                error('No directory for {ebook_num}')
         shutil.move(os.path.join(DOPUSH_LOG_DIR, filename),
                      os.path.join(DOPUSH_LOG_DIR, 'backup', filename))
         retcode = 0
@@ -331,7 +334,9 @@ def main():
         for arg in sys.argv[1:]:
             try:
                 Logger.ebook = int(arg)
-                scan_directory(int(arg))
+                if scan_directory(int(arg)):
+                    error('No directory for {arg}')
+                
             except ValueError: # no int
                 scan_file(arg, None)
 
