@@ -1,3 +1,6 @@
+0.10.4 (July 17, 2025)
+- fixed packaging errors
+
 0.10.3 (July 17, 2025)
 - added error handling to Fileinfo. Fileinfo did badly when pointed at a nonexistent directory. added a check to scan_directory and added testing
 - changed jekyll invocation in cron_jekyll.sh to improve reliability
