@@ -1,0 +1,22 @@
+To rm, it’s just something like, ‘rm -r 6/4/1/5/64156’
+I need to do this on three systems, as username gbnewby: aleph.pglaf.org, readingroo.ms, and of course gutenberg.login.ibiblio.org.
+I do this from my username on pglaf.org. Note that readingroo.ms is behind Cloudflare, so you need to use the IP address to login via ssh. On pglaf.org, there’s an entry in /etc/hosts, so you can “ssh gbnewby@readingroo.ms” but if you do that from, say, your home network connection you’ll be blocked by Cloudflare.
+On pglaf.org of course I have shortcuts:
+aleph rm -r 6/4/1/5/64156; readingroo rm -r 6/4/1/5/64156; ibiblio rm -r 6/4/1/5/64156
+^^^ That’s the command sequence I actually use. Easy-peasy.
+
+
+As you might recall, it’s intentional that only username gbnewby owns and can rm those files. It’s one of several forms of protection against a web-based vulnerability being able to delete stuff from the collection.
+
+Thanks to the PG/DP transition efforts, other people now know how to login to pglaf.org and do something like “sudo su - gbnewby” to legimately impersonate me to run commands like that.
+I sometimes think about making a self-service thing for the WWers to rm files, but am paranoid about it being exploited. Also, removing files isn’t done that often, and I like having the opportunity to review rm requests.
+
+Also btw there is a non-delete mirror on inferno.pglaf.org. So if something is removed by mistake or by malice, we should still have a copy.
+
+from  ~/ebookconverter  
+$ pipenv shell
+$ python -m ebookconverter.utils.forget_book 64156
+book 64156 has been successfully forgotten
+
+
+

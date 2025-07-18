@@ -18,7 +18,7 @@ class TestFileInfo(unittest.TestCase):
         self.test_file3 = os.path.join(os.path.dirname(__file__),'4554-0.txt')
         self.test_fakebook = os.path.join(os.path.dirname(__file__),'99999-h.htm')
         self.test_fakebook_json = os.path.join(os.path.dirname(__file__),'99999.json')
-
+    
     def test_scan_file(self):
         result = FileInfo.scan_file(self.test_file, 4554)
         self.assertTrue(result)
@@ -65,6 +65,8 @@ class TestFileInfo(unittest.TestCase):
         self.assertTrue(session.query(File.id).filter_by(fk_books=99999).count() > 0)
         self.assertTrue(session.query(File.id).filter_by(fk_books=4554).count() > nfiles_test)
 
+        # test when directory doesn't exist
+        self.assertTrue(FileInfo.scan_directory(999999))
 
         # clean up
         os.remove(os.path.join(FileInfo.WORKFLOW_LOG_DIR, 'backup', '99999.json'))

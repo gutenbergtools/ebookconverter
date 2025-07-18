@@ -1,16 +1,18 @@
-#!/public/vhost/g/gutenberg/local/bin/python3.6
-#  -*- mode: python; indent-tabs-mode: nil; -*- coding: UTF8 -*-
+#!/bin/bash
+# 
 
-"""
+#
+# pgmarc
+#
+# Distributable under the GNU General Public License Version 3 or newer.
+#
+# This script runs PGmarc., zips the resulting files
+#
 
-pgmarc script
+cd ~/ebookconverter
+. ./.env
 
-Distributable under the GNU General Public License Version 3 or newer.
+~/.local/bin/pipenv run python -m ebookconverter.PGMarc 0 80000
 
-This script runs fileinfo.
-
-"""
-
-from ebookconverter import PGMarc
-
-PGMarc.main()
+zip -j $FEEDS/pgmarc.xml.zip $FEEDS/pgmarc.xml
+zip -j $FEEDS/pgmarc.mrc.zip $FEEDS/pgmarc.mrc

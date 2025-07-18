@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.10.1'
+VERSION = '0.10.4'
 
 setup (
     name = 'ebookconverter',
@@ -12,28 +12,36 @@ setup (
 
     packages = [
         'ebookconverter',
-        'ebookconverter.writers'
+        'ebookconverter.writers',
+        'ebookconverter.utils'
     ],
 
     scripts = [
         'scripts/autodelete',
         'scripts/autorebuild',
+        'scripts/cron-csv-catalog',
+        'scripts/cron-dopush-social.sh',
+        'scripts/cron-dopush.sh',
+        'scripts/cron-jekyll.sh',
+        'scripts/cron-rebuild-files.sh',
+        'scripts/cron-reindex.sh',
+        'scripts/dev-jekyll.sh',
         'scripts/ebookconverter',
+        'scripts/cron-latesttitles.sh',
+        'scripts/cron-rdf-catalog',
+        'scripts/cron-rebuild-files.sh',
+        'scripts/cron-reindex.sh',
         'scripts/fileinfo',
         'scripts/make_csv',
         'scripts/pgmarc',
         'scripts/postbluesky',
+        'scripts/prod-jekyll.sh',
         'scripts/reload_workflow',
-        'scripts/update_from_workflow',
-        'scripts/cron-rebuild-files.sh',
-        'scripts/cron-dopush-social.sh',
-        'scripts/cron-dopush.sh',
-        'scripts/cron-jekyll.sh',
         'scripts/txt-tarball'
     ],
 
     install_requires = [
-        'ebookmaker>=0.13.3',
+        'ebookmaker>=0.13.7',
         'setproctitle==1.1.10',
         'requests_oauthlib>=1.2.0',
         'rdflib>=4.2.2',
