@@ -166,6 +166,12 @@ def scan_header(data, filename, ebook):
                         body = xpath(html, "//xhtml:body")[0]
                         for p in xpath(body, "//xhtml:p"): # fix PGTEI
                             p.tail = "\n"
+                except ValueError as what:
+                    warning("""
+                        Not parsing header.
+                        Unicode strings with encoding declaration are not supported.
+                        """)
+                    return None
                 except (lxml.etree.ParseError, IndexError) as what:
                     debug("# lxml XMLParser: %s" % what)
 

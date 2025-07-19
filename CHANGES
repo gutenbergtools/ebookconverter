@@ -1,3 +1,7 @@
+0.10.4 (WIP)
+- changed cron-reindex to work on the next day's rebuild.
+- caught an lxml exception raised by FileInfo when an xml file declares an encoding in <?xml?>; Ebookmaker handles these with Beautiful Soup.
+
 0.10.4 (July 17, 2025)
 - fixed packaging errors
 
