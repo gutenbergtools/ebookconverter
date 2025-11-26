@@ -18,11 +18,14 @@ Use git to pull files from an upstream repo into the corresponding folder in the
 
 """
 import os
+import re
+import shutil
 import stat
 import sys
 
 from libgutenberg import Logger
 from libgutenberg.GutenbergFiles import FILES
+from libgutenberg.Logger import error
 
 from utils.gitpull import update_folder
 
@@ -51,20 +54,16 @@ def scan_dopull_log():
         if m:
             ebook_num = int(m.group(1))
             Logger.ebook = ebook_num
-            origin = r'{UPSTREAM_REPO_DIR}{ebook_num}.git/'
+            print(ebook_num)
+            origin = f'{UPSTREAM_REPO_DIR}{ebook_num}.git/'
             target_path = os.path.join(FILES, str(ebook_num))
-            if not os.path.isdir(target_path):
-                return retcode
-            
+            print(origin,target_path)
             if update_folder(origin, target_path):
+                shutil.move(os.path.join(DOPULL_LOG_DIR, filename),
+                             os.path.join(DOPUSH_LOG_DIR, filename))
+                retcode = 0            
+            else:
                 error(f'failed to update {ebook_num}')
-        
-        
-        
-        shutil.move(os.path.join(DOPULL_LOG_DIR, filename),
-                     os.path.join(DOPUSH_LOG_DIR, filename))
-        retcode = 0
-
     return retcode
 
 def main():
