@@ -28,7 +28,7 @@ class Writer (writers.BaseWriter):
 
     def build(self, job):
         id = job.dc.project_gutenberg_id
-        book_content_url = job.url + "pg" + id + ".txt"
+        book_content_url = "http://gutenberg.org/cache/epub/%d/pg%d.txt" % (id, id)
         book_content = self.get_book_content(book_content_url)
         if(book_content == None):
             return
@@ -39,7 +39,9 @@ class Writer (writers.BaseWriter):
             db.connect ()
             c = db.get_cursor ()
 
+            c.execute('start transaction')
             c.execute(self.insert_summary_sql(id, summary))
+            c.execute('commit')
             info ("SummaryWriter: created summary: %d" % id)
 
         except GutenbergDatabase.DatabaseError as dberr:
@@ -111,7 +113,7 @@ class Writer (writers.BaseWriter):
         book_content = {"role": "user", "content": f"START OF BOOK BEGINNING: \n{text}\nEND OF BOOK BEGINNING"}
 
         messages = [system_prompt, user_instruction, assistant_reply, book_content]
-        response = openai_client.chat.completions.create(model="gpt-5", messages=messages)
+        response = self.openai_client.chat.completions.create(model="gpt-5", messages=messages)
         return response.choices[0].message.content
 
 
@@ -143,7 +145,7 @@ class Writer (writers.BaseWriter):
         book_content = {"role": "user", "content": f"START OF BOOK: \n{text}\nEND OF BOOK"}
 
         messages = [system_prompt, user_instruction, assistant_reply, book_content]
-        response = openai_client.chat.completions.create(model="gpt-5", messages=messages)
+        response = self.openai_client.chat.completions.create(model="gpt-5", messages=messages)
         return response.choices[0].message.content
     
     def get_book_content(self, url):
@@ -181,13 +183,13 @@ class Writer (writers.BaseWriter):
         chunk_size = 24000
         print("Summarising:", title)
 
-        if count_tokens(book_content) > chunk_size:
-            beginning_of_book = get_first_chunk(book_content, chunk_size)
-            summary = summarise_beginning_of_book(title, beginning_of_book)
+        if self.count_tokens(book_content) > chunk_size:
+            beginning_of_book = self.get_first_chunk(book_content, chunk_size)
+            summary = self.summarise_beginning_of_book(title, beginning_of_book)
         else:
-            summary = summarise_entire_book(title, book_content)
+            summary = self.summarise_entire_book(title, book_content)
 
-        return format_summary(summary)
+        return self.format_summary(summary)
 
 
     def insert_summary_sql(self, book_id, summary):

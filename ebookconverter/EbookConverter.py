@@ -673,8 +673,7 @@ def main():
                 )
                 run_job_queue(job_queue)
 
-        info("Here!")
-        # Notifier.send_notifications(done_books if options.notify else [])
+        Notifier.send_notifications(done_books if options.notify else [])
 
     except KeyboardInterrupt as what:
         # also triggered by: kill -INT(or: kill -2)
