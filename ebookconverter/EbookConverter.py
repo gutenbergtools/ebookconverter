@@ -115,7 +115,7 @@ FILENAMES = {
 GENERIC_FILENAME = 'pg{id}.generic'
 
 DEPENDENCIES = collections.OrderedDict((
-    ('everything',      ('all', 'kindle.noimages','facebook', 'bluesky', 'mastodon', 'update')),
+    ('everything',      ('all', 'kindle.noimages','facebook', 'bluesky', 'mastodon', 'update', 'summary')),
     ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
                          'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',)),
@@ -146,7 +146,7 @@ epub.images kindle.images pdf.images
 epub3.images kf8.images
 qrcode rdf
 facebook bluesky mastodon
-update
+update summary
 null
 """.split()
 
@@ -673,7 +673,8 @@ def main():
                 )
                 run_job_queue(job_queue)
 
-        Notifier.send_notifications(done_books if options.notify else [])
+        info("Here!")
+        # Notifier.send_notifications(done_books if options.notify else [])
 
     except KeyboardInterrupt as what:
         # also triggered by: kill -INT(or: kill -2)
