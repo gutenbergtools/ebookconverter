@@ -12,40 +12,58 @@
 import os
 import requests
 
-from libgutenberg import GutenbergDatabase
+from sqlalchemy import and_
+
+from libgutenberg.GutenbergDatabase import DatabaseError
 from libgutenberg.Logger import exception, error, info
-from ebookmaker import writers
+from libgutenberg.Models import Attribute
+from ebookmaker.writers import TxtWriter
+from ebookmaker import ParserFactory
 
 from openai import OpenAI
 import tiktoken
 
-class Writer (writers.BaseWriter):
+class Writer (TxtWriter.Writer):
     """ Summary Writer Class. """
 
     def __init__(self):
         super (Writer, self).__init__ ()
         self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+        self.non_text_ids = [76962,50,65,127,576,4656,10802,11220] # ideally there should be a way to automatically recognize
+                                                                   # when a newly added PG item is text-based or not
+        self.ai_bad = ['It appears%%', 'It seems%%', '%%no content provided%%', '%%no content has been provided%%']
 
     def build(self, job):
+        '''Write summary to database.'''
         id = job.dc.project_gutenberg_id
-        book_content_url = "http://gutenberg.org/cache/epub/%d/pg%d.txt" % (id, id)
-        book_content = self.get_book_content(book_content_url)
-        if(book_content == None):
+        if id in self.non_text_ids:
+            info ("SummaryWriter: Non-Text Job, Skipping Writing for %d" % id)
             return
+        
+        try:
+            parser = TxtWriter.ParserFactory.ParserFactory.parsers[job.url] # this should get the cached parser from our inherited TxtWriter
+            book_content = parser.unicode_content()
+        except KeyError as kerr:
+            error ("SummaryWriter: Couldn't Access Text: %s" % kerr)
+            return
+        except UnicodeError as uerr:
+            error ("SummaryWriter: Bad Text Content: %s" % uerr)
+            return
+        
         summary = self.summarise_book(book_content, job.dc.make_pretty_title())
+        for sign in self.ai_bad:
+            if sign in summary:
+                error ("SummaryWriter: AI Error, Skipping Writing for %d. Summary: %s" % (id, summary))
+                return
 
         try: 
-            db = GutenbergDatabase.Database ()
-            db.connect ()
-            c = db.get_cursor ()
-
-            c.execute('start transaction')
-            c.execute(self.insert_summary_sql(id, summary))
-            c.execute('commit')
+            session = job.dc.get_my_session()
+            attribute = session.query(Attribute).where(and_(Attribute.fk_attriblist == 520, Attribute.fk_books == id)).first()
+            attribute.text = summary
+            session.commit()
             info ("SummaryWriter: created summary: %d" % id)
 
-        except GutenbergDatabase.DatabaseError as dberr:
-            c.execute ('rollback')
+        except DatabaseError as dberr:
             exception ('SummaryWriter: could not add summary to database: %s' % (dberr))
 
 
@@ -192,7 +210,7 @@ class Writer (writers.BaseWriter):
         return self.format_summary(summary)
 
 
-    def insert_summary_sql(self, book_id, summary):
+    def insert_summary_sql(self, book_id, summary): # unused for now since switch to ORM
         """Append SQL INSERT statement for book summary to output file."""
         note = " (This is an automatically generated summary.)"
         sql = f"insert into attributes (fk_books,fk_attriblist,text,nonfiling) values ({book_id},520,'{summary}{note}',0);"
