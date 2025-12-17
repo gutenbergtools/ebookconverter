@@ -76,6 +76,9 @@ PREFERRED_INPUT_FORMATS = {
     # coverpage (a cover will be generated, whatever)
     'cover.medium': ('rst/*', 'html/*', 'readme/*', 'txt/*', 'tex/*',),
 
+    # summary needs text file as input to generate
+    'summary': ALL_TXTS,
+
 }
 
 PREFERRED_INPUT_FORMATS['html.noimages']      = PREFERRED_INPUT_FORMATS['html.images']
