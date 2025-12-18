@@ -1,41 +1,39 @@
 # for use if not using pipenv
-backports.functools-lru-cache==1.5
-bleach==3.1.0
+beautifulsoup4==4.14.2; python_full_version >= '3.7.0'
 cairocffi==0.8.0
-certifi==2019.9.11
-cffi==1.13.1
-chardet==3.0.4
-cheroot==8.2.1
-cssutils==1.0.2
-docutils==0.15.2
-ebookmaker==0.7.7
-idna==2.8
-isodate==0.6.0
-jaraco.functools==2.0
-libgutenberg==0.5.0
-lxml==4.4.1
-more-itertools==7.2.0
-oauthlib==3.1.0
-Pillow==6.2.1
-pkginfo==1.5.0.1
-portend==2.5
-psycopg2==2.8.4
-pycparser==2.19
-Pygments==2.3.1
-pyparsing==2.4.2
-pytz==2019.3
-qrcode==6.1
-rdflib==4.2.2
-readme-renderer==24.0
-requests==2.22.0
-requests-oauthlib==1.2.0
-requests-toolbelt==0.9.1
-roman==3.2
+cchardet==2.2.0a2; python_version >= '3.9'
+certifi==2025.10.5; python_version >= '3.7'
+cffi==2.0.0; python_version >= '3.9'
+charset-normalizer==3.4.4; python_version >= '3.7'
+cssutils==2.11.1; python_version >= '3.8'
+docutils==0.21.2; python_version >= '3.9'
+ebookconverter==0.10.4
+ebookmaker==0.13.8
+greenlet==3.2.4; python_version >= '3' and platform_machine == 'aarch64' or (platform_machine == 'ppc64le' or (platform_machine == 'x86_64' or (platform_machine == 'amd64' or (platform_machine == 'AMD64' or (platform_machine == 'win32' or platform_machine == 'WIN32')))))
+html5lib==1.1; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4'
+idna==3.11; python_version >= '3.8'
+isodate==0.7.2; python_version < '3.11'
+libgutenberg[covers,postgres]==0.10.31
+lxml==6.0.2; python_version >= '3.8'
+more-itertools==10.8.0; python_version >= '3.9'
+oauthlib==3.3.1; python_version >= '3.8'
+pillow==11.3.0; python_version >= '3.9'
+pipfile==0.0.2
+psycopg2==2.9.11; python_version >= '3.8'
+pycountry==24.6.1; python_version >= '3.8'
+pycparser==2.23; implementation_name != 'PyPy'
+pymarc==5.3.1; python_version >= '3.9'
+pyparsing==3.2.5; python_version >= '3.9'
+qrcode==8.2; python_version >= '3.9' and python_version < '4.0'
+rdflib==7.4.0; python_full_version >= '3.8.1'
+requests==2.32.5; python_version >= '3.9'
+requests-oauthlib==2.0.0; python_version >= '3.4'
+roman==5.1; python_version >= '3.9'
 setproctitle==1.1.10
-six==1.12.0
-tempora==1.14.1
-tqdm==4.31.1
-twine==1.13.0
-urllib3==1.25.6
+six==1.17.0; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3'
+soupsieve==2.8; python_version >= '3.9'
+sqlalchemy==1.4.54; python_version >= '2.7' and python_version not in '3.0, 3.1, 3.2, 3.3, 3.4, 3.5'
+toml==0.10.2; python_version >= '2.6' and python_version not in '3.0, 3.1, 3.2, 3.3'
+typing-extensions==4.15.0; python_version >= '3.9'
+urllib3==2.5.0; python_version >= '3.9'
 webencodings==0.5.1
-zc.lockfile==2.0
