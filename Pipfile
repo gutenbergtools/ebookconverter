@@ -8,8 +8,8 @@ libgutenberg = ">=0.10.33"
 ebookmaker = ">=0.13.7"
 sqlalchemy = "<2.0,>=1.4.0"
 pymarc = ">=5.2.3"
-urllib3 = ">=2.6.0"
 ebookconverter = {file = ".", editable = true}
+urllib3 = ">=2.6.3"
 
 [dev-packages]
 
