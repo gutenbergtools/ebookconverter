@@ -67,7 +67,30 @@ class FullBook:
         In your writing use simple, clear, concise and expressive language.
         State the name of the book and the author's name only once throughout your response. Always write in English. And never include any urls in your response."""}
 
+class WikipediaValidator:
+    def __init__(self, content, title_and_authors):
+        self.system_prompt = {"role": "system", "content": "You are a specialist at evaluating whether an excerpt from a certain Wikipedia article is written about a specific document, literary work, or textual source."}
+        self.assistant_reply = {"role": "assistant", "content": "Understood! Please provide the Wikipedia article and some information about the book and I will follow your instructions."}
+        self.main_prompt = {"role": "user", "content": f"""I would like to check whether an excerpt from a certain Wikipedia article is about a book, document, or text that I've found on Project Gutenberg. I will give you basic information about that book, document, or text and an excerpt from the beginning of the Wikipedia article.
 
+        WORK (basic info):
+        - Title and Author(s): {title_and_authors}
 
+        WIKIPEDIA EXCERPT:
+        ```
+        {content}
+        ```
 
+        Is this Wikipedia excerpt ABOUT THIS BOOK, DOCUMENT, OR TEXT?
 
+        IMPORTANT: We want articles and excerpts about the BOOK, DOCUMENT, OR TEXT itself (its publication, literary or historical significance, editions, reception). We do NOT want:
+        - Excerpts or articles about the author
+        - Excerpts or articles about movies/adaptations based on the book
+        - Excerpts or articles about the events, people, or subject matter that the book describes 
+
+        Ignore minor edition details (translations, volumes, annotations).
+
+        Respond:
+        VERDICT: [YES/NO]
+        CONFIDENCE: [HIGH/MEDIUM/LOW]
+        REASONING: [one very short sentence]"""}
