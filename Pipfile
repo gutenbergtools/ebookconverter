@@ -11,6 +11,7 @@ pymarc = ">=5.2.3"
 openai = ">=2.9.0"
 tiktoken = ">= 0.12.0"
 ebookconverter = {file = ".", editable = true}
+anthropic = "*"
 
 [dev-packages]
 
