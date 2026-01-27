@@ -20,8 +20,8 @@ from sqlalchemy import and_
 from urllib.parse import unquote
 
 from libgutenberg.GutenbergDatabase import DatabaseError
-from libgutenberg.Logger import exception, error, info
-from libgutenberg.Models import Attribute
+from libgutenberg.Logger import exception, error, info, warning
+from libgutenberg.Models import Attribute, Book
 from ebookmaker.writers import TxtWriter
 from ebookconverter.writers.Prompts import BeginningBook, FullBook, WikipediaValidator
 
@@ -29,30 +29,60 @@ from openai import OpenAI
 import tiktoken
 import anthropic
 
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
+OPENAI_MODEL = "gpt-5"
+
+anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
+ANTHROPIC_MODEL = "claude-sonnet-4-5-20250929"
+
+NON_TEXT_IDS = [76962,50,65,127,576,4656,10802,11220]  # ideally there should be a way to automatically recognize
+                                                       # when a newly added PG item is text-based or not 
+AI_BAD = ['It appears%%', 'It seems%%', '%%no content provided%%', '%%no content has been provided%%']
+AVOID_WIKI = ["simple.", "File:", "/Category:", "(disambiguation)"]
+
+LLM_TAG = " (This is an automatically generated summary.)"
+WIKI_TAG = " (This summary is from Wikipedia.)"
+HUMAN_TAG = " (This summary was written fully or in part by a human.)"
+
 
 class Writer (TxtWriter.Writer):
     """ Summary Writer Class. """
 
     def __init__(self):
         super (Writer, self).__init__ ()
-        self.openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-        self.anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
-        self.non_text_ids = [76962,50,65,127,576,4656,10802,11220] # ideally there should be a way to automatically recognize
-                                                                   # when a newly added PG item is text-based or not
-        self.ai_bad = ['It appears%%', 'It seems%%', '%%no content provided%%', '%%no content has been provided%%']
         self.beginning = BeginningBook()
         self.full = FullBook()
         self.wiki_request_headers = {
             "User-Agent": "Project-Gutenberg-Summarizer/0.0 (https://www.gutenberg.org/)",
         }
-        self.avoid_wiki = ["simple.", "File:", "/Category:", "(disambiguation)"]
         self.langcode = "en"
 
     def build(self, job):
         '''Write summary to database.'''
         id = job.dc.project_gutenberg_id
-        if id in self.non_text_ids:
+
+        if id in NON_TEXT_IDS:
             info ("SummaryWriter: Non-Text Job, Skipping Writing for %d" % id)
+            return
+        
+        # if wikipedia url already exists, use it if possible
+        try:
+            session = job.dc.get_my_session()
+            # attribs = session.query(Attribute).where(and_(Attribute.fk_books == id, 
+            #                                                  Attribute.fk_attriblist == 500))
+            # for attrib in attribs:
+            #     tup = self.check_wikipedia_url(attrib.text)
+            #     if tup == None:
+            #         continue
+            #     existing_wiki_summary = self.get_wikipedia_article_summary(tup[0], tup[1])
+            #     if existing_wiki_summary == None:
+            #         info('SummaryWriter: Wikipedia URL in database no longer exists. Overwriting.')
+            #         break
+            #     else:
+            #         self.insert_into_pg_database(session, id, existing_wiki_summary)
+            #         return
+        except DatabaseError as dberr:
+            exception ('SummaryWriter: could not access database: %s' % (dberr))
             return
         
         if not len(job.dc.languages) == 0:
@@ -63,47 +93,69 @@ class Writer (TxtWriter.Writer):
         urls = self.google_search_with_serper(title_and_authors + " wikipedia")
         wiki_langs_and_titles = list(filter(None, map(self.check_wikipedia_url, urls)))
 
-        db_summary = ""
-
         for lang, title in wiki_langs_and_titles:
             wiki_summary = self.get_wikipedia_article_summary(title, lang)
             if wiki_summary == None:
                 continue
             if self.validate_with_claude(wiki_summary, title_and_authors):
-                db_summary = wiki_summary + " (This summary is from Wikipedia.)"
-                break
+                self.add_wiki_url_to_database(session, id, title, lang)
+                self.insert_into_pg_database(session, id, wiki_summary + WIKI_TAG)
+                return
         
         # if we didn't find a wikipedia article that summarizes book, use LLM to summarize book via content
-        if db_summary == "":
-            try:
-                parser = TxtWriter.ParserFactory.ParserFactory.parsers[job.url] # this should get the cached parser from our inherited TxtWriter
-                book_content = parser.unicode_content()
-            except KeyError as kerr:
-                error ("SummaryWriter: Couldn't Access Text: %s" % kerr)
+        try:
+            # this should get the cached parser from our inherited TxtWriter
+            parser = TxtWriter.ParserFactory.ParserFactory.parsers[job.url]
+            book_content = parser.unicode_content()
+        except KeyError as kerr:
+            error ("SummaryWriter: Couldn't Access Text: %s" % kerr)
+            return
+        except UnicodeError as uerr:
+            error ("SummaryWriter: Bad Text Content: %s" % uerr)
+            return
+        try:
+            content_summary = self.summarise_book(book_content, title_and_authors)
+        except Exception as unkerr:
+            error ("SummaryWriter: AI Request Failed: %s" % unkerr)
+            return
+        for sign in AI_BAD:
+            if sign in content_summary:
+                error ("SummaryWriter: AI Error, Skipping Writing for %d. Summary: %s" % (id, content_summary))
                 return
-            except UnicodeError as uerr:
-                error ("SummaryWriter: Bad Text Content: %s" % uerr)
-                return
-            try:
-                content_summary = self.summarise_book(book_content, title_and_authors)
-            except Exception as unkerr:
-                error ("SummaryWriter: AI Request Failed: %s" % unkerr)
-                return
-            for sign in self.ai_bad:
-                if sign in content_summary:
-                    error ("SummaryWriter: AI Error, Skipping Writing for %d. Summary: %s" % (id, content_summary))
-                    return
-            db_summary = content_summary
-
+        
+        self.insert_into_pg_database(session, id, content_summary + LLM_TAG)
+    
+    def insert_into_pg_database(self, session, id, db_summary):
         try: 
-            session = job.dc.get_my_session()
             attribute = session.query(Attribute).where(and_(Attribute.fk_attriblist == 520, Attribute.fk_books == id)).first()
-            attribute.text = db_summary
-            session.commit()
+            if attribute != None:
+                attribute.text = db_summary
+                session.commit()
+            else:
+                book = session.query(Book).where(Book.pk == id).first()
+                book.attributes.append(Attribute(fk_attriblist=520, text=db_summary, nonfiling=0))
             info ("SummaryWriter: created summary: %d" % id)
 
         except DatabaseError as dberr:
             exception ('SummaryWriter: could not add summary to database: %s' % (dberr))
+
+
+    def add_wiki_url_to_database(self, session, id, wiki_title, wiki_lang):
+        caption = "Wikipedia page about this book: "
+        marctext = caption + f"https://{wiki_lang}.wikipedia.org/wiki/{wiki_title}"
+        try:
+            for attribute in session.query(Attribute).where(and_(Attribute.fk_attriblist == 500, Attribute.fk_books == id)):
+                if self.check_wikipedia_url(attribute.text) != None:
+                    attribute.text = marctext
+                    session.commit()
+                    info("SummaryWriter: Replaced Wikipedia URL in database")
+                    return
+            book = session.query(Book).where(Book.pk == id).first()
+            book.attributes.append(Attribute(fk_attriblist=500, nonfiling=len(caption), text=marctext))
+            info("SummaryWriter: Added Wikipedia URL to database")
+        except DatabaseError as dberr:
+            exception ('SummaryWriter: Could not add Wikipedia URL to database: %s' % (dberr))
+
 
 
     def get_wikipedia_article_summary(self, wiki_title, lang):
@@ -150,6 +202,8 @@ class Writer (TxtWriter.Writer):
             'X-API-KEY': os.getenv("SERPER_API_KEY"),
             'Content-Type': 'application/json'
         }
+        # serper is 3rd party google search API (paid for ~50k searches)
+        # if broken, add more uses or replace with official google search API
         response = requests.post(
             "https://google.serper.dev/search",
             headers=headers,
@@ -165,7 +219,6 @@ class Writer (TxtWriter.Writer):
     def check_wikipedia_url(self, url):
         lang_match = re.search(r'https?://([a-z]{2,3})\.wikipedia\.org', url)
         if not lang_match:
-            # raise ValueError(f"Could not extract language code from URL: {url}")
             return None
         lang = lang_match.group(1)
 
@@ -174,14 +227,13 @@ class Writer (TxtWriter.Writer):
         
         title_match = re.search(r'/wiki/(.+)$', url.strip())
         if not title_match:
-            # raise ValueError(f"Could not extract page title from URL: {url}")
             return None
         page_title = unquote(title_match.group(1))
 
-        if any(pattern in page_title for pattern in self.avoid_wiki):
+        if any(pattern in page_title for pattern in AVOID_WIKI):
             return None
 
-        return (lang, title_match.group(1)) # return wiki url title for mediawiki api
+        return (lang, title_match.group(1)) # return lang and wiki url title for mediawiki api
 
 
 
@@ -189,8 +241,8 @@ class Writer (TxtWriter.Writer):
         """Validate if Wikipedia summary (intro + explain) matches the book using Claude."""
         wiki_validator = WikipediaValidator(wiki_summary, title_and_authors)
         try:
-            response = self.anthropic_client.messages.create(
-                model="claude-sonnet-4-5-20250929",
+            response = anthropic_client.messages.create(
+                model=ANTHROPIC_MODEL,
                 max_tokens=500,
                 system=wiki_validator.system_prompt["content"],
                 messages=[wiki_validator.main_prompt]
@@ -200,33 +252,10 @@ class Writer (TxtWriter.Writer):
             verdict_match = re.search(r'VERDICT:\s*(YES|NO)', answer, re.IGNORECASE)
             result = verdict_match and verdict_match.group(1).upper() == "YES"
             return result
-        except Exception:
+        except Exception as e:
+            error('SummaryWriter: ' + e)
             return False
 
-
-
-
-    def get_wikipedia_articles(self, title): # unused now bc google search more accurate than wikipedia search
-        '''Get Wikipedia articles from MediaWiki query search API'''
-        wiki_query_api_url = "https://en.wikipedia.org/w/api.php"
-        params = {
-            "format": "json",
-            "action": "query",
-            "list": "search",
-            "srsearch": title,
-            "srlimit": 10,
-        }
-        try:
-            query_res = requests.get(wiki_query_api_url, params=params, headers=self.wiki_request_headers).json()
-        except requests.exceptions.JSONDecodeError:
-            return None
-        it = 0
-        while it < 10:
-            res_title = query_res["query"]["search"][it]["title"]
-            # page_id = query_res["query"]["search"][it]["pageid"]
-            if not any(pattern in res_title for pattern in self.avoid_wiki):
-                break
-    
     
     def count_tokens(self, text, encoding_name='cl100k_base'):
         """Count the number of tokens in a text."""
@@ -242,17 +271,6 @@ class Writer (TxtWriter.Writer):
         return encoding.decode(first_chunk_tokens)
 
 
-    def format_summary(self, summary):
-        """Format summary for SQL insertion by replacing markdown, removing newlines, and escaping quotes."""
-        # fixing common oddities sometimes returned by LLM
-        formatted = summary.replace('*', '"').replace('_', '"').replace('"""', '"').replace('""', '"')
-        # removing new lines because gutenberg website can't display newlines in HTML (unfortunately)
-        formatted = formatted.replace("\n", " ")
-        # add sql requirement to escape single quotes with an additional single quote
-        formatted = formatted.replace("'", "''")
-        return formatted
-
-
     def summarise_beginning_of_book(self, title_and_author, text):
         """Generate two-paragraph summary from book's opening portion using GPT. To be used for long books."""
         system_prompt = self.beginning.system_prompt
@@ -264,7 +282,7 @@ class Writer (TxtWriter.Writer):
         book_content = {"role": "user", "content": f"START OF BOOK BEGINNING: \n{text}\nEND OF BOOK BEGINNING"}
 
         messages = [system_prompt, user_instruction, assistant_reply, book_content]
-        response = self.openai_client.chat.completions.create(model="gpt-5", messages=messages)
+        response = openai_client.chat.completions.create(model=OPENAI_MODEL, messages=messages)
         return response.choices[0].message.content
 
 
@@ -279,7 +297,7 @@ class Writer (TxtWriter.Writer):
         book_content = {"role": "user", "content": f"START OF BOOK: \n{text}\nEND OF BOOK"}
 
         messages = [system_prompt, user_instruction, assistant_reply, book_content]
-        response = self.openai_client.chat.completions.create(model="gpt-5", messages=messages)
+        response = openai_client.chat.completions.create(model=OPENAI_MODEL, messages=messages)
         return response.choices[0].message.content
     
     def get_book_content(self, url):
@@ -323,12 +341,4 @@ class Writer (TxtWriter.Writer):
         else:
             summary = self.summarise_entire_book(title, book_content)
 
-        return self.format_summary(summary)
-
-
-    def insert_summary_sql(self, book_id, summary): # unused for now since switch to ORM
-        """Append SQL INSERT statement for book summary to output file."""
-        note = " (This is an automatically generated summary.)"
-        sql = f"insert into attributes (fk_books,fk_attriblist,text,nonfiling) values ({book_id},520,'{summary}{note}',0);"
-
-        return sql
+        return summary

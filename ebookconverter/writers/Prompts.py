@@ -84,9 +84,9 @@ class WikipediaValidator:
         Is this Wikipedia excerpt ABOUT THIS BOOK, DOCUMENT, OR TEXT?
 
         IMPORTANT: We want articles and excerpts about the BOOK, DOCUMENT, OR TEXT itself (its publication, literary or historical significance, editions, reception). We do NOT want:
-        - Excerpts or articles about the author
+        - Excerpts or articles about the author(s)
         - Excerpts or articles about movies/adaptations based on the book
-        - Excerpts or articles about the events, people, or subject matter that the book describes 
+        - Excerpts or articles about the events, people, or subject matter that the book, document, or text describes 
 
         Ignore minor edition details (translations, volumes, annotations).
 
