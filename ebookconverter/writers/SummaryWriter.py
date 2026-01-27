@@ -68,19 +68,19 @@ class Writer (TxtWriter.Writer):
         # if wikipedia url already exists, use it if possible
         try:
             session = job.dc.get_my_session()
-            # attribs = session.query(Attribute).where(and_(Attribute.fk_books == id, 
-            #                                                  Attribute.fk_attriblist == 500))
-            # for attrib in attribs:
-            #     tup = self.check_wikipedia_url(attrib.text)
-            #     if tup == None:
-            #         continue
-            #     existing_wiki_summary = self.get_wikipedia_article_summary(tup[0], tup[1])
-            #     if existing_wiki_summary == None:
-            #         info('SummaryWriter: Wikipedia URL in database no longer exists. Overwriting.')
-            #         break
-            #     else:
-            #         self.insert_into_pg_database(session, id, existing_wiki_summary)
-            #         return
+            attribs = session.query(Attribute).where(and_(Attribute.fk_books == id, 
+                                                             Attribute.fk_attriblist == 500))
+            for attrib in attribs:
+                wiki_tuple = self.check_wikipedia_url(attrib.text)
+                if wiki_tuple == None:
+                    continue
+                existing_wiki_summary = self.get_wikipedia_article_summary(wiki_tuple[0], wiki_tuple[1])
+                if existing_wiki_summary == None:
+                    info('SummaryWriter: Wikipedia URL in database no longer exists. Overwriting.')
+                    break
+                else:
+                    self.insert_into_pg_database(session, id, existing_wiki_summary)
+                    return
         except DatabaseError as dberr:
             exception ('SummaryWriter: could not access database: %s' % (dberr))
             return
