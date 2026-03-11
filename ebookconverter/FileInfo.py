@@ -166,6 +166,12 @@ def scan_header(data, filename, ebook):
                         body = xpath(html, "//xhtml:body")[0]
                         for p in xpath(body, "//xhtml:p"): # fix PGTEI
                             p.tail = "\n"
+                except ValueError as what:
+                    warning("""
+                        Not parsing header.
+                        Unicode strings with encoding declaration are not supported.
+                        """)
+                    return None
                 except (lxml.etree.ParseError, IndexError) as what:
                     debug("# lxml XMLParser: %s" % what)
 
@@ -243,7 +249,7 @@ def read_string(bytes_data):
 
 def is_readable(filename):
     """ Used to be "stat_file. The 'stat' part has been refactored into libgutenberg """
-    return os.access(filename, os.R_OK)
+    return os.access(filename, os.R_OK) and '/.' not in filename
 
 
 def file_sort_key(filename):
@@ -315,7 +321,7 @@ def scan_dopush_log():
             ebook_num = int(m.group(1))
             Logger.ebook = ebook_num
             if scan_directory(scan_directory(ebook_num)):
-                error('No directory for {ebook_num}')
+                error(f'No directory for {ebook_num}')
         shutil.move(os.path.join(DOPUSH_LOG_DIR, filename),
                      os.path.join(DOPUSH_LOG_DIR, 'backup', filename))
         retcode = 0
