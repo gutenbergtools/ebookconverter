@@ -26,5 +26,6 @@ git checkout remotes/origin/dev
 # Deploy the new content:
 cd ${BUILD}
 
+# jekyll is in ${HOME}/.rvm/gems
 bundle install
 bundle exec jekyll build --config _config_dev.yml

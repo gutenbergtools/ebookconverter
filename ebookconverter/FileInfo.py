@@ -249,7 +249,7 @@ def read_string(bytes_data):
 
 def is_readable(filename):
     """ Used to be "stat_file. The 'stat' part has been refactored into libgutenberg """
-    return os.access(filename, os.R_OK)
+    return os.access(filename, os.R_OK) and '/.' not in filename
 
 
 def file_sort_key(filename):
