@@ -142,25 +142,21 @@ class Writer (TxtWriter.Writer):
                     session.commit()
                     info ("SummaryWriter: replaced summary: %d" % id)
                     return
-            self.dc.book.attributes.append(Attribute(fk_attriblist=520, text=db_summary, nonfiling=0))
+            self.dc.book.attributes.append(Attribute(
+                fk_attriblist=520, text=db_summary, nonfiling=0))
             info ("SummaryWriter: created summary: %d" % id)
 
         except DatabaseError as dberr:
             exception ('SummaryWriter: could not add summary to database: %s' % (dberr))
 
 
-    def add_wiki_url_to_database(self, session, id, wiki_title, wiki_lang):
-        caption = "Wikipedia page about this book: "
-        marctext = caption + f"https://{wiki_lang}.wikipedia.org/wiki/{wiki_title}"
+    def add_wiki_url_to_database(self, id, wiki_title, wiki_lang):
+        # we've already checked for a wikipedia url, and didn't find one
+        session = self.dc.get_my_session()
+        marctext = f"{WIKI_CAPTION}: https://{wiki_lang}.wikipedia.org/wiki/{wiki_title}"
         try:
-            for attribute in session.query(Attribute).where(and_(Attribute.fk_attriblist == 500, Attribute.fk_books == id)):
-                if self.check_wikipedia_url(attribute.text) != None:
-                    attribute.text = marctext
-                    session.commit()
-                    info("SummaryWriter: Replaced Wikipedia URL in database")
-                    return
-            book = session.query(Book).where(Book.pk == id).first()
-            book.attributes.append(Attribute(fk_attriblist=500, nonfiling=len(caption), text=marctext))
+            self.dc.book.attributes.append(Attribute(
+                fk_attriblist=500, nonfiling=len(caption), text=marctext))
             info("SummaryWriter: Added Wikipedia URL to database")
         except DatabaseError as dberr:
             exception ('SummaryWriter: Could not add Wikipedia URL to database: %s' % (dberr))
