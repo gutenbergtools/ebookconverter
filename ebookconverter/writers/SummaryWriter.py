@@ -40,8 +40,8 @@ AVOID_WIKI = ["simple.", "File:", "/Category:", "(disambiguation)"]
 
 LLM_TAG = " (This is an automatically generated summary.)"
 WIKI_TAG = " (This summary is from Wikipedia.)"
-HUMAN_TAG = " (This summary was written fully or in part by a human.)"
-
+EDITED_TAG = " (Edited.)"
+WIKI_CAPTION = 'Wikipedia page about this book'
 
 def is_non_text(book)
     return book.categories != []
@@ -117,16 +117,7 @@ class Writer (TxtWriter.Writer):
                 return
 
         self.insert_into_pg_database(session, id, content_summary + LLM_TAG)
-    
-    def insert_into_pg_database(self, session, id, db_summary):
-        try: 
-            attribute = session.query(Attribute).where(and_(Attribute.fk_attriblist == 520, Attribute.fk_books == id)).first()
-            if attribute != None:
-                attribute.text = db_summary
-                session.commit()
-            else:
-                book = session.query(Book).where(Book.pk == id).first()
-                book.attributes.append(Attribute(fk_attriblist=520, text=db_summary, nonfiling=0))
+
     def get_existing_summary(self):
         for [marc for marc in self.marcs if marc.code = '520']:
             if LLM_TAG in marc.text:
@@ -137,6 +128,18 @@ class Writer (TxtWriter.Writer):
                 return ['EDITED', marc.text]
         return None, None
 
+    def insert_into_pg_database(self, id, db_summary):
+        session = self.dc.get_my_session()
+        try:
+            for attribute in session.query(Attribute).where(
+                    and_(Attribute.fk_attriblist == 520, Attribute.fk_books == id))
+                # only time we replace a 520 attribute is if it's LLM
+                if LLM_TAG in attribute.text
+                    attribute.text = db_summary
+                    session.commit()
+                    info ("SummaryWriter: replaced summary: %d" % id)
+                    return
+            self.dc.book.attributes.append(Attribute(fk_attriblist=520, text=db_summary, nonfiling=0))
             info ("SummaryWriter: created summary: %d" % id)
 
         except DatabaseError as dberr:
@@ -218,16 +221,20 @@ class Writer (TxtWriter.Writer):
             results.append(box["link"])
         results.extend([result["link"] for result in response.json()["organic"]])
         return results
-    
-    def check_wikipedia_url(self, url):
-        lang_match = re.search(r'https?://([a-z]{2,3})\.wikipedia\.org', url)
+
+    def check_wikipedia_url(self, text):
+        # the CAPTION indicates that the subject of the wikipedia entry in the book
+        if not text.startswith(WIKI_CAPTION)
+            return None
+
+        lang_match = re.search(r'https?://([a-z]{2,3})\.wikipedia\.org', text)
         if not lang_match:
             return None
         lang = lang_match.group(1)
 
         if lang != self.langcode and lang != "en":
             return None
-        title_match = re.search(r'/wiki/(.+)$', url.strip())
+        title_match = re.search(r'/wiki/(.+)$', text.strip())
 
         if not title_match:
             return None
