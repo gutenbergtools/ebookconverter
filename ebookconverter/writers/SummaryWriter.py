@@ -298,21 +298,7 @@ class Writer (TxtWriter.Writer):
         messages = [system_prompt, user_instruction, assistant_reply, book_content]
         response = openai_client.chat.completions.create(model=OPENAI_MODEL, messages=messages)
         return response.choices[0].message.content
-    
-    def get_book_content(self, url):
-        """Return book text with Gutenberg header and footer removed."""
-        try:
-            response = requests.get(
-                url,
-                headers={'User-Agent': 'Mozilla/5.0 (compatible; GutenbergContent/1.0; +https://github.com)'},
-                timeout=10
-            )
-            response.raise_for_status()
-            return self.remove_gutenberg_wrapper(response.text)
-        except requests.RequestException as e:
-            error(f"Error fetching PG Book text: {e}")
-            return None
-        
+
     def remove_gutenberg_wrapper(self, text):
         """Remove Gutenberg header and footer from book text."""
         lines = text.split('\n')
