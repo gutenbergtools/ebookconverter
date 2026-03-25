@@ -64,6 +64,8 @@ class Writer (TxtWriter.Writer):
             info ("SummaryWriter: Non-Text Job, Skipping Writing for %d" % id)
             return
         self.dc = job.dc
+        if not len(job.dc.languages) == 0:
+            self.langcode = job.dc.languages[0].id
 
         summary_type, existing_summary = self.get_existing_summary()
         if summary_type == "EDITED":
@@ -77,9 +79,6 @@ class Writer (TxtWriter.Writer):
                 new_wiki_summary = self.get_wikipedia_article_summary(wiki_tuple[0], wiki_tuple[1])
                 self.insert_into_pg_database('WIKI', new_wiki_summary)
                     return
-        
-        if not len(job.dc.languages) == 0:
-            self.langcode = job.dc.languages[0].id
 
         title_and_authors = job.dc.make_pretty_title()
 
