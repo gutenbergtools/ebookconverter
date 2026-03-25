@@ -88,7 +88,7 @@ class Writer (TxtWriter.Writer):
             self.langcode = job.dc.languages[0].id
 
         title_and_authors = job.dc.make_pretty_title()
-        
+
         urls = self.google_search_with_serper(title_and_authors + " wikipedia")
         wiki_langs_and_titles = list(filter(None, map(self.check_wikipedia_url, urls)))
 
@@ -100,7 +100,7 @@ class Writer (TxtWriter.Writer):
                 self.add_wiki_url_to_database(session, id, title, lang)
                 self.insert_into_pg_database(session, id, wiki_summary + WIKI_TAG)
                 return
-        
+
         # if we didn't find a wikipedia article that summarizes book, use LLM to summarize book via content
         try:
             # this should get the cached parser from our inherited TxtWriter
@@ -121,7 +121,7 @@ class Writer (TxtWriter.Writer):
             if sign in content_summary:
                 error ("SummaryWriter: AI Error, Skipping Writing for %d. Summary: %s" % (id, content_summary))
                 return
-        
+
         self.insert_into_pg_database(session, id, content_summary + LLM_TAG)
     
     def insert_into_pg_database(self, session, id, db_summary):
@@ -178,7 +178,7 @@ class Writer (TxtWriter.Writer):
         except requests.HTTPError as httperr:
             error("Could not reach MediaWiki API: %s" % httperr)
             return None
-        
+
         summary_res = response.json()
         page_id = summary_res["query"]["pageids"][0]
 
@@ -192,9 +192,9 @@ class Writer (TxtWriter.Writer):
 
         if lang != self.langcode:
             return self.get_wikipedia_article_summary(wiki_title, self.langcode)
-        
+
         return None
-    
+
     def google_search_with_serper(self, query):
         """Searches Google via Serper API and returns list of URLs."""
         headers = {
@@ -223,8 +223,8 @@ class Writer (TxtWriter.Writer):
 
         if lang != self.langcode and lang != "en":
             return None
-        
         title_match = re.search(r'/wiki/(.+)$', url.strip())
+
         if not title_match:
             return None
         page_title = unquote(title_match.group(1))
@@ -255,7 +255,6 @@ class Writer (TxtWriter.Writer):
             error('SummaryWriter: ' + e)
             return False
 
-    
     def count_tokens(self, text, encoding_name='cl100k_base'):
         """Count the number of tokens in a text."""
         encoding = tiktoken.get_encoding(encoding_name)
@@ -276,7 +275,6 @@ class Writer (TxtWriter.Writer):
 
         user_instruction = BeginningBook.main_prompt
         user_instruction["content"] = user_instruction["content"].replace("title_and_author", title_and_author)
-        
         assistant_reply = BeginningBook.assistant_reply
         book_content = {"role": "user", "content": f"START OF BOOK BEGINNING: \n{text}\nEND OF BOOK BEGINNING"}
 
