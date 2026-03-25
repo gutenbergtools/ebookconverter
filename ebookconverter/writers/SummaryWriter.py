@@ -63,26 +63,20 @@ class Writer (TxtWriter.Writer):
 
             info ("SummaryWriter: Non-Text Job, Skipping Writing for %d" % id)
             return
-        
-        # if wikipedia url already exists, use it if possible
-        try:
-            session = job.dc.get_my_session()
-            attribs = session.query(Attribute).where(and_(Attribute.fk_books == id, 
-                                                             Attribute.fk_attriblist == 500))
-            for attrib in attribs:
-                wiki_tuple = self.check_wikipedia_url(attrib.text)
+        self.dc = job.dc
+
+        summary_type, existing_summary = self.get_existing_summary()
+        if summary_type == "EDITED":
+            return
+        if summary_type is not "WIKI":
+            # if wikipedia url already exists, use it if possible
+            for [marc for marc in job.dc.marcs if marc.code == '500']:
+                wiki_tuple = self.check_wikipedia_url(marc.text)
                 if wiki_tuple == None:
                     continue
-                existing_wiki_summary = self.get_wikipedia_article_summary(wiki_tuple[0], wiki_tuple[1])
-                if existing_wiki_summary == None:
-                    info('SummaryWriter: Wikipedia URL in database no longer exists. Overwriting.')
-                    break
-                else:
-                    self.insert_into_pg_database(session, id, existing_wiki_summary)
+                new_wiki_summary = self.get_wikipedia_article_summary(wiki_tuple[0], wiki_tuple[1])
+                self.insert_into_pg_database('WIKI', new_wiki_summary)
                     return
-        except DatabaseError as dberr:
-            exception ('SummaryWriter: could not access database: %s' % (dberr))
-            return
         
         if not len(job.dc.languages) == 0:
             self.langcode = job.dc.languages[0].id
@@ -133,6 +127,16 @@ class Writer (TxtWriter.Writer):
             else:
                 book = session.query(Book).where(Book.pk == id).first()
                 book.attributes.append(Attribute(fk_attriblist=520, text=db_summary, nonfiling=0))
+    def get_existing_summary(self):
+        for [marc for marc in self.marcs if marc.code = '520']:
+            if LLM_TAG in marc.text:
+                return ['LLM', marc.text]
+            elif WIKI_TAG in marc.text:
+                return ['WIKI', marc.text]
+            elif EDITED_TAG in marc.text:
+                return ['EDITED', marc.text]
+        return None, None
+
             info ("SummaryWriter: created summary: %d" % id)
 
         except DatabaseError as dberr:
