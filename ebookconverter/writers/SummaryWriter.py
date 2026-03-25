@@ -50,8 +50,6 @@ class Writer (TxtWriter.Writer):
 
     def __init__(self):
         super (Writer, self).__init__ ()
-        self.beginning = BeginningBook()
-        self.full = FullBook()
         self.wiki_request_headers = {
             "User-Agent": "Project-Gutenberg-Summarizer/0.0 (https://www.gutenberg.org/)",
         }
@@ -273,12 +271,12 @@ class Writer (TxtWriter.Writer):
 
     def summarise_beginning_of_book(self, title_and_author, text):
         """Generate two-paragraph summary from book's opening portion using GPT. To be used for long books."""
-        system_prompt = self.beginning.system_prompt
+        system_prompt = BeginningBook.system_prompt
 
-        user_instruction = self.beginning.main_prompt
+        user_instruction = BeginningBook.main_prompt
         user_instruction["content"] = user_instruction["content"].replace("title_and_author", title_and_author)
         
-        assistant_reply = self.beginning.assistant_reply
+        assistant_reply = BeginningBook.assistant_reply
         book_content = {"role": "user", "content": f"START OF BOOK BEGINNING: \n{text}\nEND OF BOOK BEGINNING"}
 
         messages = [system_prompt, user_instruction, assistant_reply, book_content]
@@ -288,12 +286,12 @@ class Writer (TxtWriter.Writer):
 
     def summarise_entire_book(self, title_and_author, text):
         """Generate two-paragraph summary from entire book using GPT. To be used for short books."""
-        system_prompt = self.full.system_prompt
+        system_prompt = FullBook.system_prompt
 
-        user_instruction = self.full.main_prompt
+        user_instruction = FullBook.main_prompt
         user_instruction["content"] = user_instruction["content"].replace("title_and_author", title_and_author)
 
-        assistant_reply = self.full.assistant_reply
+        assistant_reply = FullBook.assistant_reply
         book_content = {"role": "user", "content": f"START OF BOOK: \n{text}\nEND OF BOOK"}
 
         messages = [system_prompt, user_instruction, assistant_reply, book_content]
