@@ -35,8 +35,6 @@ OPENAI_MODEL = "gpt-5"
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 ANTHROPIC_MODEL = "claude-sonnet-4-5-20250929"
 
-NON_TEXT_IDS = [76962,50,65,127,576,4656,10802,11220]  # ideally there should be a way to automatically recognize
-                                                       # when a newly added PG item is text-based or not 
 AI_BAD = ['It appears%%', 'It seems%%', '%%no content provided%%', '%%no content has been provided%%']
 AVOID_WIKI = ["simple.", "File:", "/Category:", "(disambiguation)"]
 
@@ -44,6 +42,9 @@ LLM_TAG = " (This is an automatically generated summary.)"
 WIKI_TAG = " (This summary is from Wikipedia.)"
 HUMAN_TAG = " (This summary was written fully or in part by a human.)"
 
+
+def is_non_text(book)
+    return book.categories != []
 
 class Writer (TxtWriter.Writer):
     """ Summary Writer Class. """
@@ -58,8 +59,8 @@ class Writer (TxtWriter.Writer):
     def build(self, job):
         '''Write summary to database.'''
         id = job.dc.project_gutenberg_id
+        if is_non_text(job.dc.book):
 
-        if id in NON_TEXT_IDS:
             info ("SummaryWriter: Non-Text Job, Skipping Writing for %d" % id)
             return
         
