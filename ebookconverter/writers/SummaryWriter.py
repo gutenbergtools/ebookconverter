@@ -77,11 +77,14 @@ class Writer (TxtWriter.Writer):
                 if wiki_tuple == None:
                     continue
                 new_wiki_summary = self.get_wikipedia_article_summary(wiki_tuple[0], wiki_tuple[1])
-                self.insert_into_pg_database('WIKI', new_wiki_summary)
-                    return
+                self.insert_into_pg_database(id, new_wiki_summary)
+                return
+        if summary_type is "LLM":
+            #don't need to remake summary
+            return
 
+        # there is still no summary
         title_and_authors = job.dc.make_pretty_title()
-
         urls = self.google_search_with_serper(title_and_authors + " wikipedia")
         wiki_langs_and_titles = list(filter(None, map(self.check_wikipedia_url, urls)))
 
@@ -91,7 +94,7 @@ class Writer (TxtWriter.Writer):
                 continue
             if self.validate_with_claude(wiki_summary, title_and_authors):
                 self.add_wiki_url_to_database(session, id, title, lang)
-                self.insert_into_pg_database(session, id, wiki_summary + WIKI_TAG)
+                self.insert_into_pg_database(id, wiki_summary + WIKI_TAG)
                 return
 
         # if we didn't find a wikipedia article that summarizes book, use LLM to summarize book via content
@@ -116,7 +119,7 @@ class Writer (TxtWriter.Writer):
                 error ("SummaryWriter: AI Error, Skipping Writing for %d. Summary: %s" % (id, content_summary))
                 return
 
-        self.insert_into_pg_database(session, id, content_summary + LLM_TAG)
+        self.insert_into_pg_database(id, content_summary + LLM_TAG)
 
     def get_existing_summary(self):
         for [marc for marc in self.marcs if marc.code = '520']:
