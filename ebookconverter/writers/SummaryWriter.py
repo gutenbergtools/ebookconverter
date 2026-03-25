@@ -98,7 +98,8 @@ class Writer (TxtWriter.Writer):
         try:
             # this should get the cached parser from our inherited TxtWriter
             parser = TxtWriter.ParserFactory.ParserFactory.parsers[job.url]
-            book_content = parser.unicode_content()
+            book_content = self.remove_gutenberg_wrapper(parser.unicode_content())
+ß
         except KeyError as kerr:
             error ("SummaryWriter: Couldn't Access Text: %s" % kerr)
             return
