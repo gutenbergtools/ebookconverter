@@ -3,7 +3,7 @@
 
 """
 
-CoverpageWriter.py
+UpdateWriter.py
 
 Copyright 2022 by Eric Hellman and Project Gutenberg
 

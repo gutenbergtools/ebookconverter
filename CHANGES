@@ -1,4 +1,9 @@
-0.10.6 (December 18, 2025)
+
+0.11.0 (March xx, 2026)
+- handled DB errors happening outside of the loop
+
+
+0.10.5 (December 18, 2025)
 - changed cron-reindex to work on the next day's rebuild.
 - caught an lxml exception raised by FileInfo when an xml file declares an encoding in <?xml?>; Ebookmaker handles these with Beautiful Soup.
 - we don't want to index dot files
@@ -8,6 +13,7 @@
   - dev-jekyll
   - prod-jekyll
 - updated requirements
+
 
 0.10.4 (July 17, 2025)
 - fixed packaging errors
