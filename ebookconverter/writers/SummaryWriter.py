@@ -43,7 +43,7 @@ WIKI_TAG = " (This summary is from Wikipedia.)"
 EDITED_TAG = " (Edited.)"
 WIKI_CAPTION = 'Wikipedia page about this book'
 
-def is_non_text(book)
+def is_non_text(book):
     return book.categories != []
 
 class Writer (TxtWriter.Writer):
@@ -70,16 +70,17 @@ class Writer (TxtWriter.Writer):
         summary_type, existing_summary = self.get_existing_summary()
         if summary_type == "EDITED":
             return
-        if summary_type is not "WIKI":
+        if summary_type != "WIKI":
             # if wikipedia url already exists, use it if possible
-            for [marc for marc in job.dc.marcs if marc.code == '500']:
+            notemarcs = [marc for marc in job.dc.marcs if marc.code == '500']
+            for marc in notemarcs:
                 wiki_tuple = self.check_wikipedia_url(marc.text)
                 if wiki_tuple == None:
                     continue
                 new_wiki_summary = self.get_wikipedia_article_summary(wiki_tuple[0], wiki_tuple[1])
                 self.insert_into_pg_database(id, new_wiki_summary)
                 return
-        if summary_type is "LLM":
+        if summary_type == "LLM":
             #don't need to remake summary
             return
 
@@ -93,7 +94,7 @@ class Writer (TxtWriter.Writer):
             if wiki_summary == None:
                 continue
             if self.validate_with_claude(wiki_summary, title_and_authors):
-                self.add_wiki_url_to_database(session, id, title, lang)
+                self.add_wiki_url_to_database(id, title, lang)
                 self.insert_into_pg_database(id, wiki_summary + WIKI_TAG)
                 return
 
@@ -102,7 +103,7 @@ class Writer (TxtWriter.Writer):
             # this should get the cached parser from our inherited TxtWriter
             parser = TxtWriter.ParserFactory.ParserFactory.parsers[job.url]
             book_content = self.remove_gutenberg_wrapper(parser.unicode_content())
-ß
+
         except KeyError as kerr:
             error ("SummaryWriter: Couldn't Access Text: %s" % kerr)
             return
@@ -122,7 +123,8 @@ class Writer (TxtWriter.Writer):
         self.insert_into_pg_database(id, content_summary + LLM_TAG)
 
     def get_existing_summary(self):
-        for [marc for marc in self.marcs if marc.code = '520']:
+        summarymarcs = [marc for marc in self.dc.marcs if marc.code == '520']
+        for marc in summarymarcs:
             if LLM_TAG in marc.text:
                 return ['LLM', marc.text]
             elif WIKI_TAG in marc.text:
@@ -135,15 +137,16 @@ class Writer (TxtWriter.Writer):
         session = self.dc.get_my_session()
         try:
             for attribute in session.query(Attribute).where(
-                    and_(Attribute.fk_attriblist == 520, Attribute.fk_books == id))
+                    and_(Attribute.fk_attriblist == 520, Attribute.fk_books == id)):
                 # only time we replace a 520 attribute is if it's LLM
-                if LLM_TAG in attribute.text
+                if LLM_TAG in attribute.text:
                     attribute.text = db_summary
                     session.commit()
                     info ("SummaryWriter: replaced summary: %d" % id)
                     return
             self.dc.book.attributes.append(Attribute(
                 fk_attriblist=520, text=db_summary, nonfiling=0))
+            session.commit()
             info ("SummaryWriter: created summary: %d" % id)
 
         except DatabaseError as dberr:
@@ -152,11 +155,11 @@ class Writer (TxtWriter.Writer):
 
     def add_wiki_url_to_database(self, id, wiki_title, wiki_lang):
         # we've already checked for a wikipedia url, and didn't find one
-        session = self.dc.get_my_session()
         marctext = f"{WIKI_CAPTION}: https://{wiki_lang}.wikipedia.org/wiki/{wiki_title}"
         try:
             self.dc.book.attributes.append(Attribute(
                 fk_attriblist=500, nonfiling=len(caption), text=marctext))
+            self.dc.get_my_session().commit()
             info("SummaryWriter: Added Wikipedia URL to database")
         except DatabaseError as dberr:
             exception ('SummaryWriter: Could not add Wikipedia URL to database: %s' % (dberr))
@@ -223,7 +226,7 @@ class Writer (TxtWriter.Writer):
 
     def check_wikipedia_url(self, text):
         # the CAPTION indicates that the subject of the wikipedia entry in the book
-        if not text.startswith(WIKI_CAPTION)
+        if not text.startswith(WIKI_CAPTION):
             return None
 
         lang_match = re.search(r'https?://([a-z]{2,3})\.wikipedia\.org', text)
