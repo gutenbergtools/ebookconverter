@@ -3,13 +3,19 @@
 
 # Generates a summary of a book using ChatGPT.
 # For short books we feed in the entire book, for long books we feed in roughly the first 35 pages.
+# wikipedia summaries are used when available.
 # This is necessary due to cost and context-size limitations.
 # Read the prompting for a better understanding of how it works.
 
 # One thing to realise is that what we're looking to put on the Gutenberg page is not
-# actually an exhaustive summary of all the content of a book, but rathern an impression of it
+# an exhaustive summary of all the content of a book, but rathern an impression of it
 # so that users can decide whether try a book or not. Kind of like a trailer to a movie.
 # In that sense "summary" is not actually a very accurate term.
+
+# LLM_TAG = " (This is an automatically generated summary.)" denotes  a summary composed by AI.
+# WIKI_TAG = " (This summary is from Wikipedia.)" denotes a summary from Wikipedia.
+# EDITED_TAG = " (Summary by Project Gutenberg staff.)"  denotes an authored-by-us summary.
+# WIKI_CAPTION = 'Wikipedia page about this book' If appears in 500 field a wikisummary is used.
 
 
 import os
@@ -40,7 +46,7 @@ AVOID_WIKI = ["simple.", "File:", "/Category:", "(disambiguation)"]
 
 LLM_TAG = " (This is an automatically generated summary.)"
 WIKI_TAG = " (This summary is from Wikipedia.)"
-EDITED_TAG = " (Edited.)"
+EDITED_TAG = " (Summary by Project Gutenberg staff.)"
 WIKI_CAPTION = 'Wikipedia page about this book'
 
 def is_non_text(book):
@@ -75,6 +81,10 @@ class Writer (TxtWriter.Writer):
             notemarcs = [marc for marc in job.dc.marcs if marc.code == '500']
             for marc in notemarcs:
                 wiki_tuple = self.check_wikipedia_url(marc.text)
+                if not marc.text.startswith(WIKI_CAPTION) and wiki_tuple:
+                    # don't use wikipedia for summary
+                    summary_type = 'OTHER'
+                    break
                 if wiki_tuple == None:
                     continue
                 new_wiki_summary = self.get_wikipedia_article_summary(wiki_tuple[0], wiki_tuple[1])
@@ -84,21 +94,24 @@ class Writer (TxtWriter.Writer):
             #don't need to remake summary
             return
 
-        # there is still no summary
-        title_and_authors = job.dc.make_pretty_title()
-        urls = self.google_search_with_serper(title_and_authors + " wikipedia")
-        wiki_langs_and_titles = list(filter(None, map(self.check_wikipedia_url, urls)))
+        # there is no summary
+        if summary_type != 'OTHER':
+            title_and_authors = job.dc.make_pretty_title()
+            urls = self.google_search_with_serper(title_and_authors + " wikipedia")
+            error (urls)
+            wiki_langs_and_titles = list(filter(None, map(self.check_wikipedia_url, urls)))
+            error(wiki_langs_and_titles)
+            for lang, title in wiki_langs_and_titles:
+                wiki_summary = self.get_wikipedia_article_summary(title, lang)
+                if wiki_summary == None:
+                    continue
+                if self.validate_with_claude(wiki_summary, title_and_authors):
+                    self.add_wiki_url_to_database(id, title, lang)
+                    self.insert_into_pg_database(id, wiki_summary + WIKI_TAG)
+                    return
 
-        for lang, title in wiki_langs_and_titles:
-            wiki_summary = self.get_wikipedia_article_summary(title, lang)
-            if wiki_summary == None:
-                continue
-            if self.validate_with_claude(wiki_summary, title_and_authors):
-                self.add_wiki_url_to_database(id, title, lang)
-                self.insert_into_pg_database(id, wiki_summary + WIKI_TAG)
-                return
-
-        # if we didn't find a wikipedia article that summarizes book, use LLM to summarize book via content
+        # There is no summary or wikipedia article about the book
+        # use LLM to summarize book via content
         try:
             # this should get the cached parser from our inherited TxtWriter
             parser = TxtWriter.ParserFactory.ParserFactory.parsers[job.url]
@@ -158,7 +171,7 @@ class Writer (TxtWriter.Writer):
         marctext = f"{WIKI_CAPTION}: https://{wiki_lang}.wikipedia.org/wiki/{wiki_title}"
         try:
             self.dc.book.attributes.append(Attribute(
-                fk_attriblist=500, nonfiling=len(caption), text=marctext))
+                fk_attriblist=500, nonfiling=len(WIKI_CAPTION) + 2, text=marctext))
             self.dc.get_my_session().commit()
             info("SummaryWriter: Added Wikipedia URL to database")
         except DatabaseError as dberr:
@@ -226,9 +239,6 @@ class Writer (TxtWriter.Writer):
 
     def check_wikipedia_url(self, text):
         # the CAPTION indicates that the subject of the wikipedia entry in the book
-        if not text.startswith(WIKI_CAPTION):
-            return None
-
         lang_match = re.search(r'https?://([a-z]{2,3})\.wikipedia\.org', text)
         if not lang_match:
             return None
