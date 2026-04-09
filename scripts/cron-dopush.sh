@@ -44,9 +44,6 @@ fi
 # We have work to do! 
 # echo "do_push: making files ..."
 
-~/.local/bin/pipenv run autodelete
-
-# echo "ran autodelete"
 
 # gbn 2020-04-03: "goback-24" runs the last 24 hours. Instead, we
 # will expicitly rebuild every item in the LIST:
