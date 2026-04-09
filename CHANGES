@@ -1,8 +1,25 @@
-0.11.0 (March xx, 2026)
+0.11.0 (April 9, 2026)
 - handled DB errors happening outside of the loop
+- added SummaryWriter
+    - looks for wikipedia entries for the book, uses wikipedia summary to db
+    - will skip looking for wikipedia entry if there's an existing wikipedia link.
+    - if no wikipedia entry, gets OpenAI LML to summarize the book
+    - if there's a summary, will only overwrite it if it's replacing an LML entry with a wikipedia entry.
+    - use --build=summary to add a summary
+    - summary notations are to be as follows:
+        - LLM_TAG = " (This is an automatically generated summary.)" denotes  a summary composed by AI.
+        - WIKI_TAG = " (This summary is from Wikipedia.)" denotes a summary from Wikipedia.
+        - EDITED_TAG = " (Summary by Project Gutenberg staff.)"  denotes an authored-by-us summary. This will prevent asking an AI for the summary.
+        - WIKI_CAPTION = 'Wikipedia page about this book' If appears in 500 field with a wikipedia link, a wikisummary will be used used.
+        - Needs OpenAI , Anthropic and Serper API keys in .env file to work.
+            - SERPER_API_KEY
+            - OPENAI_API_KEY
+            - ANTHROPIC_API_KEY
+    - renovated Autodelete to alllow programmatic invocation
+    - FileInfo now calls Autodelete.check_book to better handle file deletions, file moves and renaming
+    -
 
-
-0.10.5 (December 18, 2025)
+0.10.6 (December 18, 2025)
 - changed cron-reindex to work on the next day's rebuild.
 - caught an lxml exception raised by FileInfo when an xml file declares an encoding in <?xml?>; Ebookmaker handles these with Beautiful Soup.
 - we don't want to index dot files
@@ -11,6 +28,8 @@
   - cron-jekyll
   - dev-jekyll
   - prod-jekyll
+- updated requirements
+
 
 0.10.4 (July 17, 2025)
 - fixed packaging errors

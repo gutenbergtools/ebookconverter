@@ -34,7 +34,7 @@ import lxml
 
 from libgutenberg.DBUtils import check_session, ebook_exists
 from libgutenberg.DublinCoreMapping import DublinCoreObject
-from libgutenberg.GutenbergFiles import store_file_in_database, PUBLIC, FILES, FTP
+from libgutenberg.GutenbergFiles import store_file_in_database, FILES
 from libgutenberg.GutenbergGlobals import xpath
 from libgutenberg.Models import Book
 from libgutenberg.Logger import critical, debug, error, exception, info, warning
@@ -43,9 +43,9 @@ from libgutenberg.Logger import error
 
 from ebookmaker.CommonCode import find_candidates
 
+from .AutoDelete import check_book
 from .Notifier import ADDRESS_BOOK
 PRIVATE = os.getenv ('PRIVATE') or ''
-PUBLISH = os.getenv ('PUBLISH')  or ''
 
 DOPUSH_LOG_DIR = os.path.join(PRIVATE, 'logs', 'dopush')
 WORKFLOW_LOG_DIR = os.path.join(PRIVATE, 'logs', 'json')
@@ -249,7 +249,7 @@ def read_string(bytes_data):
 
 def is_readable(filename):
     """ Used to be "stat_file. The 'stat' part has been refactored into libgutenberg """
-    return os.access(filename, os.R_OK)
+    return os.access(filename, os.R_OK) and '/.' not in filename
 
 
 def file_sort_key(filename):
@@ -302,7 +302,7 @@ def scan_dopush_log():
     """ Scan the dopush log directory for new files.
 
     Files in this directory are placeholders only. The real files are
-    in FILES  and PUBLISH/.
+    in FILES.
 
     """
 
@@ -340,9 +340,10 @@ def main():
         for arg in sys.argv[1:]:
             try:
                 Logger.ebook = int(arg)
-                if scan_directory(int(arg)):
-                    error('No directory for {arg}')
-                
+                if scan_directory(Logger.ebook):
+                    error('No directory for {Logger.ebook}')
+                else:
+                    check_book(Logger.ebook)
             except ValueError: # no int
                 scan_file(arg, None)
 
