@@ -48,6 +48,7 @@ LLM_TAG = " (This is an automatically generated summary.)"
 WIKI_TAG = " (This summary is from Wikipedia.)"
 EDITED_TAG = " (Summary by Project Gutenberg staff.)"
 WIKI_CAPTION = 'Wikipedia page about this book'
+WIKIMATCH = re.compile(r"(?ix)https?://([a-z]{2,3})\.wikipedia\.org/wiki/([/!@i^*$a-z0-9_\(\)-]+)")
 
 def is_non_text(book):
     return book.categories != []
@@ -61,6 +62,15 @@ class Writer (TxtWriter.Writer):
             "User-Agent": "Project-Gutenberg-Summarizer/0.0 (https://www.gutenberg.org/)",
         }
         self.langcode = "en"
+
+    def get_wikis(self, job):
+        marcnotes = [marc for marc in job.dc.marcs if marc.code == '500']
+        wikis = []
+        for marc in marcnotes:
+            if marc.text.startswith(WIKI_CAPTION):
+                wiki_tuple = self.check_wikipedia_url(marc.text)
+                wikis.append(wiki_tuple)
+        return wikis
 
     def build(self, job):
         '''Write summary to database.'''
@@ -76,20 +86,19 @@ class Writer (TxtWriter.Writer):
         summary_type, existing_summary = self.get_existing_summary()
         if summary_type == "EDITED":
             return
+        notemarcs = [marc for marc in job.dc.marcs if marc.code == '500']
+        wiki_lang = None
+        wikis = self.get_wikis(job)
         if summary_type != "WIKI":
             # if wikipedia url already exists, use it if possible
-            notemarcs = [marc for marc in job.dc.marcs if marc.code == '500']
-            for marc in notemarcs:
-                wiki_tuple = self.check_wikipedia_url(marc.text)
-                if not marc.text.startswith(WIKI_CAPTION) and wiki_tuple:
-                    # don't use wikipedia for summary
-                    summary_type = 'OTHER'
-                    break
-                if wiki_tuple == None:
-                    continue
-                new_wiki_summary = self.get_wikipedia_article_summary(wiki_tuple[0], wiki_tuple[1])
-                self.insert_into_pg_database(id, new_wiki_summary)
-                return
+            for (wiki_lang, page_title) in wikis:
+                if wiki_lang == self.langcode or wiki_lang == "en":
+                    break            
+            if not page_title: # there were no wikipedia urls
+                return None
+            new_wiki_summary = self.get_wikipedia_article_summary(page_title, wiki_lang)
+            self.insert_into_pg_database(id, new_wiki_summary)
+            return
         if summary_type == "LLM":
             #don't need to remake summary
             return
@@ -98,15 +107,14 @@ class Writer (TxtWriter.Writer):
         if summary_type != 'OTHER':
             title_and_authors = job.dc.make_pretty_title()
             urls = self.google_search_with_serper(title_and_authors + " wikipedia")
-            error (urls)
             wiki_langs_and_titles = list(filter(None, map(self.check_wikipedia_url, urls)))
-            error(wiki_langs_and_titles)
-            for lang, title in wiki_langs_and_titles:
+            for lang, page_title in wiki_langs_and_titles:
                 wiki_summary = self.get_wikipedia_article_summary(title, lang)
                 if wiki_summary == None:
                     continue
                 if self.validate_with_claude(wiki_summary, title_and_authors):
-                    self.add_wiki_url_to_database(id, title, lang)
+                    if (lang, page_title) not in wikis:
+                        self.add_wiki_url_to_database(id, page_title, lang)
                     self.insert_into_pg_database(id, wiki_summary + WIKI_TAG)
                     return
 
@@ -239,24 +247,16 @@ class Writer (TxtWriter.Writer):
 
     def check_wikipedia_url(self, text):
         # the CAPTION indicates that the subject of the wikipedia entry in the book
-        lang_match = re.search(r'https?://([a-z]{2,3})\.wikipedia\.org', text)
-        if not lang_match:
+        
+        wiki_match = WIKIMATCH.search(text)
+        if not wiki_match:
             return None
-        lang = lang_match.group(1)
-
-        if lang != self.langcode and lang != "en":
-            return None
-        title_match = re.search(r'/wiki/(.+)$', text.strip())
-
-        if not title_match:
-            return None
-        page_title = unquote(title_match.group(1))
-
-        if any(pattern in page_title for pattern in AVOID_WIKI):
+        lang = wiki_match.group(1)
+        page_title = wiki_match.group(2)
+        if any(pattern in unquote(page_title) for pattern in AVOID_WIKI):
             return None
 
-        return (lang, title_match.group(1)) # return lang and wiki url title for mediawiki api
-
+        return (lang, page_title) # return lang and wiki url title for mediawiki api
 
 
     def validate_with_claude(self, wiki_summary, title_and_authors):
