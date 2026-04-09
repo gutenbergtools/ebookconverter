@@ -4,7 +4,7 @@
 
 from setuptools import setup
 
-VERSION = '0.10.6'
+VERSION = '0.11.0'
 
 setup (
     name = 'ebookconverter',
@@ -48,6 +48,9 @@ setup (
         'qrcode>=6.1',
         'libgutenberg[postgres]>=0.10.33',
         'pymarc>=5.2.3',
+        'tiktoken',
+        'openai',
+        'anthropic',
     ],
     
     package_data = {

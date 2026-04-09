@@ -5,7 +5,7 @@
 
 AutoDelete.py
 
-Copyright 2009 by Marcello Perathoner
+Copyright 2009-2026 by Marcello Perathoner and Project Gutenberg
 
 Distributable under the GNU General Public License Version 3 or newer.
 
@@ -16,89 +16,100 @@ checks if any of the known files of that ebook have been deleted.
 """
 
 import os
+import re
+import sys
+from datetime import datetime, timedelta
 
-from six.moves import builtins
-from six.moves import configparser
+from sqlalchemy import select, func, not_
 
-from libgutenberg.Logger import debug, info
-from libgutenberg import Logger
-from libgutenberg import GutenbergGlobals as gg
-from libgutenberg import GutenbergDatabase
 
-from ebookmaker.CommonCode import Options
+from libgutenberg import GutenbergDatabase, Logger
+from libgutenberg.GutenbergFiles import FILES
+from libgutenberg.Logger import debug, info, error
+from libgutenberg.Models import Book, File
 
-from ebookconverter.EbookConverter import config
+OB = GutenbergDatabase.Objectbase(False)
 
-PRIVATE = os.getenv ('PRIVATE') or ''
-PUBLIC  = os.getenv ('PUBLIC')  or ''
+PRIVATE = os.getenv('PRIVATE') or ''
+PUBLIC = os.getenv('PUBLIC')  or ''
+DIRS = PUBLIC + '/dirs'
+FILESMATCH = re.compile(r'^\d\d')
 
-DIRS  = PUBLIC + '/dirs'
-
-options = Options()
-
-def check_book (ebook):
+def check_book(ebook):
     """ Check all files of ebook for presence. """
 
-    c  = GutenbergDatabase.DB.get_cursor ()
-    c2 = GutenbergDatabase.DB.get_cursor ()
-
-    c.execute ("select filename from files where fk_books = %(ebook)s and diskstatus != 5",
-               { 'ebook': ebook })
-
-    for row in c.fetchall ():
-        row = GutenbergDatabase.xl (c, row)
+    session = OB.get_session()
+    files = session.query(File).filter(
+        File.fk_books == ebook,
+        File.diskstatus != 5 # files already marked as missing
+    ).all()
+    
+    for file in files:
         try:
-            if row.filename.startswith ('/'):
-                os.stat (row.filename)
+            if file.archive_path.startswith('/'): # full path somewhere
+                os.stat(file.archive_path)
                 continue
-            if row.filename.startswith ('cache'):
-                os.stat (os.path.join (PUBLIC, row.filename))
+            if file.archive_path.startswith('cache'):
+                os.stat(os.path.join(PUBLIC, file.archive_path)) # generated files
                 continue
-            if row.filename.startswith ('dirs'):
-                os.stat (os.path.join (PUBLIC, row.filename))
+            if file.archive_path.startswith('dirs'):
+                os.stat(os.path.join(PUBLIC, file.archive_path))
                 continue
-            os.stat (os.path.join (DIRS, row.filename))
+            if FILESMATCH.match(file.archive_path): # simlinked paths on ibiblio or dev environment
+                os.stat(os.path.join(FILES, file.archive_path))
+                continue
+            os.stat(os.path.join(DIRS, file.archive_path)) # standard 1/2/3 paths on ibiblio
         except OSError:
-            c2.execute ("start transaction")
-            c2.execute ("update files set diskstatus = 5 where filename = %(filename)s",
-                        { 'filename': row.filename })
-            c2.execute ("commit")
-            info ("Removed from database: %s" % row.filename)
+            file.diskstatus = 5 
+            info("Removing from database: %s" % file.archive_path)
+    session.commit()
 
 
-def main ():
+def main():
     goback = 1
-    try:
-        config ()
-    except configparser.Error as what:
-        error ("Error in configuration file: %s", str (what))
-        return 1
 
-    Logger.setup (Logger.LOGFORMAT, 'autodelete.log')
-    Logger.set_log_level (2)
+    Logger.setup(Logger.LOGFORMAT, 'autodelete.log')
+    Logger.set_log_level(2)
 
-    debug ("Starting AutoDelete.py")
+    debug("Starting AutoDelete.py")
+    if len(sys.argv) > 1:
+        for arg in sys.argv[1:]:
+            try:
+                Logger.ebook = int(arg)
+                if check_book(int(arg)):
+                    error('No directory for {arg}')
+                
+            except ValueError: # no int
+                error("not an ebook number: %s", str (arg))
 
-    GutenbergDatabase.DB = GutenbergDatabase.Database ()
-    GutenbergDatabase.DB.connect ()
-    c  = GutenbergDatabase.DB.get_cursor ()
+    else:
+        session = OB.get_session()
 
-    c.execute ("select distinct fk_books from files "
-               "where filemtime >= now () - interval '%(goback)s days' "
-               "and filename !~ '^cache/' "
-               "and diskstatus != 5 and fk_books is not null",
-               { 'goback': goback } )
-
-    for row in c.fetchall ():
-        row = GutenbergDatabase.xl (c, row)
-        ebook = int (row.fk_books)
-        Logger.ebook = ebook
-        debug ("Checking ebook")
-        check_book (ebook)
+        # 1. Define the time threshold (goback days ago)
+        time_threshold = datetime.utcnow() - timedelta(days=goback)
+        
+        # 2. Build the select statement
+        stmt = (
+            select(File.fk_books)
+            .distinct()
+            .where(
+                File.modified >= time_threshold,
+                # 'archive_path !~ ^cache/' -> regex match 'not similar'
+                not_(File.archive_path.op('~')('^cache/')),
+                File.diskstatus != 5,
+                # 'fk_books is not null'
+                File.fk_books.isnot(None)
+            )
+        )
+        booknums =  session.execute(stmt).scalars().all()    
+        for ebook in booknums:
+            Logger.ebook = ebook
+            debug("Checking ebook")
+            check_book(ebook)
 
     Logger.ebook = 0
-    debug ("Done AutoDelete.py")
+    debug("Done AutoDelete.py")
 
 
 if __name__ == '__main__':
-    main ()
+    main()

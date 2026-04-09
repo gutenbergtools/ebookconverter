@@ -14,6 +14,9 @@ Config parameters should be set in a file at /etc/ebookconverter.conf or ~/.eboo
 
 ebookconverter has been tested on Python 3.9.
 
+see the Ebookmaker Readme for system package dependencies: 
+<https://github.com/gutenbergtools/ebookmaker/blob/master/README.md>
+
 ## Installing
 
 `pipenv install ebookconverter`

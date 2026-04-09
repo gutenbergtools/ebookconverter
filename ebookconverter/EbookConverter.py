@@ -26,6 +26,8 @@ import sys
 from six.moves import urllib, cPickle
 import setproctitle
 
+import sqlalchemy
+
 from libgutenberg import DBUtils, Logger
 from libgutenberg.GutenbergFiles import remove_file_from_database, store_file_in_database
 from libgutenberg.GutenbergGlobals import Struct
@@ -76,6 +78,9 @@ PREFERRED_INPUT_FORMATS = {
     # coverpage (a cover will be generated, whatever)
     'cover.medium': ('rst/*', 'html/*', 'readme/*', 'txt/*', 'tex/*',),
 
+    # summary needs text file as input to generate
+    'summary': ALL_TXTS,
+
 }
 
 PREFERRED_INPUT_FORMATS['html.noimages']      = PREFERRED_INPUT_FORMATS['html.images']
@@ -115,7 +120,7 @@ FILENAMES = {
 GENERIC_FILENAME = 'pg{id}.generic'
 
 DEPENDENCIES = collections.OrderedDict((
-    ('everything',      ('all', 'kindle.noimages','facebook', 'bluesky', 'mastodon', 'update')),
+    ('everything',      ('all', 'kindle.noimages','facebook', 'bluesky', 'mastodon', 'update', 'summary')),
     ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
                          'cover', 'qrcode', 'rdf')),
     ('html',            ('html.images',)),
@@ -146,7 +151,7 @@ epub.images kindle.images pdf.images
 epub3.images kf8.images
 qrcode rdf
 facebook bluesky mastodon
-update
+update summary
 null
 """.split()
 
@@ -595,6 +600,9 @@ def main():
         fix_option_range(options, DBUtils.last_ebook())
     except ValueError:
         info("Not running: pidfile exists.")
+        sys.exit(2)
+    except sqlalchemy.exc.DBAPIError as e:
+        error(f"A database error occurred: {e}")
         sys.exit(2)
 
 

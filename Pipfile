@@ -8,8 +8,11 @@ libgutenberg = ">=0.10.33"
 ebookmaker = ">=0.13.7"
 sqlalchemy = "<2.0,>=1.4.0"
 pymarc = ">=5.2.3"
-ebookconverter = {file = ".", editable = true}
+openai = ">=2.9.0"
+tiktoken = ">= 0.12.0"
+anthropic = "*"
 urllib3 = ">=2.6.3"
+ebookconverter = {file = ".", editable = true}
 
 [dev-packages]
 
