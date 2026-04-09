@@ -55,7 +55,10 @@ def check_book(ebook):
             if file.archive_path.startswith('dirs'):
                 os.stat(os.path.join(PUBLIC, file.archive_path))
                 continue
-            os.stat(os.path.join(DIRS, file.archive_path))
+            if FILESMATCH.match(file.archive_path): # simlinked paths on ibiblio or dev environment
+                os.stat(os.path.join(FILES, file.archive_path))
+                continue
+            os.stat(os.path.join(DIRS, file.archive_path)) # standard 1/2/3 paths on ibiblio
         except OSError:
             file.diskstatus = 5 
             info("Removing from database: %s" % file.archive_path)
