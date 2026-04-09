@@ -5,7 +5,7 @@
 
 AutoDelete.py
 
-Copyright 2009 by Marcello Perathoner
+Copyright 2009-2026 by Marcello Perathoner and Project Gutenberg
 
 Distributable under the GNU General Public License Version 3 or newer.
 
@@ -16,41 +16,41 @@ checks if any of the known files of that ebook have been deleted.
 """
 
 import os
+import re
 import sys
 from datetime import datetime, timedelta
 
-from six.moves import builtins
-from six.moves import configparser
+from sqlalchemy import select, func, not_
 
-from libgutenberg.Logger import debug, info
-from libgutenberg import Logger
-from libgutenberg import GutenbergGlobals as gg
-from libgutenberg import GutenbergDatabase
 
+from libgutenberg import GutenbergDatabase, Logger
+from libgutenberg.GutenbergFiles import FILES
+from libgutenberg.Logger import debug, info, error
 from libgutenberg.Models import Book, File
 
-PRIVATE = os.getenv ('PRIVATE') or ''
-PUBLIC  = os.getenv ('PUBLIC')  or ''
 OB = GutenbergDatabase.Objectbase(False)
 
-DIRS  = PUBLIC + '/dirs'
+PRIVATE = os.getenv('PRIVATE') or ''
+PUBLIC = os.getenv('PUBLIC')  or ''
+DIRS = PUBLIC + '/dirs'
+FILESMATCH = re.compile(r'^\d\d')
 
-def check_book (ebook):
+def check_book(ebook):
     """ Check all files of ebook for presence. """
 
     session = OB.get_session()
     files = session.query(File).filter(
         File.fk_books == ebook,
-        File.diskstatus != 5
+        File.diskstatus != 5 # files already marked as missing
     ).all()
     
     for file in files:
         try:
-            if file.archive_path.startswith('/'):
+            if file.archive_path.startswith('/'): # full path somewhere
                 os.stat(file.archive_path)
                 continue
             if file.archive_path.startswith('cache'):
-                os.stat(os.path.join(PUBLIC, file.archive_path))
+                os.stat(os.path.join(PUBLIC, file.archive_path)) # generated files
                 continue
             if file.archive_path.startswith('dirs'):
                 os.stat(os.path.join(PUBLIC, file.archive_path))
@@ -58,30 +58,26 @@ def check_book (ebook):
             os.stat(os.path.join(DIRS, file.archive_path))
         except OSError:
             file.diskstatus = 5 
-            session.commit()
             info("Removing from database: %s" % file.archive_path)
     session.commit()
 
 
-def main ():
+def main():
     goback = 1
-    Logger.setup (Logger.LOGFORMAT, 'autodelete.log')
-    Logger.set_log_level (2)
 
-    debug ("Starting AutoDelete.py")
+    Logger.setup(Logger.LOGFORMAT, 'autodelete.log')
+    Logger.set_log_level(2)
 
-        Logger.ebook = ebook
-        debug ("Checking ebook")
-        check_book (ebook)
+    debug("Starting AutoDelete.py")
     if len(sys.argv) > 1:
         for arg in sys.argv[1:]:
             try:
                 Logger.ebook = int(arg)
-                if check_book (int(arg)):
+                if check_book(int(arg)):
                     error('No directory for {arg}')
                 
             except ValueError: # no int
-                error ("not an ebook number: %s", str (arg))
+                error("not an ebook number: %s", str (arg))
 
     else:
         session = OB.get_session()
@@ -104,10 +100,13 @@ def main ():
         )
         booknums =  session.execute(stmt).scalars().all()    
         for ebook in booknums:
+            Logger.ebook = ebook
+            debug("Checking ebook")
+            check_book(ebook)
 
     Logger.ebook = 0
-    debug ("Done AutoDelete.py")
+    debug("Done AutoDelete.py")
 
 
 if __name__ == '__main__':
-    main ()
+    main()
