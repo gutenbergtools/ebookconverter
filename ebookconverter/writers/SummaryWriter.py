@@ -89,16 +89,16 @@ class Writer (TxtWriter.Writer):
         notemarcs = [marc for marc in job.dc.marcs if marc.code == '500']
         wiki_lang = None
         wikis = self.get_wikis(job)
+        page_title = None
         if summary_type != "WIKI":
             # if wikipedia url already exists, use it if possible
             for (wiki_lang, page_title) in wikis:
                 if wiki_lang == self.langcode or wiki_lang == "en":
                     break            
-            if not page_title: # there were no wikipedia urls
-                return None
-            new_wiki_summary = self.get_wikipedia_article_summary(page_title, wiki_lang)
-            self.insert_into_pg_database(id, new_wiki_summary)
-            return
+            if  page_title: # there were no wikipedia urls
+                new_wiki_summary = self.get_wikipedia_article_summary(page_title, wiki_lang)
+                self.insert_into_pg_database(id, new_wiki_summary)
+                return
         if summary_type == "LLM":
             #don't need to remake summary
             return
@@ -109,7 +109,7 @@ class Writer (TxtWriter.Writer):
             urls = self.google_search_with_serper(title_and_authors + " wikipedia")
             wiki_langs_and_titles = list(filter(None, map(self.check_wikipedia_url, urls)))
             for lang, page_title in wiki_langs_and_titles:
-                wiki_summary = self.get_wikipedia_article_summary(title, lang)
+                wiki_summary = self.get_wikipedia_article_summary(page_title, lang)
                 if wiki_summary == None:
                     continue
                 if self.validate_with_claude(wiki_summary, title_and_authors):
