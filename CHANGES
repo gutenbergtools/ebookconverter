@@ -1,3 +1,7 @@
+0.11.1 (April 15, 2026)
+- fixed refactoring errors in SummaryWriter
+
+
 0.11.0 (April 9, 2026)
 - handled DB errors happening outside of the loop
 - added SummaryWriter
