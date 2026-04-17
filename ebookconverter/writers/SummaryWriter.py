@@ -83,40 +83,43 @@ class Writer (TxtWriter.Writer):
         if not len(job.dc.languages) == 0:
             self.langcode = job.dc.languages[0].id
 
-        summary_type, existing_summary = self.get_existing_summary()
-        if summary_type == "EDITED":
+        summary_type, existing_summary_marc = self.get_existing_summary()
+        if summary_type == "EDITED": # Always keep edited summary
             return
         notemarcs = [marc for marc in job.dc.marcs if marc.code == '500']
         wiki_lang = None
-        wikis = self.get_wikis(job)
         page_title = None
-        if summary_type != "WIKI":
-            # if wikipedia url already exists, use it if possible
-            for (wiki_lang, page_title) in wikis:
-                if wiki_lang == self.langcode or wiki_lang == "en":
-                    break            
-            if  page_title: # there were no wikipedia urls
-                new_wiki_summary = self.get_wikipedia_article_summary(page_title, wiki_lang)
-                self.insert_into_pg_database(id, new_wiki_summary)
+        wikis = self.get_wikis(job)
+        for (wiki_lang, page_title) in wikis:
+            if wiki_lang == self.langcode or wiki_lang == "en":
+                break            
+
+        if page_title: # there was a wikipedia url in the database
+            new_wiki_summary = self.get_wikipedia_article_summary(page_title, wiki_lang)
+            if new_wiki_summary:
+                self.insert_into_pg_database(
+                    id, new_wiki_summary + WIKI_TAG, existing_summary_marc)
                 return
+        
+
+        # there is no summary. Let's search for a wikipedia article.
+        title_and_authors = job.dc.make_pretty_title()
+        urls = self.google_search_with_serper(title_and_authors + " wikipedia")
+        wiki_langs_and_titles = list(filter(None, map(self.check_wikipedia_url, urls)))
+        for lang, page_title in wiki_langs_and_titles:
+            wiki_summary = self.get_wikipedia_article_summary(page_title, lang)
+            if wiki_summary == None:
+                continue
+            if self.validate_with_claude(wiki_summary, title_and_authors):
+                if (lang, page_title) not in wikis:
+                    self.add_wiki_url_to_database(id, page_title, lang)
+                self.insert_into_pg_database(
+                    id, wiki_summary + WIKI_TAG, existing_summary_marc)
+                return
+
         if summary_type == "LLM":
             #don't need to remake summary
             return
-
-        # there is no summary
-        if summary_type != 'OTHER':
-            title_and_authors = job.dc.make_pretty_title()
-            urls = self.google_search_with_serper(title_and_authors + " wikipedia")
-            wiki_langs_and_titles = list(filter(None, map(self.check_wikipedia_url, urls)))
-            for lang, page_title in wiki_langs_and_titles:
-                wiki_summary = self.get_wikipedia_article_summary(page_title, lang)
-                if wiki_summary == None:
-                    continue
-                if self.validate_with_claude(wiki_summary, title_and_authors):
-                    if (lang, page_title) not in wikis:
-                        self.add_wiki_url_to_database(id, page_title, lang)
-                    self.insert_into_pg_database(id, wiki_summary + WIKI_TAG)
-                    return
 
         # There is no summary or wikipedia article about the book
         # use LLM to summarize book via content
@@ -141,30 +144,27 @@ class Writer (TxtWriter.Writer):
                 error ("SummaryWriter: AI Error, Skipping Writing for %d. Summary: %s" % (id, content_summary))
                 return
 
-        self.insert_into_pg_database(id, content_summary + LLM_TAG)
+        self.insert_into_pg_database(id, content_summary + LLM_TAG, existing_summary_marc)
 
     def get_existing_summary(self):
         summarymarcs = [marc for marc in self.dc.marcs if marc.code == '520']
         for marc in summarymarcs:
             if LLM_TAG in marc.text:
-                return ['LLM', marc.text]
+                return ['LLM', marc]
             elif WIKI_TAG in marc.text:
-                return ['WIKI', marc.text]
+                return ['WIKI', marc]
             elif EDITED_TAG in marc.text:
-                return ['EDITED', marc.text]
+                return ['EDITED', marc]
         return None, None
 
-    def insert_into_pg_database(self, id, db_summary):
+    def insert_into_pg_database(self, id, db_summary, existing_summary_marc):
         session = self.dc.get_my_session()
         try:
-            for attribute in session.query(Attribute).where(
-                    and_(Attribute.fk_attriblist == 520, Attribute.fk_books == id)):
-                # only time we replace a 520 attribute is if it's LLM
-                if LLM_TAG in attribute.text:
-                    attribute.text = db_summary
-                    session.commit()
-                    info ("SummaryWriter: replaced summary: %d" % id)
-                    return
+            if existing_summary_marc:
+                existing_summary_marc.text = db_summary
+                session.commit()
+                info ("SummaryWriter: replaced summary: %d" % id)
+                return
             self.dc.book.attributes.append(Attribute(
                 fk_attriblist=520, text=db_summary, nonfiling=0))
             session.commit()
