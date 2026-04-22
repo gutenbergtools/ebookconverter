@@ -11,8 +11,8 @@ openai = ">=2.9.0"
 tiktoken = ">= 0.12.0"
 anthropic = "*"
 urllib3 = ">=2.6.3"
-ebookconverter = {file = ".", editable = true}
 libgutenberg = ">=0.10.35"
+ebookconverter = {file = ".", editable = true}
 
 [dev-packages]
 
