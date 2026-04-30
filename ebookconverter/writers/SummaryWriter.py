@@ -117,10 +117,6 @@ class Writer (TxtWriter.Writer):
                     id, wiki_summary + WIKI_TAG, existing_summary_marc)
                 return
 
-        if summary_type == "LLM":
-            #don't need to remake summary
-            return
-
         # There is no summary or wikipedia article about the book
         # use LLM to summarize book via content
         try:
