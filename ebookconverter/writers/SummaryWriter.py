@@ -296,8 +296,7 @@ class Writer (TxtWriter.Writer):
         """Generate two-paragraph summary from book's opening portion using GPT. To be used for long books."""
         system_prompt = BeginningBook.system_prompt
 
-        user_instruction = BeginningBook.main_prompt
-        user_instruction["content"] = user_instruction["content"].replace("title_and_author", title_and_author)
+        user_instruction = BeginningBook.main_prompt(title_and_author)
         assistant_reply = BeginningBook.assistant_reply
         book_content = {"role": "user", "content": f"START OF BOOK BEGINNING: \n{text}\nEND OF BOOK BEGINNING"}
 
@@ -310,8 +309,7 @@ class Writer (TxtWriter.Writer):
         """Generate two-paragraph summary from entire book using GPT. To be used for short books."""
         system_prompt = FullBook.system_prompt
 
-        user_instruction = FullBook.main_prompt
-        user_instruction["content"] = user_instruction["content"].replace("title_and_author", title_and_author)
+        user_instruction = FullBook.main_prompt(title_and_author)
 
         assistant_reply = FullBook.assistant_reply
         book_content = {"role": "user", "content": f"START OF BOOK: \n{text}\nEND OF BOOK"}

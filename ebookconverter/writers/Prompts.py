@@ -12,10 +12,11 @@ class BeginningBook:
 
     system_prompt = {"role": "system", "content": """You are a helpful assistant that is very good at deriving an understanding of books based on their opening chapters. You are also very good at writing texts about those books based on your understanding that are useful to potential readers who need to decide whether a particular book is interesting to them or not."""}
     assistant_reply = {"role": "assistant", "content": "Understood! Please provide the opening portion of the book and I will follow your instructions."}
-    main_prompt = {"role": "user", "content": """You will be given the opening portion of a book. Read it very carefully to understand its content and derive an idea of the book in general. Based on your understanding write two paragraphs.
+    def main_prompt(title_and_author):
+        return {"role": "user", "content": f"""You will be given the opening portion of a book. Read it very carefully to understand its content and derive an idea of the book in general. Based on your understanding write two paragraphs.
 
         The first paragraph should be concise and to-the-point. The first sentence should include:
-        - the title of the book and name of the author (if provided), which is: title_and_author.
+        - the title of the book and name of the author (if provided), which is: {title_and_author}.
         - what type of book it is (e.g. novel, scientific publication, historical account, collection of short stories etc.)
         - what general time period the book was probably written in (e.g. early 19th century, mid-19th century, late 19th century, 14th century). Only refer to general time periods like that, do NOT use specific years and dates!
 
@@ -46,9 +47,10 @@ class BeginningBook:
 class FullBook:
     system_prompt = {"role": "system", "content": """You are a helpful assistant that is very good at reading and understanding books. You are also very good at writing texts about those books based on your understanding that are useful to potential readers who need to decide whether a particular book is interesting to them or not."""}
     assistant_reply = {"role": "assistant", "content": "Understood! Please provide the book and I will follow your instructions."}
-    main_prompt = {"role": "user", "content": """You will be given the entire book. Read it very carefully to understand its content. Based on your understanding write two paragraphs.
+    def main_prompt(title_and_author):
+        return {"role": "user", "content": f"""You will be given the entire book. Read it very carefully to understand its content. Based on your understanding write two paragraphs.
 
-        In the first paragraph briefly lay out some high-level information about the book in general. Specifically include the title and the author (if available) of the book which is this: title_and_author. Include it exactly like this, do NOT change it. Also include what type of book it is (e.g. novel, biography, crime fiction, scientific. publication, collection of short stories, historical account etc.) and what time period the book was probably written in (e.g. Victorian era, early 20th century etc.). Do NOT use specific years but instead use wider time spans. So for example, rather than saying "1886", you could say "late 1800s" or "in the late 19th century". Moreover include a very concise statement what the likely topic of the book is.
+        In the first paragraph briefly lay out some high-level information about the book in general. Specifically include the title and the author (if available) of the book which is this: {title_and_author}. Include it exactly like this, do NOT change it. Also include what type of book it is (e.g. novel, biography, crime fiction, scientific. publication, collection of short stories, historical account etc.) and what time period the book was probably written in (e.g. Victorian era, early 20th century etc.). Do NOT use specific years but instead use wider time spans. So for example, rather than saying "1886", you could say "late 1800s" or "in the late 19th century". Moreover include a very concise statement what the likely topic of the book is.
 
         Here are some EXAMPLES of how that first paragraph should principally look like
         1) "Adventures of Sherlock Holmes" by Sir Arthur Conan Doyle is a collection of detective stories written during the late 19th century. The book follows the brilliant detective Sherlock Holmes and his companion Dr. John Watson as they solve various cases.
