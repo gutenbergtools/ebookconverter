@@ -10,7 +10,8 @@ Distributable under the GNU General Public License Version 3 or newer.
 
 class BeginningBook:
 
-    system_prompt = {"role": "system", "content": """You are a helpful assistant that is very good at deriving an understanding of books based on their opening chapters. You are also very good at writing texts about those books based on your understanding that are useful to potential readers who need to decide whether a particular book is interesting to them or not."""}
+    system_prompt = {"role": "system", "content": """/clear
+    You are a helpful assistant that is very good at deriving an understanding of books based on their opening chapters. You are also very good at writing texts about those books based on your understanding that are useful to potential readers who need to decide whether a particular book is interesting to them or not."""}
     assistant_reply = {"role": "assistant", "content": "Understood! Please provide the opening portion of the book and I will follow your instructions."}
     def main_prompt(title_and_author):
         return {"role": "user", "content": f"""You will be given the opening portion of a book. Read it very carefully to understand its content and derive an idea of the book in general. Based on your understanding write two paragraphs.
@@ -45,7 +46,8 @@ class BeginningBook:
 
 
 class FullBook:
-    system_prompt = {"role": "system", "content": """You are a helpful assistant that is very good at reading and understanding books. You are also very good at writing texts about those books based on your understanding that are useful to potential readers who need to decide whether a particular book is interesting to them or not."""}
+    system_prompt = {"role": "system", "content": """/clear
+    You are a helpful assistant that is very good at reading and understanding books. You are also very good at writing texts about those books based on your understanding that are useful to potential readers who need to decide whether a particular book is interesting to them or not."""}
     assistant_reply = {"role": "assistant", "content": "Understood! Please provide the book and I will follow your instructions."}
     def main_prompt(title_and_author):
         return {"role": "user", "content": f"""You will be given the entire book. Read it very carefully to understand its content. Based on your understanding write two paragraphs.
