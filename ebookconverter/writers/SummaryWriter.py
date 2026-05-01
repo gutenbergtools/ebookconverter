@@ -248,6 +248,8 @@ class Writer (TxtWriter.Writer):
         if not wiki_match:
             return None
         lang = wiki_match.group(1)
+        if lang in ['sco']: # some wikipedias are not trustworthy
+            return None
         page_title = wiki_match.group(2)
         if any(pattern in unquote(page_title) for pattern in AVOID_WIKI):
             return None
