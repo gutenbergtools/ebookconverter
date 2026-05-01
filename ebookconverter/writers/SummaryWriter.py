@@ -143,7 +143,7 @@ class Writer (TxtWriter.Writer):
         self.insert_into_pg_database(id, content_summary + LLM_TAG, existing_summary_marc)
 
     def get_existing_summary(self):
-        summarymarcs = [marc for marc in self.dc.marcs if marc.code == '520']
+        summarymarcs = [marc for marc in self.dc.book.attributes if marc.fk_attriblist == 520]
         for marc in summarymarcs:
             if LLM_TAG in marc.text:
                 return ['LLM', marc]
