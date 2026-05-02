@@ -117,10 +117,6 @@ class Writer (TxtWriter.Writer):
                     id, wiki_summary + WIKI_TAG, existing_summary_marc)
                 return
 
-        if summary_type == "LLM":
-            #don't need to remake summary
-            return
-
         # There is no summary or wikipedia article about the book
         # use LLM to summarize book via content
         try:
@@ -147,7 +143,7 @@ class Writer (TxtWriter.Writer):
         self.insert_into_pg_database(id, content_summary + LLM_TAG, existing_summary_marc)
 
     def get_existing_summary(self):
-        summarymarcs = [marc for marc in self.dc.marcs if marc.code == '520']
+        summarymarcs = [marc for marc in self.dc.book.attributes if marc.fk_attriblist == 520]
         for marc in summarymarcs:
             if LLM_TAG in marc.text:
                 return ['LLM', marc]
@@ -252,6 +248,8 @@ class Writer (TxtWriter.Writer):
         if not wiki_match:
             return None
         lang = wiki_match.group(1)
+        if lang in ['sco']: # some wikipedias are not trustworthy
+            return None
         page_title = wiki_match.group(2)
         if any(pattern in unquote(page_title) for pattern in AVOID_WIKI):
             return None
@@ -296,8 +294,7 @@ class Writer (TxtWriter.Writer):
         """Generate two-paragraph summary from book's opening portion using GPT. To be used for long books."""
         system_prompt = BeginningBook.system_prompt
 
-        user_instruction = BeginningBook.main_prompt
-        user_instruction["content"] = user_instruction["content"].replace("title_and_author", title_and_author)
+        user_instruction = BeginningBook.main_prompt(title_and_author)
         assistant_reply = BeginningBook.assistant_reply
         book_content = {"role": "user", "content": f"START OF BOOK BEGINNING: \n{text}\nEND OF BOOK BEGINNING"}
 
@@ -310,8 +307,7 @@ class Writer (TxtWriter.Writer):
         """Generate two-paragraph summary from entire book using GPT. To be used for short books."""
         system_prompt = FullBook.system_prompt
 
-        user_instruction = FullBook.main_prompt
-        user_instruction["content"] = user_instruction["content"].replace("title_and_author", title_and_author)
+        user_instruction = FullBook.main_prompt(title_and_author)
 
         assistant_reply = FullBook.assistant_reply
         book_content = {"role": "user", "content": f"START OF BOOK: \n{text}\nEND OF BOOK"}
