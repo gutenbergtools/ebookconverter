@@ -1,3 +1,7 @@
+0.11.4 (May 1, 2026)
+- fix bug preventing updates of summaries
+- prevent use of scots wikipedia
+
 0.11.3 (April 30, 2026)
 - allow refresh of LLM summaries
 - make prompts thread-safe.  title and author was not being reset.
