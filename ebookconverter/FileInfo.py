@@ -320,7 +320,7 @@ def scan_dopush_log():
         if m:
             ebook_num = int(m.group(1))
             Logger.ebook = ebook_num
-            if scan_directory(scan_directory(ebook_num)):
+            if scan_directory(ebook_num):
                 error(f'No directory for {ebook_num}')
         shutil.move(os.path.join(DOPUSH_LOG_DIR, filename),
                      os.path.join(DOPUSH_LOG_DIR, 'backup', filename))
@@ -341,7 +341,7 @@ def main():
             try:
                 Logger.ebook = int(arg)
                 if scan_directory(Logger.ebook):
-                    error('No directory for {Logger.ebook}')
+                    error(f'No directory for {Logger.ebook}')
                 else:
                     check_book(Logger.ebook)
             except ValueError: # no int
