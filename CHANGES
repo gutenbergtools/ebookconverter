@@ -1,3 +1,6 @@
+0.11.5 (May 9, 2026)
+- fixed dumb bug preventing autodelete from running
+
 0.11.4 (May 1, 2026)
 - fix bug preventing updates of summaries
 - prevent use of scots wikipedia
