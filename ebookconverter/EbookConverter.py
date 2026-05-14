@@ -146,9 +146,9 @@ rst.gen
 txt.utf-8
 html.images html.noimages
 epub.noimages kindle.noimages pdf.noimages
-cover.small cover.medium
 epub.images kindle.images pdf.images
 epub3.images kf8.images
+cover.small cover.medium
 qrcode rdf
 facebook bluesky mastodon
 update summary

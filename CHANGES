@@ -1,3 +1,6 @@
+0.11.6 (May xx, 2026)
+- moved the cover builds to align with that used for Ebookmaker to fix spurious "cover too small warnings.
+
 0.11.5 (May 9, 2026)
 - fixed dumb bug preventing autodelete from running
 
