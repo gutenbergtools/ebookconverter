@@ -50,7 +50,11 @@
   - dev-jekyll
   - prod-jekyll
 - updated requirements
-
+0.10.5 May ? 2026
+- moved cover builds to align with ebookmaker 
+    - fixes spurious "cover too small warnings".
+    - fixes https://github.com/gutenbergtools/ebookmaker/issues/305
+- removed obsolete link to archives
 
 0.10.4 (July 17, 2025)
 - fixed packaging errors
