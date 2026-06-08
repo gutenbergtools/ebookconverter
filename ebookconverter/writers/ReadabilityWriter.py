@@ -12,6 +12,7 @@ from libgutenberg.GutenbergDatabase import DatabaseError
 from libgutenberg.Logger import exception, error, info
 from libgutenberg.Models import Attribute
 from ebookmaker.writers import TxtWriter
+from ebookmaker.parsers.boilerplate import strip_headers_from_txt
 
 READABILITY_ATTR = 908
 
@@ -54,7 +55,7 @@ class Writer (TxtWriter.Writer):
             # this should get the cached parser from our inherited TxtWriter
             parser = TxtWriter.ParserFactory.ParserFactory.parsers[job.url]
             # strip the PG license boilerplate so it doesn't skew the score on short texts
-            book_content = self.remove_gutenberg_wrapper(parser.unicode_content())
+            book_content, _, _ = strip_headers_from_txt(parser.unicode_content())
         except KeyError as kerr:
             error ("ReadabilityWriter: Couldn't Access Text: %s" % kerr)
             return
@@ -83,18 +84,3 @@ class Writer (TxtWriter.Writer):
             info ("ReadabilityWriter: created score: %d" % id)
         except DatabaseError as dberr:
             exception ('ReadabilityWriter: could not add score to database: %s' % (dberr))
-
-    def remove_gutenberg_wrapper(self, text):
-        """Remove Gutenberg header and footer from book text."""
-        lines = text.split('\n')
-        start_index = 0
-        end_index = len(lines)
-
-        for i, line in enumerate(lines):
-            if line.startswith("*** START OF"):
-                start_index = i + 1
-            elif line.startswith("*** END OF"):
-                end_index = i
-                break
-
-        return '\n'.join(lines[start_index:end_index]).strip()
