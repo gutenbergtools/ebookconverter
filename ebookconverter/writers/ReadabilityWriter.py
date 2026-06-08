@@ -16,6 +16,9 @@ from ebookmaker.parsers.boilerplate import strip_headers_from_txt
 
 READABILITY_ATTR = 908
 
+# languages textstat has Flesch-adapted constants for; others get no score
+SUPPORTED_LANGS = {'en', 'de', 'es', 'fr', 'it', 'nl', 'ru', 'hu'}
+
 # reading-ease score bands: (min, max, grade level, description)
 SCORE_RANGES = [
     (90, 100, "5th grade", "Very easy to read."),
@@ -51,6 +54,13 @@ class Writer (TxtWriter.Writer):
             return
         self.dc = job.dc
 
+        # the score is only valid for languages textstat has constants for;
+        # for any other language drop a stale score from the old batch and skip
+        lang = job.dc.languages[0].id if job.dc.languages else 'en'
+        if lang not in SUPPORTED_LANGS:
+            self.remove_from_pg_database(id)
+            return
+
         try:
             # this should get the cached parser from our inherited TxtWriter
             parser = TxtWriter.ParserFactory.ParserFactory.parsers[job.url]
@@ -63,6 +73,7 @@ class Writer (TxtWriter.Writer):
             error ("ReadabilityWriter: Bad Text Content: %s" % uerr)
             return
 
+        textstat.set_lang(lang)
         score = textstat.flesch_reading_ease(book_content)
         grade, description = get_readability_grade(score)
         db_text = "Reading ease score: %.1f (%s). %s" % (score, grade, description)
@@ -84,3 +95,16 @@ class Writer (TxtWriter.Writer):
             info ("ReadabilityWriter: created score: %d" % id)
         except DatabaseError as dberr:
             exception ('ReadabilityWriter: could not add score to database: %s' % (dberr))
+
+    def remove_from_pg_database(self, id):
+        '''Delete the readability attribute (908) for unsupported-language books.'''
+        session = self.dc.get_my_session()
+        existing = [a for a in self.dc.book.attributes if a.fk_attriblist == READABILITY_ATTR]
+        if not existing:
+            return
+        try:
+            session.delete(existing[0])
+            session.commit()
+            info ("ReadabilityWriter: removed score: %d" % id)
+        except DatabaseError as dberr:
+            exception ('ReadabilityWriter: could not remove score from database: %s' % (dberr))

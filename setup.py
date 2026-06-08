@@ -51,7 +51,7 @@ setup (
         'tiktoken',
         'openai',
         'anthropic',
-        'textstat',
+        'textstat>=0.7,<0.8',
     ],
     
     package_data = {
