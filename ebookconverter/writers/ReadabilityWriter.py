@@ -9,7 +9,7 @@
 import textstat
 
 from libgutenberg.GutenbergDatabase import DatabaseError
-from libgutenberg.Logger import exception, error, info
+from libgutenberg.Logger import exception, error, info, debug
 from libgutenberg.Models import Attribute
 from ebookmaker.writers import TxtWriter
 from ebookmaker.parsers.boilerplate import strip_headers_from_txt
@@ -76,7 +76,7 @@ class Writer (TxtWriter.Writer):
             if existing:
                 existing[0].text = db_text
                 session.commit()
-                info ("ReadabilityWriter: replaced score: %d" % id)
+                debug ("ReadabilityWriter: replaced score: %d" % id)
                 return
             self.dc.book.attributes.append(Attribute(
                 fk_attriblist=READABILITY_ATTR, text=db_text, nonfiling=0))
