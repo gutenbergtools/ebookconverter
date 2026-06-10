@@ -84,6 +84,9 @@ PREFERRED_INPUT_FORMATS = {
     # readability score is computed from the text file
     'readability': ALL_TXTS,
 
+    # word count is computed from the text file
+    'wordcount': ALL_TXTS,
+
 }
 
 PREFERRED_INPUT_FORMATS['html.noimages']      = PREFERRED_INPUT_FORMATS['html.images']
@@ -125,7 +128,7 @@ GENERIC_FILENAME = 'pg{id}.generic'
 DEPENDENCIES = collections.OrderedDict((
     ('everything',      ('all', 'kindle.noimages','facebook', 'bluesky', 'mastodon', 'update', 'summary')),
     ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
-                         'cover', 'qrcode', 'rdf', 'readability')),
+                         'cover', 'qrcode', 'rdf', 'readability', 'wordcount')),
     ('html',            ('html.images',)),
     ('epub',            ('epub.images',    'epub.noimages')),
     ('epub3',           ('epub3.images',)),
@@ -154,7 +157,7 @@ epub.images kindle.images pdf.images
 epub3.images kf8.images
 qrcode rdf
 facebook bluesky mastodon
-update summary readability
+update summary readability wordcount
 null
 """.split()
 
