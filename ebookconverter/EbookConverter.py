@@ -81,6 +81,9 @@ PREFERRED_INPUT_FORMATS = {
     # summary needs text file as input to generate
     'summary': ALL_TXTS,
 
+    # readability score is computed from the text file
+    'readability': ALL_TXTS,
+
 }
 
 PREFERRED_INPUT_FORMATS['html.noimages']      = PREFERRED_INPUT_FORMATS['html.images']
@@ -122,7 +125,7 @@ GENERIC_FILENAME = 'pg{id}.generic'
 DEPENDENCIES = collections.OrderedDict((
     ('everything',      ('all', 'kindle.noimages','facebook', 'bluesky', 'mastodon', 'update', 'summary')),
     ('all',             ('html', 'epub', 'kindle', 'epub3', 'kf8', 'pdf', 'txt', 'rst',
-                         'cover', 'qrcode', 'rdf')),
+                         'cover', 'qrcode', 'rdf', 'readability')),
     ('html',            ('html.images',)),
     ('epub',            ('epub.images',    'epub.noimages')),
     ('epub3',           ('epub3.images',)),
@@ -151,7 +154,7 @@ epub3.images kf8.images
 cover.small cover.medium
 qrcode rdf
 facebook bluesky mastodon
-update summary
+update summary readability
 null
 """.split()
 
