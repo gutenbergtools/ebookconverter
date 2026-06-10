@@ -1,5 +1,11 @@
-0.11.6 (May xx, 2026)
+0.11.6 (June xx, 2026)
 - moved the cover builds to align with that used for Ebookmaker to fix spurious "cover too small warnings.
+- moved cover builds to align with ebookmaker 
+    - fixes spurious "cover too small" warnings.
+    - fixes https://github.com/gutenbergtools/ebookmaker/issues/305
+- removed obsolete link to archives
+- update FacebookAP version to v25
+- added ReadabilityWriter to compute a Flesch reading-ease score for a book's text and stores it as attribute 908.
 
 0.11.5 (May 9, 2026)
 - fixed dumb bug preventing autodelete from running
@@ -50,12 +56,6 @@
   - dev-jekyll
   - prod-jekyll
 - updated requirements
-0.10.5 May ? 2026
-- moved cover builds to align with ebookmaker 
-    - fixes spurious "cover too small" warnings.
-    - fixes https://github.com/gutenbergtools/ebookmaker/issues/305
-- removed obsolete link to archives
-- update FacebookAP version to v25
 
 0.10.4 (July 17, 2025)
 - fixed packaging errors
