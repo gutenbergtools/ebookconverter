@@ -2,9 +2,9 @@
 from datetime import datetime
 import subprocess
 
-start = datetime(2019,6,5,9)
+start = datetime(2026,6,10,12)
 test = datetime.now()
 elapsed = test - start
-pgstart = 59291
+pgstart = 78789
 todo = pgstart + elapsed.days * 12 + elapsed.seconds // 7200
 subprocess.call(["ebookconverter", "-v", "-v", "--build=facebook", "--range=%s" % todo]) 
