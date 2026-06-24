@@ -322,6 +322,8 @@ def scan_dopush_log():
             Logger.ebook = ebook_num
             if scan_directory(ebook_num):
                 error(f'No directory for {ebook_num}')
+            else:
+                check_book(ebook_num)
         shutil.move(os.path.join(DOPUSH_LOG_DIR, filename),
                      os.path.join(DOPUSH_LOG_DIR, 'backup', filename))
         retcode = 0

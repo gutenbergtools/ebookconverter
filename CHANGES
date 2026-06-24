@@ -6,6 +6,7 @@
 - removed obsolete link to archives
 - update FacebookAP version to v25
 - added ReadabilityWriter to compute a Flesch reading-ease score for a book's text and stores it as attribute 908.
+- fixed FileInfo so that it runs AutoDelete.check_book on every doPush
 
 0.11.5 (May 9, 2026)
 - fixed dumb bug preventing autodelete from running
