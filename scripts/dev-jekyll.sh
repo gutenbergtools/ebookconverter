@@ -16,6 +16,8 @@ git checkout remotes/origin/dev
 
 # Fetch input, the popular covers:
 /usr/bin/wget --quiet -O ${BUILD}/_includes/popular_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/popular/10"
+# Fetch input, the exact ebook count:
+/usr/bin/wget --quiet -O ${BUILD}/_includes/book_count.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/ebook_count/"
 
 
 # This deploys the new content. Any errors will be returned; otherwise
