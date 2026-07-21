@@ -14,6 +14,8 @@ git checkout remotes/origin/master
 /usr/bin/wget --quiet -O ${BUILD}/_includes/latest_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/latest/10"
 # Fetch input, the popular covers:
 /usr/bin/wget --quiet -O ${BUILD}/_includes/popular_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/popular/10"
+# Fetch input, the random covers:
+/usr/bin/wget --quiet -O ${BUILD}/_includes/random_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/random/10"
 
 
 

@@ -27,6 +27,7 @@ OLDSUM=`/usr/bin/sum ${BUILD}/_includes/latest_covers.html | /usr/bin/cut -f1 -d
 # This is going to appdev:
 /usr/bin/wget --quiet -O ${BUILD}/_includes/latest_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/latest/10"
 /usr/bin/wget --quiet -O ${BUILD}/_includes/popular_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/popular/10"
+/usr/bin/wget --quiet -O ${BUILD}/_includes/random_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/random/10"
 
 # Are the covers different than previously?
 NEWSUM=`/usr/bin/sum ${BUILD}/_includes/latest_covers.html | /usr/bin/cut -f1 -d" "`

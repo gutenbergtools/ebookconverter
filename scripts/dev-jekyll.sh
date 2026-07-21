@@ -17,6 +17,8 @@ git checkout remotes/origin/dev
 # Fetch input, the popular covers:
 /usr/bin/wget --quiet -O ${BUILD}/_includes/popular_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/popular/10"
 
+# Fetch input, the random covers:
+/usr/bin/wget --quiet -O ${BUILD}/_includes/random_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/random/10"
 
 # This deploys the new content. Any errors will be returned; otherwise
 # output is quelled:
