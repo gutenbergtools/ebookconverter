@@ -12,10 +12,13 @@ git checkout remotes/origin/dev
 
 
 # Fetch input, the latest covers:
-/usr/bin/wget --quiet -O ${BUILD}/_includes/latest_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/latest/10"
+/usr/bin/wget --quiet -O ${BUILD}/_includes/latest_covers.html "http://gutenberg-app1.ibiblio.org:8000/covers/medium/latest/10"
 
 # Fetch input, the popular covers:
-/usr/bin/wget --quiet -O ${BUILD}/_includes/popular_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/popular/10"
+/usr/bin/wget --quiet -O ${BUILD}/_includes/popular_covers.html "http://gutenberg-app1.ibiblio.org:8000/covers/medium/popular/10"
+
+# Fetch ebook_count:
+/usr/bin/wget --quiet -O ${BUILD}/_includes/ebook_count "http://gutenberg-app1.ibiblio.org:8000/ebook_count/"
 
 
 # This deploys the new content. Any errors will be returned; otherwise

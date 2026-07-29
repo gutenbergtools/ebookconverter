@@ -10,7 +10,7 @@
 # 20240717 - run only if there are new images (gbn)
 # 20250430 - change jekyll invocation to  better set the  ruby environment - ESH
 # 20250807 - add get for popular covers
-
+# 20260207 - switched to gutenberg-app1.ibiblio.org -ESH
 # Where to build (we might need to have multiple dev v. production locations
 # in the future)
 BUILD=/public/vhost/g/gutenberg/gutenbergsite
@@ -24,9 +24,10 @@ OLDSUM=`/usr/bin/sum ${BUILD}/_includes/latest_covers.html | /usr/bin/cut -f1 -d
 
 # Fetch input, the latest covers:
 # /usr/bin/wget --quiet -O ${BUILD}/_includes/latest_covers.html "http://gutenberg-app1:8000/covers/medium/latest/10"
-# This is going to appdev:
-/usr/bin/wget --quiet -O ${BUILD}/_includes/latest_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/latest/10"
-/usr/bin/wget --quiet -O ${BUILD}/_includes/popular_covers.html "http://[2610:28:3090:3001:0:dead:cafe:100]:8000/covers/medium/popular/10"
+# This is going to app1:
+/usr/bin/wget --quiet -O ${BUILD}/_includes/latest_covers.html "http://gutenberg-app1.ibiblio.org:8000/covers/medium/latest/10"
+/usr/bin/wget --quiet -O ${BUILD}/_includes/popular_covers.html "http://gutenberg-app1.ibiblio.org:8000/covers/medium/popular/10"
+/usr/bin/wget --quiet -O ${BUILD}/_includes/ebook_count "http://gutenberg-app1.ibiblio.org:8000/ebook_count/"
 
 # Are the covers different than previously?
 NEWSUM=`/usr/bin/sum ${BUILD}/_includes/latest_covers.html | /usr/bin/cut -f1 -d" "`
