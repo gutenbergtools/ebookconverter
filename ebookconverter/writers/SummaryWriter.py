@@ -29,6 +29,7 @@ from libgutenberg.GutenbergDatabase import DatabaseError
 from libgutenberg.Logger import exception, error, info, warning
 from libgutenberg.Models import Attribute, Book
 from ebookmaker.writers import TxtWriter
+from ebookmaker.parsers.boilerplate import strip_headers_from_txt
 from ebookconverter.writers.Prompts import BeginningBook, FullBook, WikipediaValidator
 
 from openai import OpenAI
@@ -122,7 +123,7 @@ class Writer (TxtWriter.Writer):
         try:
             # this should get the cached parser from our inherited TxtWriter
             parser = TxtWriter.ParserFactory.ParserFactory.parsers[job.url]
-            book_content = self.remove_gutenberg_wrapper(parser.unicode_content())
+            book_content, _, _ = strip_headers_from_txt(parser.unicode_content())
 
         except KeyError as kerr:
             error ("SummaryWriter: Couldn't Access Text: %s" % kerr)
@@ -315,22 +316,6 @@ class Writer (TxtWriter.Writer):
         messages = [system_prompt, user_instruction, assistant_reply, book_content]
         response = openai_client.chat.completions.create(model=OPENAI_MODEL, messages=messages)
         return response.choices[0].message.content
-
-    def remove_gutenberg_wrapper(self, text):
-        """Remove Gutenberg header and footer from book text."""
-        lines = text.split('\n')
-        start_index = 0
-        end_index = len(lines)
-
-        for i, line in enumerate(lines):
-            if line.startswith("*** START OF"):
-                start_index = i + 1
-            elif line.startswith("*** END OF"):
-                end_index = i
-                break
-
-        return '\n'.join(lines[start_index:end_index]).strip()
-
 
     def summarise_book(self, book_content, title):
         """Generate formatted summary for book, using full text or opening portion based on length."""
