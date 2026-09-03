@@ -1,23 +1,29 @@
 #!/usr/bin/env python
 #  -*- mode: python; indent-tabs-mode: nil; -*- coding: utf-8 -*-
 
-# Generates a summary of a book using ChatGPT.
-# Wikipedia summaries are used when available. Otherwise the entire book is fed
-# to a large-context model; books too long even for that are skipped.
-# Read the prompting for a better understanding of how it works.
+# Writes a short summary of a book into the database (attribute 520).
+#
+# Process per book:
+#   1. Book already has a Wikipedia-based summary  -> leave it alone, do nothing.
+#   2. Book has no summary at all                  -> look for a Wikipedia article
+#      (stored link, else Google search validated by Claude) and use its intro.
+#   3. Otherwise (no summary and no Wikipedia hit, or an existing summary that was
+#      made from the book text) -> feed the entire book to a large-context model.
+#      Books too long even for that are skipped, leaving whatever summary exists.
+# Read the prompts in Prompts.py for a better understanding of step 3.
 
 # One thing to realise is that what we're looking to put on the Gutenberg page is not
 # an exhaustive summary of all the content of a book, but rathern an impression of it
 # so that users can decide whether try a book or not. Kind of like a trailer to a movie.
 # In that sense "summary" is not actually a very accurate term.
 
-# LLM_TAG = " (This is an automatically generated summary.)" denotes  a summary composed by AI.
-# WIKI_TAG = " (This summary is from Wikipedia.)" denotes a summary from Wikipedia.
-# EDITED_TAG = " (Summary by Project Gutenberg staff.)"  denotes an authored-by-us summary.
-# Wikipedia-based summaries (WIKI_TAG, or a WIKI_CAPTION note in the 500 field) are never
-# touched. Other existing summaries are regenerated from the book text; only books with
-# no summary at all get the Wikipedia search first.
-# WIKI_CAPTION = 'Wikipedia page about this book' If appears in 500 field a wikisummary is used.
+# Provenance is encoded by a sentence appended to the stored summary text:
+#   LLM_TAG    " (This is an automatically generated summary.)"  composed by AI
+#   WIKI_TAG   " (This summary is from Wikipedia.)"              taken from Wikipedia
+#   EDITED_TAG " (Summary by Project Gutenberg staff.)"          written by us
+# Caveat: WIKI_TAG is recent. Older Wikipedia-based summaries carry LLM_TAG, so the
+# reliable sign of a Wikipedia origin is a 500-field note starting with WIKI_CAPTION
+# ('Wikipedia page about this book: <url>'), which has always been written alongside.
 
 
 import os
@@ -39,11 +45,14 @@ import anthropic
 
 openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), max_retries=4)
 OPENAI_MODEL = "gpt-5.6-luna"
-MAX_INPUT_CHARS = 3_000_000 # ~4 chars/token; keeps well under the model's 1M-token context
+# Skip books longer than this (~750k tokens at ~4 chars/token, under the model's 1M-token
+# context). Very few books are affected; they keep whatever summary they already have.
+MAX_INPUT_CHARS = 3_000_000
 
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 ANTHROPIC_MODEL = "claude-sonnet-4-5-20250929"
 
+# a summary containing one of these means the model saw no book text; don't store it
 AI_BAD = ['It appears%%', 'It seems%%', '%%no content provided%%', '%%no content has been provided%%']
 AVOID_WIKI = ["simple.", "File:", "/Category:", "(disambiguation)"]
 
@@ -54,6 +63,7 @@ WIKI_CAPTION = 'Wikipedia page about this book'
 WIKIMATCH = re.compile(r"(?ix)https?://([a-z]{2,3})\.wikipedia\.org/wiki/([/!@i^*$a-z0-9_\(\)-]+)")
 
 def is_non_text(book):
+    """True for audio, images, data etc. that have no text to summarise."""
     return book.categories != []
 
 class Writer (TxtWriter.Writer):
@@ -67,6 +77,7 @@ class Writer (TxtWriter.Writer):
         self.langcode = "en"
 
     def get_wikis(self, job):
+        """Return (lang, page_title) for every Wikipedia link stored in the book's 500 notes."""
         marcnotes = [marc for marc in job.dc.marcs if marc.code == '500']
         wikis = []
         for marc in marcnotes:
@@ -91,19 +102,21 @@ class Writer (TxtWriter.Writer):
         title_and_authors = job.dc.make_pretty_title()
         wikis = self.get_wikis(job)
         if existing_summary_marc:
-            # never touch Wikipedia-based summaries: older ones carry the LLM tag,
-            # so a Wikipedia note in the 500 field is the reliable sign
+            # Never touch a Wikipedia-based summary. The 500-note check matters because
+            # older Wikipedia summaries carry LLM_TAG (see header).
             if summary_type == "WIKI" or wikis:
                 return
-        # the Wikipedia search has already been done for books with a summary; don't repeat it
+        # Only books with no summary get the Wikipedia search: for the rest it was
+        # already done once, and repeating it costs Serper + Claude calls.
         elif self.summarise_from_wikipedia(id, wikis, title_and_authors):
             return
 
-        # There is no summary or wikipedia article about the book
-        # use LLM to summarize book via content
+        # Summarise from the book text: either there is no summary and no Wikipedia
+        # article, or the existing summary was made from the book text and gets redone.
         try:
-            # this should get the cached parser from our inherited TxtWriter
+            # the parser was already run by our TxtWriter base class; reuse its parsed text
             parser = TxtWriter.ParserFactory.ParserFactory.parsers[job.url]
+            # drop the Project Gutenberg license header/footer before feeding the model
             book_content, _, _ = strip_headers_from_txt(parser.unicode_content())
 
         except KeyError as kerr:
@@ -125,16 +138,19 @@ class Writer (TxtWriter.Writer):
                 error ("SummaryWriter: AI Error, Skipping Writing for %d. Summary: %s" % (id, content_summary))
                 return
 
+        # updates the existing 520 row in place, or creates one if there is none
         self.insert_into_pg_database(id, content_summary + LLM_TAG, existing_summary_marc)
 
     def summarise_from_wikipedia(self, id, wikis, title_and_authors):
-        """Store a Wikipedia summary from a known link or a validated search hit; return True if stored."""
+        """Store a Wikipedia summary from a stored link or a validated search hit; True if stored."""
+        # a Wikipedia link already recorded in the 500 notes needs no validation
         for wiki_lang, page_title in wikis:
             wiki_summary = self.get_wikipedia_article_summary(page_title, wiki_lang)
             if wiki_summary:
                 self.insert_into_pg_database(id, wiki_summary + WIKI_TAG, None)
                 return True
 
+        # otherwise Google for one and let Claude confirm the article is about this book
         urls = self.google_search_with_serper(title_and_authors + " wikipedia")
         for lang, page_title in filter(None, map(self.check_wikipedia_url, urls)):
             wiki_summary = self.get_wikipedia_article_summary(page_title, lang)
@@ -146,6 +162,7 @@ class Writer (TxtWriter.Writer):
         return False
 
     def get_existing_summary(self):
+        """Return (provenance, 520 row) of the stored summary, or (None, None) if there is none."""
         summarymarcs = [marc for marc in self.dc.book.attributes if marc.fk_attriblist == 520]
         for marc in summarymarcs:
             if LLM_TAG in marc.text:
@@ -157,6 +174,7 @@ class Writer (TxtWriter.Writer):
         return None, None
 
     def insert_into_pg_database(self, id, db_summary, existing_summary_marc):
+        """Replace the text of an existing 520 row, or add a new one."""
         session = self.dc.get_my_session()
         try:
             if existing_summary_marc:
@@ -174,7 +192,7 @@ class Writer (TxtWriter.Writer):
 
 
     def add_wiki_url_to_database(self, id, wiki_title, wiki_lang):
-        # we've already checked for a wikipedia url, and didn't find one
+        """Record the Wikipedia link as a 500 note; this is what later marks the summary as Wikipedia-based."""
         marctext = f"{WIKI_CAPTION}: https://{wiki_lang}.wikipedia.org/wiki/{wiki_title}"
         try:
             self.dc.book.attributes.append(Attribute(
@@ -281,6 +299,7 @@ class Writer (TxtWriter.Writer):
 
     def summarise_book(self, book_content, title_and_author):
         """Generate a summary of the entire book using the WholeBook prompt."""
+        # one user message: instructions, then the whole book, then a closing reminder
         user_message = "%s\n\n%s\n\n%s" % (
             WholeBook.user.format(title_and_author=title_and_author), book_content, WholeBook.after)
         response = openai_client.responses.create(
