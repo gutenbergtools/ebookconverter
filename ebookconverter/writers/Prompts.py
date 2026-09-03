@@ -9,7 +9,7 @@ Distributable under the GNU General Public License Version 3 or newer.
 """
 
 class WholeBook:
-    """Prompt for summarising an entire book: system, then user + book text + after in one user message."""
+    """Prompt for summarising a whole book: system, then one user message = user + book + after."""
 
     system = """You are good at writing brief introduction texts for books that convey the main content/point without giving away spoilers.
 
