@@ -48,7 +48,7 @@ openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), max_retries=4)
 OPENAI_MODEL = "gpt-5.6-luna"
 # Skip books longer than this (the model's context is ~1M tokens; leave room for prompt and
 # output). Very few books are affected; they keep whatever summary they already have.
-MAX_INPUT_TOKENS = 900_000
+MAX_INPUT_TOKENS = 800_000
 TOKENIZER = tiktoken.get_encoding("o200k_base") # tokenizer of the GPT-5 family
 
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
