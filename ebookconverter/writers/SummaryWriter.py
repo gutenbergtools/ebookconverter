@@ -52,8 +52,8 @@ MAX_INPUT_CHARS = 3_000_000
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 ANTHROPIC_MODEL = "claude-sonnet-4-5-20250929"
 
-# a summary containing one of these means the model saw no book text; don't store it
-AI_BAD = ['It appears%%', 'It seems%%', '%%no content provided%%', '%%no content has been provided%%']
+# the prompt asks for 80-90 words; anything much shorter is a refusal or an error, not a summary
+MIN_SUMMARY_WORDS = 40
 AVOID_WIKI = ["simple.", "File:", "/Category:", "(disambiguation)"]
 
 LLM_TAG = " (This is an automatically generated summary.)"
@@ -133,10 +133,9 @@ class Writer (TxtWriter.Writer):
         except Exception as unkerr:
             error ("SummaryWriter: AI Request Failed: %s" % unkerr)
             return
-        for sign in AI_BAD:
-            if sign in content_summary:
-                error ("SummaryWriter: AI Error, Skipping Writing for %d. Summary: %s" % (id, content_summary))
-                return
+        if len(content_summary.split()) < MIN_SUMMARY_WORDS:
+            error ("SummaryWriter: AI Error, Skipping Writing for %d. Summary: %s" % (id, content_summary))
+            return
 
         # updates the existing 520 row in place, or creates one if there is none
         self.insert_into_pg_database(id, content_summary + LLM_TAG, existing_summary_marc)
