@@ -1,21 +1,29 @@
 #!/usr/bin/env python
 #  -*- mode: python; indent-tabs-mode: nil; -*- coding: utf-8 -*-
 
-# Generates a summary of a book using ChatGPT.
-# For short books we feed in the entire book, for long books we feed in roughly the first 35 pages.
-# wikipedia summaries are used when available.
-# This is necessary due to cost and context-size limitations.
-# Read the prompting for a better understanding of how it works.
+# Writes a short summary of a book into the database (attribute 520).
+#
+# Process per book:
+#   1. Book already has a Wikipedia-based summary  -> leave it alone, do nothing.
+#   2. Book has no summary at all                  -> look for a Wikipedia article
+#      (stored link, else Google search validated by Claude) and use its intro.
+#   3. Otherwise (no summary and no Wikipedia hit, or an existing summary that was
+#      made from the book text) -> feed the entire book to a large-context model.
+#      Books too long even for that are skipped, leaving whatever summary exists.
+# Read the prompts in Prompts.py for a better understanding of step 3.
 
 # One thing to realise is that what we're looking to put on the Gutenberg page is not
 # an exhaustive summary of all the content of a book, but rathern an impression of it
 # so that users can decide whether try a book or not. Kind of like a trailer to a movie.
 # In that sense "summary" is not actually a very accurate term.
 
-# LLM_TAG = " (This is an automatically generated summary.)" denotes  a summary composed by AI.
-# WIKI_TAG = " (This summary is from Wikipedia.)" denotes a summary from Wikipedia.
-# EDITED_TAG = " (Summary by Project Gutenberg staff.)"  denotes an authored-by-us summary.
-# WIKI_CAPTION = 'Wikipedia page about this book' If appears in 500 field a wikisummary is used.
+# Provenance is encoded by a sentence appended to the stored summary text:
+#   LLM_TAG    " (This is an automatically generated summary.)"  composed by AI
+#   WIKI_TAG   " (This summary is from Wikipedia.)"              taken from Wikipedia
+#   EDITED_TAG " (Summary by Project Gutenberg staff.)"          written by us
+# Caveat: WIKI_TAG is recent. Older Wikipedia-based summaries carry LLM_TAG, so the
+# reliable sign of a Wikipedia origin is a 500-field note starting with WIKI_CAPTION
+# ('Wikipedia page about this book: <url>'), which has always been written alongside.
 
 
 import os
@@ -29,19 +37,25 @@ from libgutenberg.GutenbergDatabase import DatabaseError
 from libgutenberg.Logger import exception, error, info, warning
 from libgutenberg.Models import Attribute, Book
 from ebookmaker.writers import TxtWriter
-from ebookconverter.writers.Prompts import BeginningBook, FullBook, WikipediaValidator
+from ebookmaker.parsers.boilerplate import strip_headers_from_txt
+from ebookconverter.writers.Prompts import WholeBook, WikipediaValidator
 
 from openai import OpenAI
-import tiktoken
 import anthropic
+import tiktoken
 
-openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"))
-OPENAI_MODEL = "gpt-5"
+openai_client = OpenAI(api_key=os.getenv("OPENAI_API_KEY"), max_retries=4)
+OPENAI_MODEL = "gpt-5.6-luna"
+# Skip books longer than this (the model's context is ~1M tokens; leave room for prompt and
+# output). Very few books are affected; they keep whatever summary they already have.
+MAX_INPUT_TOKENS = 800_000
+TOKENIZER = tiktoken.get_encoding("o200k_base") # tokenizer of the GPT-5 family
 
 anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY"))
 ANTHROPIC_MODEL = "claude-sonnet-4-5-20250929"
 
-AI_BAD = ['It appears%%', 'It seems%%', '%%no content provided%%', '%%no content has been provided%%']
+# the prompt asks for 80-90 words; anything much shorter is a refusal or an error, not a summary
+MIN_SUMMARY_WORDS = 35
 AVOID_WIKI = ["simple.", "File:", "/Category:", "(disambiguation)"]
 
 LLM_TAG = " (This is an automatically generated summary.)"
@@ -51,6 +65,7 @@ WIKI_CAPTION = 'Wikipedia page about this book'
 WIKIMATCH = re.compile(r"(?ix)https?://([a-z]{2,3})\.wikipedia\.org/wiki/([/!@i^*$a-z0-9_\(\)-]+)")
 
 def is_non_text(book):
+    """True for audio, images, data etc. that have no text to summarise."""
     return book.categories != []
 
 class Writer (TxtWriter.Writer):
@@ -64,12 +79,14 @@ class Writer (TxtWriter.Writer):
         self.langcode = "en"
 
     def get_wikis(self, job):
+        """Return (lang, page_title) for every Wikipedia link stored in the book's 500 notes."""
         marcnotes = [marc for marc in job.dc.marcs if marc.code == '500']
         wikis = []
         for marc in marcnotes:
             if marc.text.startswith(WIKI_CAPTION):
                 wiki_tuple = self.check_wikipedia_url(marc.text)
-                wikis.append(wiki_tuple)
+                if wiki_tuple:
+                    wikis.append(wiki_tuple)
         return wikis
 
     def build(self, job):
@@ -84,45 +101,25 @@ class Writer (TxtWriter.Writer):
             self.langcode = job.dc.languages[0].id
 
         summary_type, existing_summary_marc = self.get_existing_summary()
-        if summary_type == "EDITED": # Always keep edited summary
-            return
-        notemarcs = [marc for marc in job.dc.marcs if marc.code == '500']
-        wiki_lang = None
-        page_title = None
-        wikis = self.get_wikis(job)
-        for (wiki_lang, page_title) in wikis:
-            if wiki_lang == self.langcode or wiki_lang == "en":
-                break            
-
-        if page_title: # there was a wikipedia url in the database
-            new_wiki_summary = self.get_wikipedia_article_summary(page_title, wiki_lang)
-            if new_wiki_summary:
-                self.insert_into_pg_database(
-                    id, new_wiki_summary + WIKI_TAG, existing_summary_marc)
-                return
-        
-
-        # there is no summary. Let's search for a wikipedia article.
         title_and_authors = job.dc.make_pretty_title()
-        urls = self.google_search_with_serper(title_and_authors + " wikipedia")
-        wiki_langs_and_titles = list(filter(None, map(self.check_wikipedia_url, urls)))
-        for lang, page_title in wiki_langs_and_titles:
-            wiki_summary = self.get_wikipedia_article_summary(page_title, lang)
-            if wiki_summary == None:
-                continue
-            if self.validate_with_claude(wiki_summary, title_and_authors):
-                if (lang, page_title) not in wikis:
-                    self.add_wiki_url_to_database(id, page_title, lang)
-                self.insert_into_pg_database(
-                    id, wiki_summary + WIKI_TAG, existing_summary_marc)
+        wikis = self.get_wikis(job)
+        if existing_summary_marc:
+            # Never touch a Wikipedia-based summary. The 500-note check matters because
+            # older Wikipedia summaries carry LLM_TAG (see header).
+            if summary_type == "WIKI" or wikis:
                 return
+        # Only books with no summary get the Wikipedia search: for the rest it was
+        # already done once, and repeating it costs Serper + Claude calls.
+        elif self.summarise_from_wikipedia(id, wikis, title_and_authors):
+            return
 
-        # There is no summary or wikipedia article about the book
-        # use LLM to summarize book via content
+        # Summarise from the book text: either there is no summary and no Wikipedia
+        # article, or the existing summary was made from the book text and gets redone.
         try:
-            # this should get the cached parser from our inherited TxtWriter
+            # the parser was already run by our TxtWriter base class; reuse its parsed text
             parser = TxtWriter.ParserFactory.ParserFactory.parsers[job.url]
-            book_content = self.remove_gutenberg_wrapper(parser.unicode_content())
+            # drop the Project Gutenberg license header/footer before feeding the model
+            book_content, _, _ = strip_headers_from_txt(parser.unicode_content())
 
         except KeyError as kerr:
             error ("SummaryWriter: Couldn't Access Text: %s" % kerr)
@@ -130,19 +127,43 @@ class Writer (TxtWriter.Writer):
         except UnicodeError as uerr:
             error ("SummaryWriter: Bad Text Content: %s" % uerr)
             return
+        if len(TOKENIZER.encode(book_content)) > MAX_INPUT_TOKENS:
+            info ("SummaryWriter: Book too long for %s, Skipping Writing for %d" % (OPENAI_MODEL, id))
+            return
         try:
             content_summary = self.summarise_book(book_content, title_and_authors)
         except Exception as unkerr:
             error ("SummaryWriter: AI Request Failed: %s" % unkerr)
             return
-        for sign in AI_BAD:
-            if sign in content_summary:
-                error ("SummaryWriter: AI Error, Skipping Writing for %d. Summary: %s" % (id, content_summary))
-                return
+        if len(content_summary.split()) < MIN_SUMMARY_WORDS:
+            error ("SummaryWriter: AI Error, Skipping Writing for %d. Summary: %s" % (id, content_summary))
+            return
 
+        # updates the existing 520 row in place, or creates one if there is none
         self.insert_into_pg_database(id, content_summary + LLM_TAG, existing_summary_marc)
 
+    def summarise_from_wikipedia(self, id, wikis, title_and_authors):
+        """Store a Wikipedia summary from a stored link or a validated search hit; True if stored."""
+        # a Wikipedia link already recorded in the 500 notes needs no validation
+        for wiki_lang, page_title in wikis:
+            wiki_summary = self.get_wikipedia_article_summary(page_title, wiki_lang)
+            if wiki_summary:
+                self.insert_into_pg_database(id, wiki_summary + WIKI_TAG, None)
+                return True
+
+        # otherwise Google for one and let Claude confirm the article is about this book
+        urls = self.google_search_with_serper(title_and_authors + " wikipedia")
+        for lang, page_title in filter(None, map(self.check_wikipedia_url, urls)):
+            wiki_summary = self.get_wikipedia_article_summary(page_title, lang)
+            if wiki_summary and self.validate_with_claude(wiki_summary, title_and_authors):
+                if (lang, page_title) not in wikis:
+                    self.add_wiki_url_to_database(id, page_title, lang)
+                self.insert_into_pg_database(id, wiki_summary + WIKI_TAG, None)
+                return True
+        return False
+
     def get_existing_summary(self):
+        """Return (provenance, 520 row) of the stored summary, or (None, None) if there is none."""
         summarymarcs = [marc for marc in self.dc.book.attributes if marc.fk_attriblist == 520]
         for marc in summarymarcs:
             if LLM_TAG in marc.text:
@@ -154,6 +175,7 @@ class Writer (TxtWriter.Writer):
         return None, None
 
     def insert_into_pg_database(self, id, db_summary, existing_summary_marc):
+        """Replace the text of an existing 520 row, or add a new one."""
         session = self.dc.get_my_session()
         try:
             if existing_summary_marc:
@@ -171,7 +193,7 @@ class Writer (TxtWriter.Writer):
 
 
     def add_wiki_url_to_database(self, id, wiki_title, wiki_lang):
-        # we've already checked for a wikipedia url, and didn't find one
+        """Record the Wikipedia link as a 500 note; this is what later marks the summary as Wikipedia-based."""
         marctext = f"{WIKI_CAPTION}: https://{wiki_lang}.wikipedia.org/wiki/{wiki_title}"
         try:
             self.dc.book.attributes.append(Attribute(
@@ -276,71 +298,11 @@ class Writer (TxtWriter.Writer):
             error('SummaryWriter: ' + e)
             return False
 
-    def count_tokens(self, text, encoding_name='cl100k_base'):
-        """Count the number of tokens in a text."""
-        encoding = tiktoken.get_encoding(encoding_name)
-        return len(encoding.encode(text))
-
-
-    def get_first_chunk(self, text, max_token_size, encoding_name="cl100k_base"):
-        """Extract first chunk of text up to max_token_size tokens."""
-        encoding = tiktoken.get_encoding(encoding_name)
-        tokens = encoding.encode(text)
-        first_chunk_tokens = tokens[:max_token_size]
-        return encoding.decode(first_chunk_tokens)
-
-
-    def summarise_beginning_of_book(self, title_and_author, text):
-        """Generate two-paragraph summary from book's opening portion using GPT. To be used for long books."""
-        system_prompt = BeginningBook.system_prompt
-
-        user_instruction = BeginningBook.main_prompt(title_and_author)
-        assistant_reply = BeginningBook.assistant_reply
-        book_content = {"role": "user", "content": f"START OF BOOK BEGINNING: \n{text}\nEND OF BOOK BEGINNING"}
-
-        messages = [system_prompt, user_instruction, assistant_reply, book_content]
-        response = openai_client.chat.completions.create(model=OPENAI_MODEL, messages=messages)
-        return response.choices[0].message.content
-
-
-    def summarise_entire_book(self, title_and_author, text):
-        """Generate two-paragraph summary from entire book using GPT. To be used for short books."""
-        system_prompt = FullBook.system_prompt
-
-        user_instruction = FullBook.main_prompt(title_and_author)
-
-        assistant_reply = FullBook.assistant_reply
-        book_content = {"role": "user", "content": f"START OF BOOK: \n{text}\nEND OF BOOK"}
-
-        messages = [system_prompt, user_instruction, assistant_reply, book_content]
-        response = openai_client.chat.completions.create(model=OPENAI_MODEL, messages=messages)
-        return response.choices[0].message.content
-
-    def remove_gutenberg_wrapper(self, text):
-        """Remove Gutenberg header and footer from book text."""
-        lines = text.split('\n')
-        start_index = 0
-        end_index = len(lines)
-
-        for i, line in enumerate(lines):
-            if line.startswith("*** START OF"):
-                start_index = i + 1
-            elif line.startswith("*** END OF"):
-                end_index = i
-                break
-
-        return '\n'.join(lines[start_index:end_index]).strip()
-
-
-    def summarise_book(self, book_content, title):
-        """Generate formatted summary for book, using full text or opening portion based on length."""
-        chunk_size = 24000
-        print("Summarising:", title)
-
-        if self.count_tokens(book_content) > chunk_size:
-            beginning_of_book = self.get_first_chunk(book_content, chunk_size)
-            summary = self.summarise_beginning_of_book(title, beginning_of_book)
-        else:
-            summary = self.summarise_entire_book(title, book_content)
-
-        return summary
+    def summarise_book(self, book_content, title_and_author):
+        """Generate a summary of the entire book using the WholeBook prompt."""
+        # one user message: instructions, then the whole book, then a closing reminder
+        user_message = "%s\n\n%s\n\n%s" % (
+            WholeBook.user.format(title_and_author=title_and_author), book_content, WholeBook.after)
+        response = openai_client.responses.create(
+            model=OPENAI_MODEL, instructions=WholeBook.system, input=user_message)
+        return response.output_text.strip()
