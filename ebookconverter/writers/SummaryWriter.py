@@ -53,7 +53,7 @@ anthropic_client = anthropic.Anthropic(api_key=os.environ.get("ANTHROPIC_API_KEY
 ANTHROPIC_MODEL = "claude-sonnet-4-5-20250929"
 
 # the prompt asks for 80-90 words; anything much shorter is a refusal or an error, not a summary
-MIN_SUMMARY_WORDS = 40
+MIN_SUMMARY_WORDS = 35
 AVOID_WIKI = ["simple.", "File:", "/Category:", "(disambiguation)"]
 
 LLM_TAG = " (This is an automatically generated summary.)"
