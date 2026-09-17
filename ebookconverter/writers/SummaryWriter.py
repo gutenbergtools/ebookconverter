@@ -4,7 +4,7 @@
 # Writes a short summary of a book into the database (attribute 520).
 #
 # Process per book:
-#   1. Book already has a Wikipedia-based summary  -> leave it alone, do nothing.
+#   1. Book has a Wikipedia-based or staff-edited summary -> leave it alone.
 #   2. Book has no summary at all                  -> look for a Wikipedia article
 #      (stored link, else Google search validated by Claude) and use its intro.
 #   3. Otherwise (no summary and no Wikipedia hit, or an existing summary that was
@@ -104,9 +104,9 @@ class Writer (TxtWriter.Writer):
         title_and_authors = job.dc.make_pretty_title()
         wikis = self.get_wikis(job)
         if existing_summary_marc:
-            # Never touch a Wikipedia-based summary. The 500-note check matters because
-            # older Wikipedia summaries carry LLM_TAG (see header).
-            if summary_type == "WIKI" or wikis:
+            # Never touch a Wikipedia-based or staff-edited summary. The 500-note check
+            # matters because older Wikipedia summaries carry LLM_TAG (see header).
+            if summary_type in ("WIKI", "EDITED") or wikis:
                 return
         # Only books with no summary get the Wikipedia search: for the rest it was
         # already done once, and repeating it costs Serper + Claude calls.
