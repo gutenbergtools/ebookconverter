@@ -24,6 +24,7 @@ It should work a bit like a movie trailer in the sense of providing an impressio
 <rules>
 - Write 80-90 words. Do NOT exceed 90. One single paragraph.
 - If possible, the first sentence follows this pattern: "(title)" by (author) is a (type of work) written/published in (time period).
+- Always put the title in straight double quotes ("..."). No italics, asterisks, or other markdown.
 - Always write in English.
 - No preamble or framing ("Here is", "Sure", "This book is about" etc).
 - Avoid a "list style" of writing.
