@@ -103,10 +103,12 @@ class Writer (TxtWriter.Writer):
         summary_type, existing_summary_marc = self.get_existing_summary()
         title_and_authors = job.dc.make_pretty_title()
         wikis = self.get_wikis(job)
+        has_wiki_note = any(marc.code == '500' and marc.text.startswith(WIKI_CAPTION) for marc in job.dc.marcs)
         if existing_summary_marc:
             # Never touch a Wikipedia-based or staff-edited summary. The 500-note check
             # matters because older Wikipedia summaries carry LLM_TAG (see header).
-            if summary_type in ("WIKI", "EDITED") or wikis:
+            # Check the note itself, not the parsed link: non-ASCII titles don't parse.
+            if summary_type in ("WIKI", "EDITED") or has_wiki_note:
                 return
         # Only books with no summary get the Wikipedia search: for the rest it was
         # already done once, and repeating it costs Serper + Claude calls.
