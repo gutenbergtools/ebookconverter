@@ -297,7 +297,7 @@ class Writer (TxtWriter.Writer):
             result = verdict_match and verdict_match.group(1).upper() == "YES"
             return result
         except Exception as e:
-            error('SummaryWriter: ' + e)
+            error('SummaryWriter: ' + str(e))
             return False
 
     def summarise_book(self, book_content, title_and_author):
