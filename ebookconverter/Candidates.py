@@ -41,7 +41,7 @@ class Candidates(object):
         ).order_by(File.fk_filetypes, File.fk_encodings, File.modified.desc())
 
         for file_ in files:
-            if (ebook > 10000 and file_.file_type == 'html'
+            if (ebook > 10000 and file_.file_type.pk == 'html'
                 and not os.path.basename(file_.archive_path).startswith(str(ebook))):
                 # must have the form 12345-h.htm (not eg. glossary.htm)
                 continue
