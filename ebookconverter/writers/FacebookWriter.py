@@ -24,7 +24,7 @@ from ebookmaker import writers
 
 PGURL = "https://www.gutenberg.org/"
 
-GRAPH = "https://graph.facebook.com/v25.0/"
+GRAPH = "https://graph.facebook.com/v26.0/"
 
 class Writer (writers.BaseWriter):
     """ Class to post about new ebooks.
