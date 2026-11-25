@@ -129,7 +129,7 @@ class Writer (TxtWriter.Writer):
         except UnicodeError as uerr:
             error ("SummaryWriter: Bad Text Content: %s" % uerr)
             return
-        if len(TOKENIZER.encode(book_content)) > MAX_INPUT_TOKENS:
+        if len(TOKENIZER.encode(book_content, disallowed_special=())) > MAX_INPUT_TOKENS:
             info ("SummaryWriter: Book too long for %s, Skipping Writing for %d" % (OPENAI_MODEL, id))
             return
         try:
