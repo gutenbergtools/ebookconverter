@@ -146,22 +146,26 @@ class Writer (TxtWriter.Writer):
 
     def summarise_from_wikipedia(self, id, wikis, title_and_authors):
         """Store a Wikipedia summary from a stored link or a validated search hit; True if stored."""
-        # a Wikipedia link already recorded in the 500 notes needs no validation
-        for wiki_lang, page_title in wikis:
-            wiki_summary = self.get_wikipedia_article_summary(page_title, wiki_lang)
-            if wiki_summary:
-                self.insert_into_pg_database(id, wiki_summary + WIKI_TAG, None)
-                return True
+        # any failure here (network, Serper, Wikipedia API) falls through to the LLM summary
+        try:
+            # a Wikipedia link already recorded in the 500 notes needs no validation
+            for wiki_lang, page_title in wikis:
+                wiki_summary = self.get_wikipedia_article_summary(page_title, wiki_lang)
+                if wiki_summary:
+                    self.insert_into_pg_database(id, wiki_summary + WIKI_TAG, None)
+                    return True
 
-        # otherwise Google for one and let Claude confirm the article is about this book
-        urls = self.google_search_with_serper(title_and_authors + " wikipedia")
-        for lang, page_title in filter(None, map(self.check_wikipedia_url, urls)):
-            wiki_summary = self.get_wikipedia_article_summary(page_title, lang)
-            if wiki_summary and self.validate_with_claude(wiki_summary, title_and_authors):
-                if (lang, page_title) not in wikis:
-                    self.add_wiki_url_to_database(id, page_title, lang)
-                self.insert_into_pg_database(id, wiki_summary + WIKI_TAG, None)
-                return True
+            # otherwise Google for one and let Claude confirm the article is about this book
+            urls = self.google_search_with_serper(title_and_authors + " wikipedia")
+            for lang, page_title in filter(None, map(self.check_wikipedia_url, urls)):
+                wiki_summary = self.get_wikipedia_article_summary(page_title, lang)
+                if wiki_summary and self.validate_with_claude(wiki_summary, title_and_authors):
+                    if (lang, page_title) not in wikis:
+                        self.add_wiki_url_to_database(id, page_title, lang)
+                    self.insert_into_pg_database(id, wiki_summary + WIKI_TAG, None)
+                    return True
+        except Exception as e:
+            error("SummaryWriter: Wikipedia lookup failed for %d, using book text: %s" % (id, e))
         return False
 
     def get_existing_summary(self):
