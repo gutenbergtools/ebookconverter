@@ -23,14 +23,15 @@ It should work a bit like a movie trailer in the sense of providing an impressio
 
 <rules>
 - Write 80-90 words. Do NOT exceed 90. One single paragraph.
-- If possible, the first sentence follows this pattern: "(title)" by (author) is a (type of work) written/published in (time period).
+- If possible, the first sentence follows this pattern: "(title)" by (author) is a (type of work) published in (time period).
+- For the time period, use the publication info given with the request, if any. It describes the edition Project Gutenberg transcribed, which may be a later reprint or translation, so give an exact year only if you are sure it is the first publication. Otherwise use a general period (e.g. "the late 19th century"), and if you are unsure, leave the date out. Never guess a year from the text alone.
 - Always put the title in straight double quotes ("..."). No italics, asterisks, or other markdown.
 - Always write in English.
 - No preamble or framing ("Here is", "Sure", "This book is about" etc).
 - Avoid a "list style" of writing.
 </rules>"""
 
-    user = 'Please write an introduction text for the complete book below. Title and author: {title_and_author}'
+    user = 'Please write an introduction text for the complete book below. Title and author: {title_and_author}{pubinfo_line}'
 
     after = """First briefly recall the setting, main characters, and events through the middle and later parts of the book. Then write the intro: 80-90 words, one paragraph, present tense, in English, no spoilers. Output only the intro paragraph. Avoid a "list style" of writing. Aim for conversational tone."""
 

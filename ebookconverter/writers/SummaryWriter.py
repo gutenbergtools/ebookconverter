@@ -302,9 +302,13 @@ class Writer (TxtWriter.Writer):
 
     def summarise_book(self, book_content, title_and_author):
         """Generate a summary of the entire book using the WholeBook prompt."""
+        # catalog publication info (MARC 260), never PG's release date
+        pubinfo = str(self.dc.pubinfo)
+        pubinfo_line = ". Publication info: %s" % pubinfo if pubinfo else ""
         # one user message: instructions, then the whole book, then a closing reminder
         user_message = "%s\n\n%s\n\n%s" % (
-            WholeBook.user.format(title_and_author=title_and_author), book_content, WholeBook.after)
+            WholeBook.user.format(title_and_author=title_and_author, pubinfo_line=pubinfo_line),
+            book_content, WholeBook.after)
         response = openai_client.responses.create(
             model=OPENAI_MODEL, instructions=WholeBook.system, input=user_message)
         return response.output_text.strip()
