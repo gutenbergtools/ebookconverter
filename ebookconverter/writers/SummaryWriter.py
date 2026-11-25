@@ -300,10 +300,17 @@ class Writer (TxtWriter.Writer):
             error('SummaryWriter: ' + str(e))
             return False
 
+    def get_pubinfo(self):
+        """Catalog publication info (MARC 260, never PG's release date), or '' if missing or malformed."""
+        try:
+            return str(self.dc.pubinfo).strip()
+        except Exception as e:
+            warning("SummaryWriter: Ignoring malformed publication info: %s" % e)
+            return ""
+
     def summarise_book(self, book_content, title_and_author):
         """Generate a summary of the entire book using the WholeBook prompt."""
-        # catalog publication info (MARC 260), never PG's release date
-        pubinfo = str(self.dc.pubinfo)
+        pubinfo = self.get_pubinfo()
         pubinfo_line = ". Publication info: %s" % pubinfo if pubinfo else ""
         # one user message: instructions, then the whole book, then a closing reminder
         user_message = "%s\n\n%s\n\n%s" % (
